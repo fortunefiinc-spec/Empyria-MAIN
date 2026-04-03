@@ -52,9 +52,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .ab:active{transform:scale(.95)}
 #city-panel{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
 #city-panel.open{background:rgba(0,0,0,.55);pointer-events:all}
-.cp-sheet{position:absolute;bottom:0;left:0;right:0;max-height:86vh;background:var(--bg);border-radius:16px 16px 0 0;border-top:2px solid var(--bdr);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.cp-sheet{position:absolute;bottom:0;left:0;right:0;height:62vh;max-height:88vh;min-height:30vh;background:var(--bg);border-radius:16px 16px 0 0;border-top:2px solid var(--bdr);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow:hidden}
 #city-panel.open .cp-sheet{transform:translateY(0)}
-.cp-drag{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:10px auto 6px;flex-shrink:0}
+.cp-drag{width:48px;height:5px;background:rgba(255,255,255,.25);border-radius:3px;margin:8px auto 4px;flex-shrink:0;cursor:grab;touch-action:none}
 .cp-tabs{display:flex;border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .cp-tabs::-webkit-scrollbar{display:none}
 .cp-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 12px;cursor:pointer;flex-shrink:0;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--txt-d);border-bottom:2px solid transparent;white-space:nowrap}
@@ -219,7 +219,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div class="cp-page" id="cp-shop">
       <div class="sh-sec"><div class="sh-t">⚡ COOLDOWN BOOSTS</div><div class="sh-grid">
         <div class="sh-card" onclick="buyShop('b1')"><div class="sh-ico">&#x26A1;</div><div class="sh-name">Boost I &middot; 4u</div><div class="sh-desc">-25% all cooldowns</div><div class="sh-p"><span class="pr pr-t">0.10 TON</span><span class="pr pr-s">50 &#x2B50;</span></div></div>
-        <div class="sh-card feat" onclick="buyShop('vip')"><div class="sh-ico">&#x1F451;</div><div class="sh-name">VIP Dagspass</div><div class="sh-desc">-60% CD + 2x output</div><div class="sh-p"><span class="pr pr-t">0.75 TON</span><span class="pr pr-s">375 &#x2B50;</span></div></div>
+        <div class="sh-card feat" onclick="buyShop('vip')"><div class="sh-ico">&#x1F451;</div><div class="sh-name">VIP Day Pass</div><div class="sh-desc">-60% CD + 2x output</div><div class="sh-p"><span class="pr pr-t">0.75 TON</span><span class="pr pr-s">375 &#x2B50;</span></div></div>
         <div class="sh-card" onclick="buyShop('b2')"><div class="sh-ico">&#x26A1;&#x26A1;</div><div class="sh-name">Boost II &middot; 8u</div><div class="sh-desc">-50% all cooldowns</div><div class="sh-p"><span class="pr pr-t">0.25 TON</span><span class="pr pr-s">125 &#x2B50;</span></div></div>
         <div class="sh-card" onclick="buyShop('rst')"><div class="sh-ico">&#x1F504;</div><div class="sh-name">Quick Reset</div><div class="sh-desc">1 game instant reset</div><div class="sh-p"><span class="pr pr-t">0.05 TON</span><span class="pr pr-s">25 &#x2B50;</span></div></div>
       </div></div>
@@ -228,8 +228,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="sh-card" onclick="buyShop('ul-react')"><div class="sh-ico">&#x26A1;</div><div class="sh-name">Lightning Forge</div><div class="sh-desc">Direct unlock</div><div class="sh-p"><span class="pr pr-t">0.30 TON</span><span class="pr pr-s">150 &#x2B50;</span></div></div>
       </div></div>
       <div class="sh-sec"><div class="sh-t">&#x1F48E; PREMIUM</div><div class="sh-grid">
-        <div class="sh-card feat" onclick="buyShop('bp')"><div class="sh-ico">&#x1F3D7;&#xFE0F;</div><div class="sh-name">Builder Pass</div><div class="sh-desc">+25% output + Boost/dag</div><div class="sh-p"><span class="pr pr-t">2 TON</span><span class="pr pr-s">1000 &#x2B50;</span></div></div>
-        <div class="sh-card feat" onclick="buyShop('ep')"><div class="sh-ico">&#x1F451;</div><div class="sh-name">Empire Pass</div><div class="sh-desc">+50% output + Boost/dag</div><div class="sh-p"><span class="pr pr-t">5 TON</span><span class="pr pr-s">2500 &#x2B50;</span></div></div>
+        <div class="sh-card feat" onclick="buyShop('bp')"><div class="sh-ico">&#x1F3D7;&#xFE0F;</div><div class="sh-name">Builder Pass</div><div class="sh-desc">+25% output + daily Boost</div><div class="sh-p"><span class="pr pr-t">2 TON</span><span class="pr pr-s">1000 &#x2B50;</span></div></div>
+        <div class="sh-card feat" onclick="buyShop('ep')"><div class="sh-ico">&#x1F451;</div><div class="sh-name">Empire Pass</div><div class="sh-desc">+50% output + daily Boost</div><div class="sh-p"><span class="pr pr-t">5 TON</span><span class="pr pr-s">2500 &#x2B50;</span></div></div>
       </div></div>
     </div>
     <div class="cp-page" id="cp-stats">
@@ -1064,7 +1064,7 @@ function cancelPlacing(){
 }
 
 const ERA_REPLACES={academy:['lumber'],hq:['market'],treasury:['forge'],temple:['smelter'],observatory:['academy'],citadel:['hq'],vault:['treasury'],dragonforge:['workshop'],alchemist:['market','smelter'],starforge:['dragonforge','observatory'],portal:['citadel'],nexus:['vault','alchemist'],shadowkeep:['portal','starforge'],empirebank:['nexus','temple']};
-function removeSuperseded(id){const rem=ERA_REPLACES[id];if(!rem)return;rem.forEach(old=>{if(!G.bld[old])return;if(buildingMeshes[old]){scene.remove(buildingMeshes[old]);delete buildingMeshes[old];}G.bld[old]='superseded';toast('🔄 '+BLD_DEF[old].name+' vervangen',2000);});}
+function removeSuperseded(id){const rem=ERA_REPLACES[id];if(!rem)return;rem.forEach(old=>{if(!G.bld[old])return;if(buildingMeshes[old]){scene.remove(buildingMeshes[old]);delete buildingMeshes[old];}G.bld[old]='superseded';toast('🔄 '+BLD_DEF[old].name+' replaced',2000);});}
 
 function showPlacementBar(id,def){
   let bar=document.getElementById('placement-bar');
@@ -1125,7 +1125,13 @@ function updateEra(){
 function addLog(msg,type='neutral'){const now=new Date();const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');G.log.unshift({msg,type,time});if(G.log.length>60)G.log.pop();}
 
 // ═══ CITY PANEL ═══
-function openCity(){document.getElementById('city-panel').classList.add('open');cpTab('empire');}
+function openCity(){
+  const panel=document.getElementById('city-panel');
+  const sheet=document.getElementById('cp-sheet');
+  if(sheet) sheet.style.height='62vh'; // reset to default each open
+  panel.classList.add('open');
+  cpTab('empire');
+}
 function closeCity(){document.getElementById('city-panel').classList.remove('open');}
 function cityBgClick(e){if(e.target===document.getElementById('city-panel'))closeCity();}
 
@@ -1218,7 +1224,7 @@ function renderPassiveSection(){
 }
 
 function renderLogSection(){
-  let html='<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITEITENLOG</div>';
+  let html='<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOGLOG</div>';
   if(!G.log.length)return html+'<div style="font-size:9px;color:rgba(180,160,120,.3);text-align:center;padding:12px">Nog geen activiteit</div>';
   G.log.slice(0,40).forEach(e=>{html+=`<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}"><span style="color:rgba(180,150,80,.4)">[${e.time||''}]</span> ${e.msg}</div>`;});
   return html;
@@ -1275,7 +1281,7 @@ function renderQuestsTab(){
   let fires='';for(let i=1;i<=7;i++)fires+=`<span style="font-size:14px;opacity:${G.streak>=i?1:.25}">🔥</span>`;
   let qhtml='';
   (G.quests||[]).forEach(q=>{const pct=Math.min(100,Math.round((q.progress||0)/q.need*100));const rwTxt=Object.entries(q.reward).map(([k,v])=>'+'+v+' '+(RES_ICO[k]||k)).join(' ');qhtml+=`<div style="background:var(--bg3);border:1px solid ${q.done?'rgba(76,175,122,.5)':'var(--bdr)'};border-radius:9px;padding:9px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><div style="font-size:12px;font-weight:700;color:${q.done?'var(--grn)':'var(--txt)'}">${q.label}</div><div style="font-size:10px;color:var(--txt-d)">${q.progress||0}/${q.need}</div></div><div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:4px"><div style="height:100%;width:${pct}%;background:${q.done?'var(--grn)':'linear-gradient(90deg,var(--gold-d),var(--gold-b))'};border-radius:2px;transition:width .3s"></div></div><div style="font-size:9px;color:var(--txt-d)">Reward: ${rwTxt}${q.done?' ✓':''}</div></div>`;});
-  el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b)">🔥 Daily Streak</div><div style="font-size:18px;font-weight:900;color:${sc}">×${G.streak}</div></div><div style="display:flex;gap:3px;margin-bottom:8px">${fires}</div><button onclick="claimStreakBonus()" style="width:100%;padding:8px;border-radius:7px;border:none;font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;${btnSt}">${btnTxt}</button></div><div style="font-family:Cinzel,serif;font-size:10px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">📋 DAGELIJKSE QUESTS</div>${qhtml}`;
+  el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b)">🔥 Daily Streak</div><div style="font-size:18px;font-weight:900;color:${sc}">×${G.streak}</div></div><div style="display:flex;gap:3px;margin-bottom:8px">${fires}</div><button onclick="claimStreakBonus()" style="width:100%;padding:8px;border-radius:7px;border:none;font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;${btnSt}">${btnTxt}</button></div><div style="font-family:Cinzel,serif;font-size:10px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">📋 DAILY QUESTS</div>${qhtml}`;
 }
 function claimStreakBonus(){if(G.streakClaimed){toast('Already claimed!');return;}const bonus=Math.min(G.streak*8,200);addRes('emp',bonus);if(G.streak>=5)addRes('emp',G.streak*2);G.streakClaimed=true;toast('🔥 Streak ×'+G.streak+' — +'+bonus+' $EMP!',3500);updateHUD();renderQuestsTab();}
 function renderUpgradesTab(){const el=document.getElementById('cp-upgrades');if(!el)return;el.innerHTML=renderUpgradeSection();setTimeout(()=>{el.querySelectorAll('button[data-upg]').forEach(btn=>{btn.onclick=()=>buyUpgrade(btn.dataset.upg);});},0);}
@@ -2009,7 +2015,7 @@ function renderEconomyPanel(){
   else if(activeEconTab==='econ-stats')content=renderEconStats(pop);
   else if(activeEconTab==='econ-market')content=renderEconMarket();
   else if(activeEconTab==='econ-emp')content=renderEconEMP();
-  else if(activeEconTab==='econ-log')content=`<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITEITEN</div>${(E.log||[]).slice(0,30).map(e=>`<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}">${e.msg}</div>`).join('')}`;
+  else if(activeEconTab==='econ-log')content=`<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOG</div>${(E.log||[]).slice(0,30).map(e=>`<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}">${e.msg}</div>`).join('')}`;
 
   el.innerHTML=`<div style="padding:4px 0 24px">${header}${events}${tabBar}${content}</div>`;
 }
@@ -2131,6 +2137,59 @@ _st.textContent=`
 `;
 document.head.appendChild(_st);
 
+
+// ─── Draggable city panel ─────────────────────────────────────────────────────
+(function(){
+  let dragging=false, startY=0, startH=0;
+  function getSheet(){ return document.getElementById('cp-sheet'); }
+
+  function onStart(e){
+    const sheet=getSheet(); if(!sheet) return;
+    dragging=true;
+    startY=e.touches?e.touches[0].clientY:e.clientY;
+    startH=sheet.offsetHeight;
+    sheet.style.transition='none';
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!dragging) return;
+    const sheet=getSheet(); if(!sheet) return;
+    const y=e.touches?e.touches[0].clientY:e.clientY;
+    const delta=startY-y;          // positive = drag up = bigger panel
+    const newH=Math.min(Math.max(startH+delta, window.innerHeight*.28), window.innerHeight*.90);
+    sheet.style.height=newH+'px';
+    e.preventDefault();
+  }
+  function onEnd(e){
+    if(!dragging) return;
+    dragging=false;
+    const sheet=getSheet(); if(!sheet) return;
+    sheet.style.transition='';
+    const h=sheet.offsetHeight;
+    const vh=window.innerHeight;
+    // Snap: if dragged below 28vh → close; between 28-45vh → snap to 42vh; above → keep
+    if(h < vh*.28){
+      closeCity();
+    } else if(h < vh*.45){
+      sheet.style.height=(vh*.42)+'px';
+    }
+    // else keep current height
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    // Wire drag handle
+    const drag=document.querySelector('.cp-drag');
+    if(drag){
+      drag.addEventListener('touchstart',onStart,{passive:false});
+      drag.addEventListener('mousedown',onStart);
+    }
+    document.addEventListener('touchmove',onMove,{passive:false});
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('touchend',onEnd);
+    document.addEventListener('mouseup',onEnd);
+  });
+})();
+// ──────────────────────────────────────────────────────────────────────────────
 </script>
 </body>
 </html>
