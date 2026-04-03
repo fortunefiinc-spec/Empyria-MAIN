@@ -6,6 +6,7 @@
 <title>EMPYRIA — Build Your Emporium</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -142,6 +143,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div id="topbar-row1">
       <div id="logo">EMPYRIA<span class="v">&nbsp;v0.2</span><small id="era-label">ERA I — STONE AGE</small></div>
       <div style="flex:1"></div>
+      <div id="db-badge" title="Cloud sync" style="font-size:13px;flex-shrink:0;cursor:default;pointer-events:all" onclick="showLeaderboard()">☁️</div>
       <div id="wallet-btn" onclick="toggleWallet()" style="display:flex;align-items:center;gap:3px;background:rgba(15,20,35,.8);border:1px solid rgba(80,120,200,.4);border-radius:10px;padding:3px 9px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:#6aaaff;white-space:nowrap">💼 Connect</div>
       <div id="worker-badge" onclick="openEconomy()" style="display:flex;align-items:center;gap:3px;background:rgba(40,30,10,.7);border:1px solid rgba(180,140,60,.3);border-radius:10px;padding:3px 8px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:rgba(200,175,130,.8)">👷 20</div>
       <div id="emp-pill" onclick="openCity()" style="display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#1a1200,#2a1e00);border:1.5px solid var(--gold);border-radius:12px;padding:4px 11px;cursor:pointer;flex-shrink:0;pointer-events:all">
@@ -344,6 +346,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
 
 <!-- WALLET MODAL -->
+
+<!-- LEADERBOARD MODAL -->
+<div id="leaderboard-modal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.92);display:none;align-items:flex-end;justify-content:center">
+  <div style="background:linear-gradient(180deg,#0f0c06,#0a0803);border-radius:16px 16px 0 0;border-top:1.5px solid var(--gold);width:100%;max-width:480px;padding:20px;padding-bottom:36px;max-height:70vh;overflow-y:auto">
+    <div style="width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 12px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:Cinzel,serif;font-size:16px;color:var(--gold-b)">🏆 Leaderboard</div>
+      <div id="lb-your-rank" style="font-size:10px;color:var(--txt-d)"></div>
+    </div>
+    <div id="leaderboard-list"><div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Loading...</div></div>
+    <button onclick="document.getElementById('leaderboard-modal').style.display='none'" style="width:100%;margin-top:12px;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--txt-d);cursor:pointer;font-size:12px">Close</button>
+  </div>
+</div>
 <div id="wallet-modal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.88);display:none;align-items:flex-end;justify-content:center">
   <div style="background:linear-gradient(180deg,#0f121c,#0b0d14);border-radius:16px 16px 0 0;border-top:1.5px solid rgba(80,120,200,.4);width:100%;max-width:480px;padding:20px;padding-bottom:36px">
     <div style="width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 16px"></div>
@@ -1246,7 +1261,11 @@ const GTITLES={tap:'⛏️ MINE DASH',aim:'🎯 TOWER DEFENSE',mem:'🃏 RUNE MA
 function playGame(id){if(cdLeft(id)>0){toast('Cooldown active!');return;}if(id==='block'&&!G.bld.lumber){toast('Build Lumber Mill!');return;}if(id==='react'&&!G.bld.forge){toast('Bouw de Smederij!');return;}G.curGame=id;closeCity();document.getElementById('gmod').classList.add('on');['tap','aim','mem','block','react'].forEach(g=>document.getElementById('g-'+g).style.display='none');document.getElementById('gmod-title').textContent=GTITLES[id];({tap:initTap,aim:initAim,mem:initMem,block:initBlock,react:initReact})[id]();}
 function closeGame(){checkQuestProgress('play',1);document.getElementById('gmod').classList.remove('on');clearGameTimers();}
 function clearGameTimers(){if(typeof _aimT!=='undefined'&&_aimT)clearInterval(_aimT);if(typeof _aimST!=='undefined'&&_aimST)clearInterval(_aimST);if(typeof _tapT!=='undefined'&&_tapT)clearInterval(_tapT);if(typeof _tapSpawnT!=='undefined'&&_tapSpawnT)clearInterval(_tapSpawnT);if(typeof _mem!=='undefined'&&_mem&&_mem.timerT)clearInterval(_mem.timerT);if(typeof _blkT!=='undefined'&&_blkT)clearInterval(_blkT);if(typeof _reactT!=='undefined'&&_reactT)clearTimeout(_reactT);if(typeof _aimAF!=='undefined'&&_aimAF){cancelAnimationFrame(_aimAF);_aimAF=null;}if(typeof _aimOn!=='undefined')_aimOn=false;}
-function showResult(title,sub,rws){G.pending=rws;document.getElementById('rp-t').textContent=title;document.getElementById('rp-s').textContent=sub;const w=document.getElementById('rp-rws');w.innerHTML='';for(const[k,v]of Object.entries(rws))if(v>0)w.innerHTML+=`<div class="rp-rw"><div class="rp-rw-v">+${v}</div><div class="rp-rw-l">${RES_ICO[k]||''} ${k.toUpperCase()}</div></div>`;document.getElementById('result').classList.add('on');}
+function showResult(title,sub,rws){
+  // Submit to DB
+  const totalEmp=Object.entries(rws).filter(([k])=>k==='emp').reduce((s,[,v])=>s+v,0);
+  if(G.curGame&&totalEmp>0) dbSubmitScore(G.curGame, Object.values(rws).reduce((a,b)=>a+b,0), totalEmp);
+  G.pending=rws;document.getElementById('rp-t').textContent=title;document.getElementById('rp-s').textContent=sub;const w=document.getElementById('rp-rws');w.innerHTML='';for(const[k,v]of Object.entries(rws))if(v>0)w.innerHTML+=`<div class="rp-rw"><div class="rp-rw-v">+${v}</div><div class="rp-rw-l">${RES_ICO[k]||''} ${k.toUpperCase()}</div></div>`;document.getElementById('result').classList.add('on');}
 function collectResult(){for(const[k,v]of Object.entries(G.pending))addRes(k,v);G.pending={};document.getElementById('result').classList.remove('on');closeGame();updateHUD();toast('✓ Resources verzameld!');}
 function playAgain(){document.getElementById('result').classList.remove('on');if(G.curGame&&cdLeft(G.curGame)<=0)playGame(G.curGame);else{closeGame();toast('Cooldown active!');}}
 
@@ -1316,6 +1335,208 @@ let _tT;
 function toast(msg,dur=2200){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.style.opacity='1';clearTimeout(_tT);_tT=setTimeout(()=>t.style.opacity='0',dur);}
 
 // ═══ LAUNCH ═══
+
+// ─── Supabase Database ────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://giwdqbikgxwrwgebmmtd.supabase.co';   // e.g. https://xyz.supabase.co
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdpd2RxYmlrZ3h3cndnZWJtbXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTU1NTQsImV4cCI6MjA5MDc5MTU1NH0.ooWzy7RIS4JdMmjVbeQICcgrqHmXGstMivPnA22M2as';
+
+let db = null;
+let dbPlayer = null; // current player row from DB
+let dbSyncing = false;
+
+function initDB() {
+  try {
+    if (typeof supabase === 'undefined') { console.warn('Supabase not loaded'); return; }
+    db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    console.log('✅ Supabase connected');
+  } catch(e) { console.warn('DB init failed:', e); }
+}
+
+// Called after Telegram init — upsert player row
+async function dbSyncPlayer() {
+  if (!db || !tgUser?.id) return;
+  try {
+    const empBal = Math.floor(G.res.emp || E.res.emp || 0);
+    const payload = {
+      telegram_id:   tgUser.id,
+      username:      tgUser.username || null,
+      first_name:    tgUser.first_name || 'Player',
+      wallet_address: walletAddr || null,
+      emp_balance:   empBal,
+      prestige_level: G.prestige || 0,
+      era:           G.era || 1,
+      play_streak:   G.streak || 0,
+      last_login:    new Date().toISOString().slice(0,10),
+      game_state:    buildSaveState(),
+    };
+    const { data, error } = await db
+      .from('players')
+      .upsert(payload, { onConflict: 'telegram_id' })
+      .select()
+      .single();
+    if (error) throw error;
+    dbPlayer = data;
+    console.log('💾 DB synced — EMP:', empBal);
+    updateDBStatusBadge(true);
+  } catch(e) {
+    console.warn('DB sync failed:', e.message);
+    updateDBStatusBadge(false);
+  }
+}
+
+// Load game state from DB (overrides localStorage if DB is newer)
+async function dbLoadPlayer() {
+  if (!db || !tgUser?.id) return;
+  try {
+    const { data, error } = await db
+      .from('players')
+      .select('*')
+      .eq('telegram_id', tgUser.id)
+      .single();
+    if (error || !data) return; // new player, no data yet
+    dbPlayer = data;
+    // Only restore if DB state exists and is newer than local
+    if (data.game_state) {
+      const localEmp = G.res.emp || 0;
+      const dbEmp    = data.emp_balance || 0;
+      if (dbEmp > localEmp) {
+        restoreSaveState(data.game_state);
+        toast('☁️ Game restored from cloud!', 3000);
+      }
+    }
+    updateDBStatusBadge(true);
+  } catch(e) {
+    console.warn('DB load failed:', e.message);
+  }
+}
+
+// Fetch leaderboard top 10
+async function dbGetLeaderboard() {
+  if (!db) return [];
+  try {
+    const { data, error } = await db
+      .from('leaderboard')
+      .select('rank, display_name, emp_balance, prestige_level, era')
+      .limit(10);
+    if (error) throw error;
+    return data || [];
+  } catch(e) {
+    console.warn('Leaderboard error:', e.message);
+    return [];
+  }
+}
+
+// Submit mini-game score
+async function dbSubmitScore(game, score, empEarned) {
+  if (!db || !tgUser?.id) return;
+  try {
+    await db.from('scores').insert({
+      telegram_id: tgUser.id,
+      game, score,
+      emp_earned: empEarned || 0,
+    });
+  } catch(e) { /* silent fail */ }
+}
+
+// Build saveable state from G + E
+function buildSaveState() {
+  return {
+    res:G.res, bld:G.bld, cd:G.cd, stats:G.stats, upgrades:G.upgrades,
+    era:G.era, streak:G.streak, lastLogin:G.lastLogin, streakClaimed:G.streakClaimed,
+    quests:G.quests, questsDate:G.questsDate,
+    prestige:G.prestige, prestigeBonus:G.prestigeBonus,
+    mysteryBoxes:G.mysteryBoxes, totalTaps:G.totalTaps, nextBoxAt:G.nextBoxAt,
+    log:(G.log||[]).slice(0,20),
+    eRes:E.res, ePop:E.pop, eBuildings:E.buildings, eNextId:E.nextId,
+    eHappiness:E.happiness, eStability:E.stability, eDefense:E.defense,
+    eYear:E.year, eDay:E.day, eTick:E.tick, eSeason:E.season,
+    eUpgradesDone:E.upgradesDone, ePriceBonus:E.priceBonus,
+    ePrestigeBonus:E.prestigeBonus, eEmpRate:E.empRate,
+    savedAt: Date.now(),
+  };
+}
+
+// Restore state from DB game_state JSON
+function restoreSaveState(s) {
+  try {
+    if(s.res)Object.assign(G.res,s.res);
+    if(s.bld)Object.assign(G.bld,s.bld);
+    if(s.cd)Object.assign(G.cd,s.cd);
+    if(s.stats)Object.assign(G.stats,s.stats);
+    if(s.upgrades)Object.assign(G.upgrades,s.upgrades);
+    G.era=s.era||1;G.streak=s.streak||0;G.lastLogin=s.lastLogin||'';
+    G.streakClaimed=s.streakClaimed||false;G.quests=s.quests||[];G.questsDate=s.questsDate||'';
+    G.prestige=s.prestige||0;G.prestigeBonus=s.prestigeBonus||0;
+    G.mysteryBoxes=s.mysteryBoxes||0;G.totalTaps=s.totalTaps||0;G.nextBoxAt=s.nextBoxAt||0;
+    G.log=s.log||[];
+    if(s.eRes)Object.assign(E.res,s.eRes);
+    if(s.ePop)Object.assign(E.pop,s.ePop);
+    if(s.eBuildings)E.buildings=s.eBuildings;
+    if(s.eNextId)E.nextId=s.eNextId;
+    E.happiness=s.eHappiness??70;E.stability=s.eStability??80;E.defense=s.eDefense??0;
+    E.year=s.eYear??1;E.day=s.eDay??0;E.tick=s.eTick??0;E.season=s.eSeason??0;
+    E.upgradesDone=s.eUpgradesDone||[];E.priceBonus=s.ePriceBonus??1;
+    E.prestigeBonus=s.ePrestigeBonus??0;E.empRate=s.eEmpRate??0;
+    updateHUD();
+  } catch(e) { console.warn('restoreSaveState error:', e); }
+}
+
+// Small cloud indicator in topbar
+function updateDBStatusBadge(ok) {
+  const el = document.getElementById('db-badge');
+  if (el) { el.textContent = ok ? '☁️' : '⚠️'; el.title = ok ? 'Cloud sync OK' : 'Sync failed'; }
+}
+
+// Auto-sync every 2 minutes + on important events
+let _dbSyncTimer = null;
+function startDBSync() {
+  if (!db) return;
+  // Initial load from cloud
+  dbLoadPlayer().then(() => {
+    // Then start periodic sync
+    _dbSyncTimer = setInterval(() => dbSyncPlayer(), 120_000);
+    // Sync immediately after load
+    setTimeout(dbSyncPlayer, 3000);
+  });
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
+
+async function showLeaderboard() {
+  const modal = document.getElementById('leaderboard-modal');
+  const list  = document.getElementById('leaderboard-list');
+  const rankEl= document.getElementById('lb-your-rank');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Loading...</div>';
+
+  const rows = await dbGetLeaderboard();
+  if (!rows.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">No players yet — be the first!</div>';
+    return;
+  }
+
+  // Find own rank
+  const myId = tgUser?.id;
+  const mine = rows.find(r => r.telegram_id === myId);
+  if (mine && rankEl) rankEl.textContent = 'Your rank: #' + mine.rank;
+
+  list.innerHTML = rows.map(r => {
+    const isMe = r.telegram_id === myId;
+    const medal = r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':'#'+r.rank;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.06);background:${isMe?'rgba(180,140,60,.1)':'transparent'};border-radius:6px">
+      <div style="font-size:16px;width:28px;text-align:center;flex-shrink:0">${medal}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;color:${isMe?'#f5dd40':'var(--txt)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.display_name}${isMe?' (you)':''}</div>
+        <div style="font-size:9px;color:var(--txt-d)">ERA ${r.era} · Prestige ${r.prestige_level}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:12px;font-weight:900;color:#f5dd40">${(r.emp_balance||0).toLocaleString()}</div>
+        <div style="font-size:8px;color:var(--txt-d)">$EMP</div>
+      </div>
+    </div>`;
+  }).join('');
+}
 // ─── Telegram + TON Connect ───────────────────────────────────────────────
 let tgUser=null, tonUI=null, walletAddr=null;
 
@@ -1351,6 +1572,7 @@ async function initTONConnect(){
         updateWalletUI(true);
         fetchTONBalance(walletAddr);
         saveWalletLink(walletAddr);
+        dbSyncPlayer(); // update wallet in DB
         toast('✅ Wallet connected!');
       } else {
         walletAddr=null;
@@ -1431,7 +1653,8 @@ function launch(){
   sp.style.transition='opacity .5s';sp.style.opacity='0';
   setTimeout(()=>sp.style.display='none',500);
 
-  // Init Telegram + TON Connect
+  // Init DB + Telegram + TON Connect
+  initDB();
   initTelegram();
   initTONConnect();
 
@@ -1446,6 +1669,7 @@ function launch(){
   loadGame();
   eLoad();
   loadWalletLink();
+  startDBSync(); // Cloud save/load
 
   // Init economy tab in city panel
   setTimeout(()=>{
