@@ -86,11 +86,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 /* Resource pills */
 #res-compact{display:flex;gap:4px;flex-wrap:wrap}
 .rcp{display:flex;align-items:center;gap:3px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:9px;padding:3px 7px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:8px;padding:3px 7px;
   white-space:nowrap;flex-shrink:0;font-size:11px;font-weight:600;
-  transition:border-color .2s}
+  transition:all .2s}
 .rcp:hover{border-color:rgba(240,192,96,.3)}
 .rcp.emp{border-color:rgba(245,216,64,.35);background:rgba(240,184,64,.1)}
 .rv{font-weight:700;color:var(--txt)}
@@ -329,6 +329,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 @keyframes bounce{0%{transform:scale(1) rotate(-5deg)}100%{transform:scale(1.15) rotate(5deg)}}
 @keyframes fall{0%{top:-60px;opacity:1}80%{opacity:1}100%{top:110%;opacity:0}}
 @keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-60px);opacity:0}}
+@keyframes empPop{0%{transform:translateY(0) scale(1);opacity:1}70%{transform:translateY(-45px) scale(1.1);opacity:1}100%{transform:translateY(-80px) scale(.8);opacity:0}}
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(240,192,96,.2)}50%{box-shadow:0 0 20px rgba(240,192,96,.5)}}
 </style>
 </head>
@@ -424,7 +425,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div class="cp-page on" id="cp-empire"></div>
     <div class="cp-page" id="cp-games">
       <div class="gl">
-        <div class="gc"><div class="gc-ico">&#x26CF;&#xFE0F;</div><div class="gc-body"><div class="gc-name">Mine Dash</div><div class="gc-desc">Tik de vallende erts! Bouw combos voor bonus.</div><div class="gc-tags"><span class="gt">&#x1FAA8; Stone</span><span class="gt">&#x1FAB5; Wood</span><span class="gt">30 min</span></div><div class="gc-cd" id="cd-tap">&#x23F1; <span style="color:var(--grn)">READY!</span></div></div><button class="gc-play" id="btn-tap" onclick="playGame('tap')">PLAY</button></div>
+        <div class="gc"><div class="gc-ico">&#x26CF;&#xFE0F;</div><div class="gc-body"><div class="gc-name">Mine Dash</div><div class="gc-desc">Tap falling ore! Build combos for bonuses.</div><div class="gc-tags"><span class="gt">&#x1FAA8; Stone</span><span class="gt">&#x1FAB5; Wood</span><span class="gt">30 min</span></div><div class="gc-cd" id="cd-tap">&#x23F1; <span style="color:var(--grn)">READY!</span></div></div><button class="gc-play" id="btn-tap" onclick="playGame('tap')">PLAY</button></div>
         <div class="gc"><div class="gc-ico">&#x1F3AF;</div><div class="gc-body"><div class="gc-name">Tower Defense</div><div class="gc-desc">Shoot enemy waves! Defend your castle.</div><div class="gc-tags"><span class="gt">&#x1F947; Gold</span><span class="gt">&#x1FAA8; Stone</span><span class="gt">45 min</span></div><div class="gc-cd" id="cd-aim">&#x23F1; <span style="color:var(--grn)">READY!</span></div></div><button class="gc-play" id="btn-aim" onclick="playGame('aim')">PLAY</button></div>
         <div class="gc"><div class="gc-ico">&#x1F0CF;</div><div class="gc-body"><div class="gc-name">Rune Match</div><div class="gc-desc">Find all 8 pairs. Fewer moves = more reward!</div><div class="gc-tags"><span class="gt">&#x1FAB5; Wood</span><span class="gt">&#x1F947; Gold</span><span class="gt">60 min</span></div><div class="gc-cd" id="cd-mem">&#x23F1; <span style="color:var(--grn)">READY!</span></div></div><button class="gc-play" id="btn-mem" onclick="playGame('mem')">PLAY</button></div>
         <div class="gc" id="gc-block"><div class="gc-ico">&#x1F9F1;</div><div class="gc-body"><div class="gc-name">Block Builder</div><div class="gc-desc">Tetris-style. Clear lines = resources!</div><div class="gc-tags"><span class="gt">Alles</span><span class="gt">90 min</span></div><div class="gc-cd" id="cd-block">&#x23F1; 90 min</div></div><button class="gc-play" id="btn-block" onclick="playGame('block')" disabled>&#x1F512;</button><div class="gc-lock" id="lk-block">&#x1F512; Build Lumber Mill</div></div>
@@ -737,7 +738,7 @@ const QUEST_POOL=[
   {id:'mine_iron',label:'⚙️ Mine 15 iron',type:'mine',res:'iron',need:15,reward:{emp:8}},
   {id:'play_games',label:'🎮 Play 2 mini-games',type:'play',need:2,reward:{emp:4,stone:10}},
   {id:'earn_emp',label:'🪙 Verdien 100 $EMP',type:'earn',need:100,reward:{emp:5,crystal:1}},
-  {id:'sell_res',label:'💰 Sell resources (×3)',type:'sell',need:3,reward:{emp:4,gold:3}},
+  {id:'sell_res',label:'💰 Sell resources ×3',type:'sell',need:3,reward:{emp:4,gold:3}},
   {id:'open_box',label:'📦 Open 1 Mystery Box',type:'open_box',need:1,reward:{emp:3,stone:15}},
   {id:'build_any',label:'🏗️ Build any building',type:'build',need:1,reward:{emp:15}},
   {id:'mine_crystal',label:'💎 Mine 5 crystal',type:'mine',res:'crystal',need:5,reward:{emp:10,mana:1}},
@@ -1857,7 +1858,11 @@ function updateWorldLife(){
 }
 // ──────────────────────────────────────────────────────────────────────────
 
-function animate(){requestAnimationFrame(animate);animT+=.016;processMove();updateCam();updateHints();animateWorkers();
+function animate(){requestAnimationFrame(animate);animT+=.016;
+  // Skip heavy updates when panel is fully open and not visible
+  const panelOpen=document.getElementById('city-panel')?.classList.contains('open');
+  processMove();updateCam();updateHints();
+  if(!panelOpen||animT%3<1) animateWorkers(); // reduce worker updates when panel open
   resourceNodes.forEach(n=>{n.traverse(cv=>{if(cv.userData&&cv.userData.isGoldCrystal)cv.rotation.y+=.025;});});
   // Animate water
   if(window._waterMesh){
@@ -1884,6 +1889,9 @@ function nearestNode(){let best=null,bd=Infinity;resourceNodes.forEach(n=>{if(!n
 function rollRareDrop(type){const drops=RARE_DROPS[type];if(!drops)return null;for(const d of drops)if(Math.random()<d.chance)return d;return null;}
 
 function doMine(){
+  // Visual pulse on MINE button
+  const mb=document.querySelector('.mine-btn');
+  if(mb){mb.style.transform='scale(.9)';setTimeout(()=>mb.style.transform='',100);}
   const n=nearestNode();if(!n){toast('Walk closer to a resource!');return;}
   const type=n.userData.type;n.userData.hp--;
   const op=n.position.clone();let si=0;
@@ -1957,7 +1965,11 @@ function confirmPlace(wx,wz){
     const def2=BLD_DEF[id];if(def2)for(const[r,v]of Object.entries(def2.cost))G.res[r]=(G.res[r]||0)+v;updateHUD();return;
   }
   G.bld[id]=true;removeSuperseded(id);buildBldMesh(id,snap.x,snap.z);startPassive();updateEra();updateHUD();renderBuildGrid();checkQuestProgress('build',1);
-  toast('✅ '+BLD_DEF[id].name+' built!');addLog(BLD_DEF[id].ico+' '+BLD_DEF[id].name+' built','good');
+  window.haptic?.('heavy');
+  const _bdef=BLD_DEF[id];
+  const _empMsg=_bdef?.empOut>0?' · +'+(_bdef.empOut*(E.empMult||1)).toFixed(2)+'💰/tick':'';
+  toast('✅ '+_bdef?.name+' built!'+_empMsg,3000);
+  addLog(_bdef?.ico+' '+_bdef?.name+' built','good');
   setTimeout(updateWorkerNPCs,200);
 }
 
@@ -2320,7 +2332,7 @@ function renderUpgradeSection(){
 }
 
 function renderPassiveSection(){
-  const ph=passPerHour();let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⏰ PASSIEF PER UUR</div>';
+  const ph=passPerHour();let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⏰ PASSIVE PER HOUR</div>';
   const activeKeys=Object.keys(ph).filter(k=>ph[k]>0);
   if(!activeKeys.length)return html+'<div style="text-align:center;padding:16px;color:var(--txt-d);font-size:11px">Bouw gebouwen voor passief inkomen</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">';
@@ -2405,7 +2417,14 @@ setInterval(updateGameCards,1000);
 // ═══ QUESTS ═══
 function getTodayStr(){return new Date().toISOString().slice(0,10);}
 function initDailyQuests(){const today=getTodayStr();if(G.questsDate!==today){G.questsDate=today;const pool=[...QUEST_POOL].sort(()=>Math.random()-.5);G.quests=pool.slice(0,3).map(q=>({...q,progress:0,done:false}));const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);if(G.lastLogin===yesterday)G.streak=Math.min(G.streak+1,30);else if(G.lastLogin!==today)G.streak=1;G.lastLogin=today;G.streakClaimed=false;saveGame();}}
-function checkQuestProgress(type,amount,res){if(!G.quests)return;G.quests.forEach(q=>{if(q.done)return;if(q.type===type){if(type==='mine'&&res&&q.res&&q.res!==res)return;q.progress=Math.min(q.need,(q.progress||0)+amount);if(q.progress>=q.need){q.done=true;Object.entries(q.reward).forEach(([k,v])=>addRes(k,v));toast('✅ Quest: '+q.label,4000);updateHUD();addLog('✅ '+q.label,'good');}}});}
+function checkQuestProgress(type,amount,res){if(!G.quests)return;G.quests.forEach(q=>{if(q.done)return;if(q.type===type){if(type==='mine'&&res&&q.res&&q.res!==res)return;q.progress=Math.min(q.need,(q.progress||0)+amount);if(q.progress>=q.need){q.done=true;Object.entries(q.reward).forEach(([k,v])=>addRes(k,v));window.haptic?.('heavy');toast('✅ Quest: '+q.label,4000);updateHUD();addLog('✅ '+q.label,'good');}}});}
+function renderQuestProgress(q){
+  const pct=Math.min(100,((q.progress||0)/q.need)*100);
+  const done=q.done;
+  return`<div style="height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:5px;overflow:hidden">
+    <div style="height:100%;width:${pct}%;background:${done?'var(--grn)':'var(--gold)'};border-radius:2px;transition:width .4s"></div>
+  </div>`;
+}
 function renderQuestsTab(){
   const el=document.getElementById('cp-quests');if(!el)return;
   const bonus=Math.min(G.streak*5,150),sc=G.streak>=7?'#f0b040':G.streak>=3?'#f0c96e':'#a8c0d0';
@@ -2429,7 +2448,7 @@ function buyShop(id){if(!walletAddr){toast('Connect your wallet first!');toggleW
 // ═══ MYSTERY BOX ═══
 function checkMysteryBox(){G.totalTaps++;if(G.nextBoxAt<=0)G.nextBoxAt=G.totalTaps+20+Math.floor(Math.random()*31);if(G.totalTaps>=G.nextBoxAt){G.mysteryBoxes++;G.nextBoxAt=G.totalTaps+20+Math.floor(Math.random()*31);showMysteryBox();}}
 function pickMysteryReward(){const total=MYSTERY_REWARDS.reduce((s,r)=>s+r.weight,0);let roll=Math.random()*total;for(const r of MYSTERY_REWARDS){roll-=r.weight;if(roll<=0)return r;}return MYSTERY_REWARDS[0];}
-function showMysteryBox(){const r=pickMysteryReward(),box=document.getElementById('mystery-box'),lbl=document.getElementById('mystery-label'),btn=document.getElementById('mystery-open');if(!box)return;box.style.display='flex';lbl.textContent='📦 Mystery Box!';btn.onclick=()=>{box.style.display='none';Object.entries(r.res).forEach(([k,v])=>addRes(k,v));toast('📦 '+r.label+' — '+Object.entries(r.res).map(([k,v])=>'+'+v+' '+k).join(' '),3500);updateHUD();checkQuestProgress('open_box',1);};}
+function showMysteryBox(){const r=pickMysteryReward(),box=document.getElementById('mystery-box'),lbl=document.getElementById('mystery-label'),btn=document.getElementById('mystery-open');if(!box)return;box.style.display='flex';lbl.textContent='📦 Mystery Box!';btn.onclick=()=>{box.style.display='none';Object.entries(r.res).forEach(([k,v])=>addRes(k,v));toast('🎁 '+r.label+' — '+Object.entries(r.res).map(([k,v])=>'+'+v+' '+k).join(' '),3500);updateHUD();checkQuestProgress('open_box',1);};}
 
 // ═══ MINI-GAMES ═══
 const GTITLES={tap:'⛏️ MINE DASH',aim:'🎯 TOWER DEFENSE',mem:'🃏 RUNE MATCH',block:'🧱 BLOCK BUILDER',react:'⚡ LIGHTNING FORGE'};
@@ -2446,7 +2465,7 @@ function playAgain(){document.getElementById('result').classList.remove('on');if
 
 // GAME 1: MINE DASH
 let _tap={},_tapT=null,_tapSpawnT=null;
-function initTap(){_tap={stone:0,wood:0,gold:0,iron:0,crystal:0,emp:0,combo:0,comboT:null,taps:0,timeLeft:30,active:false};document.getElementById('g-tap').style.display='flex';document.getElementById('ts-combo').textContent='×1';document.getElementById('ts-timer').textContent='30s';['ts-s','ts-w','ts-g','ts-e','ts-rare'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='0';});document.getElementById('tap-arena').innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style="font-family:Cinzel,serif;font-size:22px;color:var(--gold-b)">⛏️ MINE DASH</div><div style="font-size:12px;color:var(--txt-d);text-align:center">Tik de vallende erts!<br>Bouw combos voor grotere beloningen</div><button onclick="startMineDash()" style="padding:12px 28px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#000;font-family:Cinzel,serif;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer">▶ START</button></div>';}
+function initTap(){_tap={stone:0,wood:0,gold:0,iron:0,crystal:0,emp:0,combo:0,comboT:null,taps:0,timeLeft:30,active:false};document.getElementById('g-tap').style.display='flex';document.getElementById('ts-combo').textContent='×1';document.getElementById('ts-timer').textContent='30s';['ts-s','ts-w','ts-g','ts-e','ts-rare'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='0';});document.getElementById('tap-arena').innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style="font-family:Cinzel,serif;font-size:22px;color:var(--gold-b)">⛏️ MINE DASH</div><div style="font-size:12px;color:var(--txt-d);text-align:center">Tap falling ore!<br>Build combos for bigger rewards</div><button onclick="startMineDash()" style="padding:12px 28px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#000;font-family:Cinzel,serif;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer">▶ START</button></div>';}
 const ORE_TYPES=[{emoji:'🪨',res:'stone',val:1,color:'#a09080',size:52},{emoji:'🪵',res:'wood',val:1,color:'#8B5E3C',size:48},{emoji:'🥇',res:'gold',val:1,color:'#f5c830',size:44},{emoji:'⚙️',res:'iron',val:1,color:'#8aa4b8',size:44},{emoji:'💎',res:'crystal',val:1,color:'#8855ff',size:40},{emoji:'🪙',res:'emp',val:3,color:'var(--gold-b)',size:44},{emoji:'💣',res:null,val:0,color:'#cc2200',size:46}];
 function startMineDash(){const arena=document.getElementById('tap-arena');arena.innerHTML='';_tap.active=true;_tap.timeLeft=30;_tapT=setInterval(()=>{_tap.timeLeft--;const el=document.getElementById('ts-timer');if(el){el.textContent=_tap.timeLeft+'s';el.style.color=_tap.timeLeft<=5?'#ff2222':'var(--red)';}if(_tap.timeLeft<=0){clearInterval(_tapT);clearInterval(_tapSpawnT);endTap();}},1000);_tapSpawnT=setInterval(spawnOre,600);spawnOre();spawnOre();}
 function spawnOre(){if(!_tap.active)return;const arena=document.getElementById('tap-arena'),W=arena.offsetWidth||300;const wts=[25,25,20,15,8,10,Math.max(2,15-_tap.combo*2)],total=wts.reduce((a,b)=>a+b,0);let roll=Math.random()*total,type=ORE_TYPES[0];for(let i=0;i<ORE_TYPES.length;i++){roll-=wts[i];if(roll<=0){type=ORE_TYPES[i];break;}}const el=document.createElement('div'),x=Math.random()*(W-type.size),dur=1.8+Math.random()*1.2;el.style.cssText=`position:absolute;left:${x}px;top:-60px;width:${type.size}px;height:${type.size}px;font-size:${type.size-8}px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;filter:drop-shadow(0 2px 6px ${type.color});animation:fall ${dur}s linear forwards`;el.textContent=type.emoji;el.dataset.t=JSON.stringify(type);el.addEventListener('pointerdown',e=>{e.stopPropagation();if(!_tap.active)return;const t=JSON.parse(el.dataset.t);el.style.transform='scale(1.4)';el.style.opacity='0';setTimeout(()=>el.remove(),150);clearTimeout(_tap.comboT);_tap.combo=Math.min(_tap.combo+1,10);_tap.comboT=setTimeout(()=>{_tap.combo=0;const tc=document.getElementById('ts-combo');if(tc)tc.textContent='×1';},1500);const m2=1+_tap.combo*.15;const tc2=document.getElementById('ts-combo');if(tc2)tc2.textContent='×'+_tap.combo.toFixed(1);if(t.res===null){_tap.combo=0;const tc3=document.getElementById('ts-combo');if(tc3){tc3.style.color='#ff4444';setTimeout(()=>tc3.style.color='var(--gold-b)',400);}}else if(t.res){const earned=Math.ceil(t.val*m2);_tap[t.res]=(_tap[t.res]||0)+earned;const sid=document.getElementById(t.res==='emp'?'ts-e':'ts-'+t.res[0]);if(sid)sid.textContent=_tap[t.res]||0;if(t.res==='crystal'){const rc=document.getElementById('ts-rare');if(rc)rc.textContent=_tap.crystal||0;}}_tap.taps++;checkMysteryBox();});arena.appendChild(el);setTimeout(()=>{if(el.parentNode)el.remove();},dur*1000+200);}
@@ -2880,7 +2899,7 @@ function launch(){
       updateHUD();
       toast('🏰 Welcome to Empyria! Mine · Build · Earn $EMP!', 4000);
     } else {
-      toast('⚔️ Welcome back! Your economy is running.', 2500);
+      toast('⚔️ Welcome back! '+Math.floor(G.res.emp||0)+' $EMP ready.', 2500);
     }
     updateHUD();
   }, 900);
@@ -2991,8 +3010,17 @@ const E={
 };
 
 function ePop(){return E.pop.workers+E.pop.merchants+E.pop.nobles;}
+
+function showEmpFloat(amount){
+  if(!amount||amount<=0) return;
+  const el=document.createElement('div');
+  el.textContent='+'+Math.floor(amount)+'💰';
+  el.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:52px;z-index:999;font-family:Cinzel,serif;font-size:13px;font-weight:900;color:#f5d840;pointer-events:none;text-shadow:0 1px 6px rgba(0,0,0,.8);animation:empPop .9s ease-out forwards';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
 function eEarn(amount,source){
-  if(amount>0) E.totalEmpEarned=(E.totalEmpEarned||0)+amount;E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
+  if(amount>0){ E.totalEmpEarned=(E.totalEmpEarned||0)+amount; if(amount>=2&&Math.random()<.15) showEmpFloat(amount); }E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
 function eEff(b){const def=MBLD[b.type];if(!def||!b.active)return 0; const innBonus=G.bld.inn?1.15:1;const wRatio=def.workers>0?Math.min(1,(b.workers||0)/def.workers):1;let inputOk=1;if(def.inp&&Object.keys(def.inp).length>0){const met=Object.entries(def.inp).filter(([k,v])=>(E.res[k]||0)>=v).length;inputOk=.3+.7*(met/Object.keys(def.inp).length);}const sci=E.sciBonus?1.25:1,guild=E.guildBonus?1.20:1,pres=1+(E.prestigeBonus||0);return Math.max(0,Math.min(2.0,(.3+.7*wRatio)*inputOk*E.logMult*sci*guild*pres*innBonus));}
 
@@ -3157,6 +3185,11 @@ function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)retur
   },500);
 }catch(ex){console.warn('eLoad:',ex);}}
 setInterval(eSave,30000);
+// Save when app goes to background (mobile)
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ saveGame(); eSave(); dbSyncPlayer(); }
+});
+window.addEventListener('pagehide',()=>{ saveGame(); eSave(); });
 
 // Economy display in Empire panel
 function openEconomy(){
@@ -3225,7 +3258,7 @@ function renderEconBuild(){
 
 function renderEconStats(pop){
   const resHtml=MRES_ECO_KEYS.map(k=>{const v=Math.floor(E.res[k]||0),cap=E.cap[k]||500,pct=Math.min(100,v/cap*100),col=pct>80?'#c04040':pct>50?'var(--gold)':'#4a8a4a';return`<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:8px;margin-bottom:2px"><span>${MRES_ECO[k].ico} ${MRES_ECO[k].n}</span><span style="color:var(--txt-d)">${v}/${cap}</span></div><div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${col};border-radius:2px"></div></div></div>`;}).join('');
-  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px">${[['😊 Geluk',Math.round(E.happiness)+'%',E.happiness>60?'#4a8a4a':'#c04040'],['⚖️ Stabiliteit',Math.round(E.stability)+'%',E.stability>50?'#4a8a4a':'var(--gold)'],['🛡️ Verdediging',E.defense,E.defense>20?'#4a8a4a':'rgba(180,160,120,.6)'],['📦 Logistiek',Math.round(E.logMult*100)+'%',E.logMult>.7?'#4a8a4a':'var(--gold)'],['🌾 Arbeiders',E.pop.workers,'rgba(200,175,130,.8)'],['🏪 Kooplieden',E.pop.merchants,'rgba(200,175,130,.8)']].map(([l,v,col])=>`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:7px 9px"><div style="font-size:8px;color:var(--txt-d)">${l}</div><div style="font-size:14px;font-weight:700;color:${col};margin-top:1px">${v}</div></div>`).join('')}</div><div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">RESOURCES</div>${resHtml}`;
+  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px">${[['😊 Happiness',Math.round(E.happiness)+'%',E.happiness>60?'#4a8a4a':'#c04040'],['⚖️ Stability',Math.round(E.stability)+'%',E.stability>50?'#4a8a4a':'var(--gold)'],['🛡️ Defense',E.defense,E.defense>20?'#4a8a4a':'rgba(180,160,120,.6)'],['📦 Logistics',Math.round(E.logMult*100)+'%',E.logMult>.7?'#4a8a4a':'var(--gold)'],['🌾 Workers',E.pop.workers,'rgba(200,175,130,.8)'],['🏪 Merchants',E.pop.merchants,'rgba(200,175,130,.8)']].map(([l,v,col])=>`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:7px 9px"><div style="font-size:8px;color:var(--txt-d)">${l}</div><div style="font-size:14px;font-weight:700;color:${col};margin-top:1px">${v}</div></div>`).join('')}</div><div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">RESOURCES</div>${resHtml}`;
 }
 
 function renderEconMarket(){
