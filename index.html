@@ -597,6 +597,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <button onclick="document.getElementById('wallet-modal').style.display='none'" style="width:100%;margin-top:10px;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--txt-d);cursor:pointer;font-size:12px">Close</button>
   </div>
 </div>
+
+<!-- TUTORIAL OVERLAY -->
+<div id="tutorial-overlay" style="position:fixed;inset:0;z-index:350;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;pointer-events:none">
+  <div id="tutorial-card" style="background:linear-gradient(160deg,var(--bg2),var(--bg3));border:1.5px solid rgba(240,184,64,.4);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 20px 32px;pointer-events:all">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div id="tut-icon" style="font-size:32px">⛏️</div>
+      <div style="flex:1">
+        <div id="tut-title" style="font-family:Cinzel,serif;font-size:15px;color:var(--gold-b);margin-bottom:2px">Mine Resources</div>
+        <div id="tut-step" style="font-size:9px;color:var(--txt-d)">Step 1 of 5</div>
+      </div>
+      <button onclick="tutNext()" style="padding:8px 18px;background:linear-gradient(135deg,#183010,#2a5020);border:1px solid rgba(64,200,112,.4);border-radius:10px;color:#80f0a0;font-size:12px;font-weight:700;cursor:pointer">NEXT →</button>
+    </div>
+    <div id="tut-body" style="font-size:13px;color:var(--txt2);line-height:1.6"></div>
+    <div style="display:flex;gap:4px;margin-top:12px" id="tut-dots"></div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <!-- ═══ THREE.JS ═══ -->
@@ -795,6 +811,10 @@ let ghostPos={x:0,z:0};  // current ghost snapped position
 let ghostBlocked=false;   // is current ghost position blocked?
 let camTarget={x:0,z:0},camDist=22,camAngle=Math.PI*0.65;
 let pPos={x:0,z:0},playerGroup,animT=0,walkT=0;
+let dayT=0;           // 0..1 day cycle (full cycle = 8 real minutes)
+let clouds=[];        // cloud meshes
+let birds=[];         // bird flock groups
+let sunLight=null, fillLight=null, ambLight=null, hemiLight=null;
 const moving={};const SPD=0.16;
 const TX={};
 
@@ -1128,11 +1148,51 @@ function initThree(){
   const fill=new THREE.DirectionalLight(0x8ab8e8,.3);fill.position.set(-30,20,-20);scene.add(fill);
   scene.add(new THREE.HemisphereLight(0x88c0d8,0x183a0c,.65));
   buildTerrain();buildDecorations();buildResourceNodes();buildPlayer();
+  buildClouds();buildBirds();
+  // Store light refs for day/night
+  sunLight=scene.children.find(c=>c.isDirectionalLight);
+  hemiLight=scene.children.find(c=>c.isHemisphereLight);
+  ambLight=scene.children.find(c=>c.isAmbientLight);
+  fillLight=scene.children.find(c=>c.isDirectionalLight&&c!==sunLight);
   canvas.addEventListener('pointerdown',onWorldTap,{passive:false});
   animate();
 }
 
 
+
+// ─── Tutorial ─────────────────────────────────────────────────────────────
+const TUTORIAL_STEPS=[
+  {ico:'⛏️',title:'Mine Resources',body:'Walk around the 3D world using the D-pad. When you get close to a glowing resource node, tap <strong>MINE</strong> or the world to collect it. Each tap earns a small amount of <strong>$EMP</strong>!'},
+  {ico:'💰',title:'Earn $EMP Tokens',body:'<strong>$EMP is everything.</strong> You earn it by mining, selling resources, playing mini-games, and completing daily quests. Your total earned $EMP is your <strong>airdrop score</strong> — saved forever.'},
+  {ico:'🏗️',title:'Build Your Empire',body:'Tap <strong>CITY</strong> → <strong>BUILD</strong> to construct buildings. Each building you place on the map generates passive income. EMP buildings 💰 earn $EMP every few seconds — even when you are offline!'},
+  {ico:'🚀',title:'Presale Boosts',body:'In <strong>CITY → $EMP tab</strong> you can buy production multipliers with $EMP. <em>Early Investor I</em> (10 $EMP) gives ×1.5 production. Stack all tiers for up to <strong>×67 boost</strong>! These multiply ALL your passive income.'},
+  {ico:'🌟',title:'You Are Ready!',body:'The more you build and invest, the more $EMP you earn. At token launch, your total earned $EMP becomes your <strong>real token allocation</strong>. Start earning now — early players get the best rewards!'},
+];
+let tutStep=0;
+function showTutorial(){
+  const ov=document.getElementById('tutorial-overlay');
+  if(ov){ov.style.display='flex';tutRender();}
+}
+function tutRender(){
+  const s=TUTORIAL_STEPS[tutStep];if(!s)return;
+  document.getElementById('tut-icon').textContent=s.ico;
+  document.getElementById('tut-title').textContent=s.title;
+  document.getElementById('tut-step').textContent=`Step ${tutStep+1} of ${TUTORIAL_STEPS.length}`;
+  document.getElementById('tut-body').innerHTML=s.body;
+  const dots=document.getElementById('tut-dots');
+  dots.innerHTML=TUTORIAL_STEPS.map((_,i)=>
+    `<div style="width:${i===tutStep?20:6}px;height:6px;border-radius:3px;background:${i===tutStep?'var(--gold-b)':'rgba(255,255,255,.2)'};transition:width .2s"></div>`
+  ).join('');
+}
+function tutNext(){
+  tutStep++;
+  if(tutStep>=TUTORIAL_STEPS.length){
+    document.getElementById('tutorial-overlay').style.display='none';
+    localStorage.setItem('empyria_tutorial_done','1');
+    toast('🏰 Welcome to Empyria! Earn $EMP · Build · Grow 🌱',4000);
+  } else { tutRender(); }
+}
+// ──────────────────────────────────────────────────────────────────────────
 // ─── Worker NPC System ───────────────────────────────────────────────────────
 function createWorkerNPC(bx, bz, workerIdx){
   const g=new THREE.Group();
@@ -1185,6 +1245,120 @@ function animateWorkers(){
   });
 }
 // ─────────────────────────────────────────────────────────────────────────────
+
+
+// ─── Clouds ───────────────────────────────────────────────────────────────
+function buildClouds(){
+  const cloudMat=new THREE.MeshLambertMaterial({color:0xeef4ff,transparent:true,opacity:.72});
+  for(let i=0;i<14;i++){
+    const g=new THREE.Group();
+    const cx=(Math.random()-.5)*90, cy=16+Math.random()*12, cz=(Math.random()-.5)*90;
+    // 3-5 overlapping spheres per cloud
+    const parts=3+Math.floor(Math.random()*3);
+    for(let p=0;p<parts;p++){
+      const r=2.5+Math.random()*3;
+      const blob=new THREE.Mesh(new THREE.SphereGeometry(r,6,5),cloudMat.clone());
+      blob.position.set((Math.random()-.5)*5,(Math.random()-.5)*1.5,(Math.random()-.5)*3);
+      blob.scale.set(1+Math.random()*.5,.55+Math.random()*.3,1);
+      g.add(blob);
+    }
+    g.position.set(cx,cy,cz);
+    g.userData.speed=(0.008+Math.random()*.012)*(Math.random()>.5?1:-1);
+    g.userData.baseY=cy;
+    scene.add(g);clouds.push(g);
+  }
+}
+
+// ─── Birds (simple V-shapes that flap) ────────────────────────────────────
+function buildBirds(){
+  for(let i=0;i<6;i++){
+    const g=new THREE.Group();
+    const bx=(Math.random()-.5)*70, by=10+Math.random()*8, bz=(Math.random()-.5)*70;
+    // Wing pair
+    const wingMat=new THREE.MeshLambertMaterial({color:0x303838,side:THREE.DoubleSide});
+    const lw=new THREE.Mesh(new THREE.PlaneGeometry(.7,.28),wingMat);
+    lw.position.set(-.4,0,0);lw.rotation.y=.3;
+    const rw=new THREE.Mesh(new THREE.PlaneGeometry(.7,.28),wingMat);
+    rw.position.set(.4,0,0);rw.rotation.y=-.3;
+    g.add(lw);g.add(rw);
+    g.position.set(bx,by,bz);
+    g.userData={speed:.04+Math.random()*.03,phase:Math.random()*Math.PI*2,
+      rx:bx,rz:bz,r:20+Math.random()*30,angle:Math.random()*Math.PI*2};
+    scene.add(g);birds.push(g);
+  }
+}
+
+// ─── Day/Night cycle (in animate loop) ────────────────────────────────────
+function updateDayNight(){
+  dayT=(dayT+.000035)%1; // full cycle ≈ 8 real minutes
+  const t=dayT;
+  // Sun arc
+  const sunAngle=t*Math.PI*2-Math.PI/2;
+  const sunX=Math.cos(sunAngle)*60, sunY=Math.sin(sunAngle)*55, sunZ=20;
+  if(sunLight){sunLight.position.set(sunX,sunY,sunZ);}
+
+  // Sky + fog color transitions: dawn=.05, day=.25, dusk=.75, night=.85
+  let skyR,skyG,skyB,fogR,fogG,fogB,sunI,ambI,hemiI;
+  if(t<.05||t>.95){       // night
+    skyR=.04;skyG=.05;skyB=.14; fogR=.06;fogG=.07;fogB=.18;
+    sunI=0.0; ambI=.12; hemiI=.15;
+  } else if(t<.15){       // dawn
+    const p=(t-.05)/.10;
+    skyR=.04+p*.55;skyG=.05+p*.28;skyB=.14+p*.30;
+    fogR=.06+p*.5;fogG=.07+p*.22;fogB=.18+p*.22;
+    sunI=p*.9; ambI=.12+p*.28; hemiI=.15+p*.45;
+  } else if(t<.70){       // day
+    skyR=.48;skyG=.72;skyB=.88; fogR=.60;fogG=.80;fogB=.88;
+    sunI=1.15; ambI=.40; hemiI=.65;
+  } else if(t<.80){       // dusk
+    const p=(t-.70)/.10;
+    skyR=.48+p*.30;skyG=.72-p*.28;skyB=.88-p*.50;
+    fogR=.60+p*.30;fogG=.80-p*.30;fogB=.88-p*.48;
+    sunI=1.15-p*1.1; ambI=.40-p*.28; hemiI=.65-p*.50;
+  } else {                // night transition
+    const p=(t-.80)/.15;
+    skyR=.78-p*.74;skyG=.44-p*.39;skyB=.38-p*.24;
+    fogR=.90-p*.84;fogG=.50-p*.43;fogB=.40-p*.22;
+    sunI=.05-p*.05; ambI=.12; hemiI=.15;
+  }
+  renderer.setClearColor(new THREE.Color(skyR,skyG,skyB));
+  scene.fog.color.setRGB(fogR,fogG,fogB);
+  if(sunLight)sunLight.intensity=sunI;
+  if(ambLight)ambLight.intensity=ambI;
+  if(hemiLight)hemiLight.intensity=hemiI;
+
+  // Night: make lanterns glow brighter
+  const isNight=t<.15||t>.80;
+  scene.traverse(obj=>{
+    if(obj.isPointLight&&obj.intensity!==undefined){
+      obj.intensity=isNight?2.2:.8;
+    }
+  });
+}
+
+// ─── Animate clouds + birds ────────────────────────────────────────────────
+function updateWorldLife(){
+  // Clouds drift
+  clouds.forEach(cl=>{
+    cl.position.x+=cl.userData.speed;
+    cl.position.y=cl.userData.baseY+Math.sin(animT*.12+cl.position.x*.03)*1.2;
+    if(cl.position.x>55)cl.position.x=-55;
+    if(cl.position.x<-55)cl.position.x=55;
+  });
+  // Birds orbit + flap
+  birds.forEach(b=>{
+    b.userData.angle+=b.userData.speed*.016;
+    const bx=Math.cos(b.userData.angle)*b.userData.r;
+    const bz=Math.sin(b.userData.angle)*b.userData.r;
+    b.position.set(bx,b.position.y+Math.sin(animT*1.2+b.userData.phase)*.015,bz);
+    b.rotation.y=-b.userData.angle+Math.PI/2;
+    // Wing flap
+    const flap=Math.sin(animT*6+b.userData.phase)*.4;
+    if(b.children[0])b.children[0].rotation.z=flap;
+    if(b.children[1])b.children[1].rotation.z=-flap;
+  });
+}
+// ──────────────────────────────────────────────────────────────────────────
 
 function animate(){requestAnimationFrame(animate);animT+=.016;processMove();updateCam();updateHints();animateWorkers();
   resourceNodes.forEach(n=>{n.traverse(cv=>{if(cv.userData&&cv.userData.isGoldCrystal)cv.rotation.y+=.025;});});
@@ -2155,9 +2329,9 @@ function launch(){
   loadWalletLink();
   startDBSync(); // Cloud save/load
 
-  // Init economy tab in city panel
+  // Start economy tick (1 tick = 1 game-day = 8s)
   setTimeout(()=>{
-    initEconomyTab();
+    // Start economy tick
     // Start economy tick (1 tick = 1 game-day ~1s)
     clearInterval(window._eTick);
     window._eTick = setInterval(()=>{
@@ -2271,11 +2445,15 @@ const EMP_EXPEDITIONS=[
 
 // Economy events
 const MEVENTS=[
-  {id:'spring_trade',title:'⚖️ Spring Trade Convoy!',type:'good',seasonal:'spring',desc:'Merchants arrive with silver.',choices:[{l:'Sell food (30)',cost:{food:30},fx:()=>{eEarn(20,'Konvooi');E.res.gold+=100;},rw:'+20$EMP +100g'},{l:'Sell tools (15)',cost:{tools:15},fx:()=>{eEarn(30,'Tools handel');E.res.gold+=150;},rw:'+30$EMP +150g'},{l:'Pass',fx:()=>{},rw:'Niks'}]},
-  {id:'raiders',title:'⚔️ Raiders!',type:'bad',desc:'Bandits attack your trade routes.',choices:[{l:'Deploy militia (15 iron)',cost:{iron:15},fx:()=>{addLog('Raiders repelled!','good');},rw:'Veilig'},{l:'Betaal tol (20$EMP)',cost:{emp:20},fx:()=>{},rw:'Vrede'},{l:'Ignore',fx:()=>{eEarn(E.raidResist?-10:-25,'Rover aanval');},rw:'-25$EMP'}]},
-  {id:'migrants',title:'🚶 Settlers Arrive',type:'good',desc:'Settlers seek a new home.',choices:[{l:'Welcome all',fx:()=>{const n=5+~~(Math.random()*8);E.pop.workers+=n;addLog('+'+n+' arbeiders','good');},rw:'Groei'},{l:'Turn away',fx:()=>{E.stability=Math.min(100,E.stability+5);},rw:'+5 stabiliteit'}]},
+  {id:'spring_trade',title:'⚖️ Spring Trade Convoy!',type:'good',seasonal:'spring',desc:'Merchants arrive with silver.',choices:[{l:'Sell food (30)',cost:{food:30},fx:()=>{eEarn(20,'Spring Convoy');E.res.gold+=100;},rw:'+20$EMP +100g'},{l:'Sell tools (15)',cost:{tools:15},fx:()=>{eEarn(30,'Tools Trade');E.res.gold+=150;},rw:'+30$EMP +150g'},{l:'Pass',fx:()=>{},rw:'Nothing'}]},
+  {id:'raiders',title:'⚔️ Raiders!',type:'bad',desc:'Bandits attack your trade routes.',choices:[{l:'Deploy militia (15 iron)',cost:{iron:15},fx:()=>{addLog('Raiders repelled!','good');},rw:'Safe'},{l:'Pay toll (20 $EMP)',cost:{emp:20},fx:()=>{},rw:'Peace'},{l:'Ignore',fx:()=>{eEarn(E.raidResist?-10:-25,'Raider attack');},rw:'-25 $EMP'}]},
+  {id:'migrants',title:'🚶 Settlers Arrive',type:'good',desc:'Settlers seek a new home.',choices:[{l:'Welcome all',fx:()=>{const n=5+~~(Math.random()*8);E.pop.workers+=n;addLog('+'+n+' workers arrived','good');},rw:'Growth'},{l:'Turn away',fx:()=>{E.stability=Math.min(100,E.stability+5);},rw:'+5 stability'}]},
   {id:'plague',title:'☠️ Disease Outbreak',type:'bad',desc:'Sickness spreads through the workers.',choices:[{l:'Hire physicians (80g)',cost:{gold:80},fx:()=>{addLog('Plague cured.','good');},rw:'Cured!'},{l:'Quarantine',fx:()=>{E.pop.workers=Math.max(5,E.pop.workers-5);E.stability-=10;},rw:'-5 workers'}]},
-  {id:'royal_contract',title:'👑 Royal Contract!',type:'good',desc:'The Crown needs supplies.',choices:[{l:'Deliver (30 tools + 50 food)',cost:{tools:30,food:50},fx:()=>{eEarn(60,'Koninklijk contract');E.res.gold+=400;E.stability=Math.min(100,E.stability+15);},rw:'+60$EMP +400g'},{l:'Partial (15+25)',cost:{tools:15,food:25},fx:()=>{eEarn(25,'Gedeeltelijk');E.res.gold+=150;},rw:'+25$EMP +150g'},{l:'Decline',fx:()=>{E.stability=Math.max(0,E.stability-8);},rw:'-8 stabiliteit'}]},
+  {id:'royal_contract',title:'👑 Royal Contract!',type:'good',desc:'The Crown needs supplies.',choices:[{l:'Deliver (30 tools + 50 food)',cost:{tools:30,food:50},fx:()=>{eEarn(60,'Royal Contract');E.res.gold+=400;E.stability=Math.min(100,E.stability+15);},rw:'+60$EMP +400g'},{l:'Partial (15+25)',cost:{tools:15,food:25},fx:()=>{eEarn(25,'Partial Delivery');E.res.gold+=150;},rw:'+25$EMP +150g'},{l:'Decline',fx:()=>{E.stability=Math.max(0,E.stability-8);},rw:'-8 stability'}]},
+  {id:'merchant_fleet',title:'⛵ Merchant Fleet Arrives',type:'good',desc:'A fleet of traders wants to dock at your harbour.',choices:[{l:'Open your docks (need harbour)',cost:{},fx:()=>{if(G.bld.harbour){eEarn(80,'Merchant Fleet');toast('⛵ Fleet docked! +80 $EMP');}else{eEarn(20,'Small trade');toast('Build a Harbour for bigger rewards!');}},rw:'+80$EMP (harbour) or +20'},{l:'Charge docking fee',fx:()=>{eEarn(30,'Docking fee');E.res.gold+=200;},rw:'+30$EMP +200g'},{l:'Ignore',fx:()=>{},rw:'Nothing'}]},
+  {id:'lost_explorer',title:'🗺️ Lost Explorer',type:'good',desc:'An explorer stumbled upon your settlement.',choices:[{l:'Fund his expedition (50 $EMP)',cost:{emp:50},fx:()=>{const r=80+~~(Math.random()*120);eEarn(r,'Expedition return');toast('🗺️ Expedition returned! +'+r+' $EMP');},rw:'+80-200$EMP'},{l:'Hire as scout',fx:()=>{eEarn(15,'Scout hire');addRes('crystal',2);},rw:'+15$EMP +2💎'},{l:'Send away',fx:()=>{},rw:'Nothing'}]},
+  {id:'crystal_vein',title:'💎 Crystal Vein Discovered!',type:'good',desc:'Your miners found a rich crystal deposit.',choices:[{l:'Mine it heavily (iron x20)',cost:{iron:20},fx:()=>{addRes('crystal',8);eEarn(25,'Crystal mine');},rw:'+8💎 +25$EMP'},{l:'Sell mining rights (40$EMP)',cost:{emp:40},fx:()=>{eEarn(120,'Crystal rights');},rw:'+120$EMP'},{l:'Ignore',fx:()=>{},rw:'Nothing'}]},
+  {id:'emp_signal',title:'🪙 $EMP Signal Detected',type:'good',desc:'A mysterious energy resonates through your empire.',choices:[{l:'Channel the signal',fx:()=>{const bonus=Math.floor((E.empMult||1)*15);eEarn(bonus,'EMP Signal');toast('🪙 Signal channeled! +'+bonus+' $EMP');},rw:'×mult $EMP bonus'},{l:'Enhance with crystal (10)',cost:{crystal:10},fx:()=>{const bonus=Math.floor((E.empMult||1)*40);eEarn(bonus,'Enhanced Signal');},rw:'×mult ×3 $EMP'},{l:'Ignore',fx:()=>{},rw:'Nothing'}]},
 ];
 
 // Economy state
@@ -2562,100 +2740,67 @@ function renderEconEMP(){
   const totalEarned=Math.floor(E.totalEmpEarned||0);
   const currentEmp=Math.floor(E.res.emp||0);
   const nextUpgrade=EMP_UPGRADES.filter(u=>!E.upgradesDone.includes(u.id)&&u.tier)[0];
+  const passEmpRate=Object.entries(G.bld).reduce((sum,[id,built])=>{
+    if(built!==true)return sum;
+    const def=BLD_DEF[id];return sum+(def&&def.empOut?def.empOut:0);
+  },0)*(E.empMult||1)*(E.priceBonus||1);
+  const hrRate=(passEmpRate*450).toFixed(1); // 3600s / 8s tick
   const presaleHtml=`
-    <div style="background:linear-gradient(135deg,#0c1828,#0c2018);border:1.5px solid rgba(64,200,112,.35);border-radius:12px;padding:14px;margin-bottom:12px">
-      <div style="font-size:8px;color:rgba(100,220,100,.6);letter-spacing:2px;margin-bottom:6px">🚀 PRESALE — PRODUCTION MULTIPLIER</div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="flex:1">
-          <div style="font-size:26px;font-weight:900;color:var(--grn2)">×${mult.toFixed(2)}</div>
-          <div style="font-size:9px;color:rgba(64,200,112,.7)">current production boost</div>
+    <div style="background:linear-gradient(135deg,#0a1820,#0c1c10);border:1.5px solid rgba(240,184,64,.35);border-radius:16px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:.04;pointer-events:none">💰</div>
+      <div style="font-size:8px;color:var(--gold);letter-spacing:2px;margin-bottom:10px">🚀 PRESALE PROGRAM</div>
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:900;color:var(--emp);font-family:Cinzel,serif">${totalEarned.toLocaleString()}</div>
+          <div style="font-size:8px;color:var(--txt-d);margin-top:2px">TOTAL $EMP EARNED</div>
+          <div style="font-size:7px;color:rgba(240,184,64,.5);margin-top:1px">your airdrop score</div>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:14px;font-weight:700;color:var(--emp)">${totalEarned} $EMP</div>
-          <div style="font-size:8px;color:rgba(200,180,80,.5)">total earned (airdrop score)</div>
+        <div style="flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(64,200,112,.2);border-radius:10px;padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:900;color:var(--grn2);font-family:Cinzel,serif">×${mult.toFixed(2)}</div>
+          <div style="font-size:8px;color:var(--txt-d);margin-top:2px">MULTIPLIER</div>
+          <div style="font-size:7px;color:rgba(64,200,112,.5);margin-top:1px">+${hrRate}/hr passive</div>
         </div>
       </div>
-      <div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-bottom:8px;overflow:hidden">
-        <div style="height:100%;width:${Math.min(100,((mult-1)/8)*100)}%;background:linear-gradient(90deg,#22cc44,#44ff88);border-radius:2px;transition:width .5s"></div>
+      <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:10px;color:var(--txt2);line-height:1.6">
+        Your <strong style="color:var(--emp)">total earned $EMP</strong> = your <strong style="color:var(--gold-b)">token allocation</strong> at launch. Buy multipliers to earn faster. 🎯
       </div>
-      <div style="font-size:8px;color:var(--txt2)">Buy boosts below → earn $EMP faster → higher airdrop allocation at token launch</div>
+      <div style="height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(100,((mult-1)/67)*100)}%;background:linear-gradient(90deg,var(--grn),var(--emp));border-radius:3px;transition:width .6s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:7px;color:var(--txt-d);margin-top:3px">
+        <span>×1 start</span><span>×67.5 max</span>
+      </div>
     </div>`;
 
   const boostUpgrades=EMP_UPGRADES.filter(u=>u.tier);
   const utilUpgrades=EMP_UPGRADES.filter(u=>!u.tier);
   const upgHtml=[
-    '<div style="font-size:8px;color:rgba(100,220,100,.5);letter-spacing:1.5px;margin-bottom:8px">⚡ PRODUCTION BOOSTS — spend $EMP, earn faster</div>',
+    '<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⚡ PRODUCTION BOOSTS</div>',
     ...boostUpgrades.map(u=>{
       const has=E.upgradesDone.includes(u.id),can=(E.res.emp||0)>=u.cost;
-      const tierColors=['#40ee80','#60c8ff','#f0c060','#f08040','#cc44ff','#ff4488'];
-      const tc=tierColors[(u.tier||1)-1]||'#f5dd40';
-      return`<div style="background:rgba(255,255,255,.04);border:1px solid ${has?'rgba(70,200,70,.4)':can?'rgba(200,180,100,.45)':'rgba(255,255,255,.07)'};border-radius:9px;padding:10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:20px">${u.ico}</span>
-        <div style="flex:1">
-          <div style="font-size:10px;font-weight:700;color:${has?'rgba(70,200,70,.9)':tc}">${u.n}</div>
-          <div style="font-size:8px;color:var(--txt-d)">${u.desc}</div>
+      const tierCols=['#40ee80','#60c8ff','#f0c060','#f08040','#c080ff','#ff80b0'];
+      const tc=tierCols[(u.tier||1)-1]||'var(--emp)';
+      return`<div style="background:${has?'rgba(32,80,40,.3)':'rgba(255,255,255,.03)'};border:1.5px solid ${has?'rgba(64,200,112,.35)':can?'rgba(240,184,64,.25)':'rgba(255,255,255,.07)'};border-radius:12px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:26px;flex-shrink:0">${u.ico}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;color:${has?'var(--grn2)':tc}">${u.n}</div>
+          <div style="font-size:8px;color:var(--txt-d);margin-top:1px">${u.desc}</div>
         </div>
         ${has
-          ?`<div style="text-align:center"><div style="font-size:9px;color:var(--grn2)">✓ Active</div></div>`
-          :`<button onclick="eBuyUpgrade('${u.id}')" style="padding:7px 12px;background:${can?'rgba(200,180,100,.45)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(200,160,60,.5)':'rgba(255,255,255,.1)'};border-radius:7px;color:${can?'#f5dd40':'rgba(180,160,120,.35)'};font-size:10px;font-weight:700;cursor:${can?'pointer':'default'};white-space:nowrap">${u.cost}💰</button>`
+          ?'<div style="background:rgba(64,200,112,.15);border:1px solid rgba(64,200,112,.3);border-radius:8px;padding:5px 10px;font-size:9px;color:var(--grn2);font-weight:700">✓ ACTIVE</div>'
+          :`<button onclick="eBuyUpgrade('${u.id}')" style="padding:8px 14px;background:${can?'rgba(180,140,40,.25)':'rgba(255,255,255,.04)'};border:1.5px solid ${can?'rgba(240,184,64,.4)':'rgba(255,255,255,.1)'};border-radius:9px;color:${can?'var(--emp)':'rgba(255,255,255,.2)'};font-size:10px;font-weight:700;cursor:${can?'pointer':'default'};white-space:nowrap;min-width:58px;text-align:center">${u.cost}<br><span style="font-size:8px">💰</span></button>`
         }
       </div>`;
     }),
     '<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">🔧 UTILITY</div>',
     ...utilUpgrades.map(u=>{
       const has=E.upgradesDone.includes(u.id),can=(E.res.emp||0)>=u.cost;
-      return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:16px">${u.ico}</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:${has?'rgba(74,138,74,.8)':'var(--txt)'}">${u.n}</div><div style="font-size:8px;color:var(--txt-d)">${u.desc}</div></div>${has?`<span style="font-size:9px;color:var(--grn)">✓</span>`:`<button onclick="eBuyUpgrade('${u.id}')" style="padding:5px 10px;background:${can?'rgba(200,180,100,.45)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(200,160,60,.4)':'rgba(255,255,255,.1)'};border-radius:6px;color:${can?'#f5dd40':'rgba(180,160,120,.4)'};font-size:9px;cursor:pointer">${u.cost}💰</button>`}</div>`;
+      return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="font-size:16px">${u.ico}</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:${has?'var(--grn)':'var(--txt)'}">${u.n}</div><div style="font-size:8px;color:var(--txt-d)">${u.desc}</div></div>${has?'<span style="font-size:9px;color:var(--grn)">✓</span>':`<button onclick="eBuyUpgrade('${u.id}')" style="padding:5px 10px;background:${can?'rgba(180,140,60,.2)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(240,184,64,.3)':'rgba(255,255,255,.1)'};border-radius:6px;color:${can?'var(--emp)':'rgba(255,255,255,.2)'};font-size:9px;cursor:pointer">${u.cost}💰</button>`}</div>`;
     }),
   ].join('');
-  const importHtml=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px">${EMP_IMPORTS.map(imp=>`<button onclick="eBuyImport('${imp.k}',${imp.qty},${imp.cost})" style="padding:7px 8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;font-size:8px;color:var(--txt);cursor:pointer;text-align:left">${imp.label}<br><span style="color:var(--emp)">${imp.cost} $EMP</span></button>`).join('')}</div>`;
-  const expHtml=EMP_EXPEDITIONS.map(exp=>{const active=E.expeditions.find(e=>e.id===exp.id),can=(E.res.emp||0)>=exp.cost;return`<div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div style="font-size:9px;font-weight:700;color:var(--txt)">⛵ ${exp.n}</div><div style="font-size:8px;color:var(--txt-d)">${exp.minRet}–${exp.maxRet} $EMP · ${Math.round(exp.risk*100)}% risk</div></div>${active?`<span style="font-size:8px;color:var(--emp)">${active.ticksLeft}t</span>`:`<button onclick="eLaunchExpedition('${exp.id}')" style="padding:5px 10px;background:${can?'rgba(40,80,140,.3)':'rgba(255,255,255,.03)'};border:1px solid ${can?'rgba(60,120,200,.35)':'rgba(255,255,255,.08)'};border-radius:6px;color:${can?'#6aaaff':'rgba(180,160,120,.4)'};font-size:8px;cursor:pointer">${exp.cost}💰</button>`}</div></div>`;}).join('');
-  return`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">$EMP UPGRADES</div>${upgHtml}<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">NOODIMPORTEN</div>${importHtml}<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">EXPEDITIES</div>${expHtml}`;
+
+  return presaleHtml + upgHtml;
 }
-
-// Wire economy tab into city panel
-function initEconomyTab(){
-  const panel=document.getElementById('cp-sheet');if(!panel)return;
-  // Check if economy tab already exists
-  if(document.getElementById('cp-economy'))return;
-  // Add tab button
-  const tabs=document.querySelector('.cp-tabs');
-  if(tabs){const t=document.createElement('div');t.className='cp-tab';t.onclick=()=>cpTab('economy');t.innerHTML='<i>🏛️</i>ECONOMY';tabs.insertBefore(t,tabs.children[1]);}
-  // Add economy page
-  const pg=document.createElement('div');pg.className='cp-page';pg.id='cp-economy';pg.dataset.tab='econ-build';
-  panel.appendChild(pg);
-}
-
-// cpTab economy override removed — economy merged into empire tab
-const _origCpTab=cpTab;
-cpTab=function(name){
-  _origCpTab(name);
-  if(name==='economy'){
-    document.querySelectorAll('.cp-page').forEach(p=>p.classList.remove('on'));
-    document.querySelectorAll('.cp-tab').forEach(t=>t.classList.remove('on'));
-    const pg=document.getElementById('cp-economy');if(pg)pg.classList.add('on');
-    // Highlight the right tab
-    const tabs=document.querySelectorAll('.cp-tab');
-    tabs.forEach(t=>{if(t.textContent.includes('ECONOMY'))t.classList.add('on');});
-    renderEconomyPanel();
-  }
-};
-
-
-// Context menu prevention
-document.addEventListener('contextmenu',e=>{if(!e.target?.closest?.('#city-panel')&&!e.target?.closest?.('#gmod'))e.preventDefault();});
-document.addEventListener('selectstart',e=>{if(e.target?.closest?.('#dpad')||e.target?.closest?.('#cam-ctrl')||e.target?.closest?.('#action-bar'))e.preventDefault();});
-
-// CSS animations
-const _st=document.createElement('style');
-_st.textContent=`
-@keyframes bounce{0%{transform:scale(1) rotate(-5deg)}100%{transform:scale(1.15) rotate(5deg)}}
-@keyframes fall{0%{top:-60px;opacity:1}80%{opacity:1}100%{top:110%;opacity:0}}
-@keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-60px);opacity:0}}
-#gmod{display:none;flex-direction:column}#gmod.on{display:flex}
-#result{display:none;align-items:center;justify-content:center}#result.on{display:flex}
-#mystery-box{display:none}
-`;
-document.head.appendChild(_st);
 
 
 // ─── Draggable city panel ─────────────────────────────────────────────────────
