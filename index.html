@@ -367,8 +367,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <span style="font-size:7px;color:var(--gold);letter-spacing:.5px">$EMP</span>
       </div>
     </div>
-    <div id="topbar-row2">
+    <div id="topbar-row2" style="display:flex;align-items:center;gap:4px;padding:3px 8px 5px;overflow-x:auto;scrollbar-width:none">
       <div id="res-compact"></div>
+      <div id="passive-rate" style="display:none;align-items:center;gap:2px;background:rgba(64,200,112,.08);border:1px solid rgba(64,200,112,.2);border-radius:7px;padding:2px 6px;flex-shrink:0;white-space:nowrap">
+        <span style="font-size:9px;color:var(--grn2)" id="passive-rate-val">+0</span>
+        <span style="font-size:7px;color:var(--txt-d)">/hr</span>
+      </div>
     </div>
   </div>
 </div>
@@ -733,7 +737,7 @@ const QUEST_POOL=[
   {id:'mine_iron',label:'⚙️ Mine 15 iron',type:'mine',res:'iron',need:15,reward:{emp:8}},
   {id:'play_games',label:'🎮 Play 2 mini-games',type:'play',need:2,reward:{emp:4,stone:10}},
   {id:'earn_emp',label:'🪙 Verdien 100 $EMP',type:'earn',need:100,reward:{emp:5,crystal:1}},
-  {id:'sell_res',label:'💰 Verkoop (×3)',type:'sell',need:3,reward:{emp:4,gold:3}},
+  {id:'sell_res',label:'💰 Sell resources (×3)',type:'sell',need:3,reward:{emp:4,gold:3}},
   {id:'open_box',label:'📦 Open 1 Mystery Box',type:'open_box',need:1,reward:{emp:3,stone:15}},
   {id:'build_any',label:'🏗️ Build any building',type:'build',need:1,reward:{emp:15}},
   {id:'mine_crystal',label:'💎 Mine 5 crystal',type:'mine',res:'crystal',need:5,reward:{emp:10,mana:1}},
@@ -758,8 +762,9 @@ function addRes(k,v){
   if(!v||v<=0)return;
   G.res[k]=Math.min(CAP,(G.res[k]||0)+v);
   G.stats[k]=(G.stats[k]||0)+v;
-  // Keep E.res in sync for shared keys so economy buildings see current stock
   if(E.res[k]!==undefined) E.res[k]=Math.min(E.cap[k]||CAP,(E.res[k]||0)+v);
+  // Track total resources mined for quest progress
+  G.totalMined=(G.totalMined||0)+v;
 }
 function getPrestigeMultiplier(){return 1+G.prestigeBonus;}
 function getUpgBonus(id){const l=G.upgrades[id]||0;return l===0?1:l===1?1.25:1.6;}
@@ -917,7 +922,7 @@ function buildTerrain(){
 
   // Rocky cliff outcrops — clusters of angular stones
   const rockColors=[0x6a6858,0x5c5848,0x787060,0x686054];
-  for(let i=0;i<22;i++){
+  for(let i=0;i<14;i++){
     const rx=(Math.random()-.5)*70, rz=(Math.random()-.5)*70;
     if(Math.abs(rx)<5&&Math.abs(rz)<5) continue;
     const gy=sampleH(rx,rz); if(gy<0.3) continue;
@@ -945,7 +950,7 @@ function buildTerrain(){
 
   // Low bushes — replace bright grass tufts
   const bushCols=[0x1a4a0a,0x164008,0x1e520c,0x124006,0x226010];
-  for(let i=0;i<55;i++){
+  for(let i=0;i<35;i++){
     const bx2=(Math.random()-.5)*58, bz2=(Math.random()-.5)*58;
     if(Math.abs(bx2)<4&&Math.abs(bz2)<4) continue;
     const gy=sampleH(bx2,bz2);
@@ -1153,6 +1158,7 @@ function initThree(){
   const fill=new THREE.DirectionalLight(0x8ab8e8,.3);fill.position.set(-30,20,-20);scene.add(fill);
   scene.add(new THREE.HemisphereLight(0x88c0d8,0x183a0c,.65));
   buildTerrain();buildDecorations();buildResourceNodes();buildPlayer();
+  buildAmbientDetails();
   buildClouds();buildBirds();
   // Store light refs for day/night
   sunLight=scene.children.find(c=>c.isDirectionalLight);
@@ -1201,56 +1207,190 @@ function tutNext(){
 // ─── Worker NPC System ───────────────────────────────────────────────────────
 function createWorkerNPC(bx, bz, workerIdx){
   const g=new THREE.Group();
-  // Body
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.16,.22,.12),new THREE.MeshLambertMaterial({color:[0x8a2810,0x2a4810,0x10284a,0x4a2810,0x6a1840][workerIdx%5]}));
-  body.position.y=.22; g.add(body);
+  // Tunic colors — varied by worker index
+  const tunicCols=[0x7a2008,0x1a4a18,0x0e2848,0x4a3010,0x5a1838,0x384018];
+  const pantsCols=[0x3a2808,0x182808,0x101828,0x302008,0x281020];
+  const skinCols =[0xf0b060,0xe8a050,0xd09040,0xf5c070];
+  const tc=tunicCols[workerIdx%tunicCols.length];
+  const pc=pantsCols[workerIdx%pantsCols.length];
+  const sc=skinCols[workerIdx%skinCols.length];
+
+  // Legs
+  const lleg=new THREE.Mesh(new THREE.BoxGeometry(.07,.15,.07),new THREE.MeshLambertMaterial({color:pc}));
+  lleg.position.set(-.05,.075,0); g.add(lleg);
+  const rleg=new THREE.Mesh(new THREE.BoxGeometry(.07,.15,.07),new THREE.MeshLambertMaterial({color:pc}));
+  rleg.position.set(.05,.075,0); g.add(rleg);
+  // Body/tunic
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.18,.20,.12),new THREE.MeshLambertMaterial({color:tc}));
+  body.position.y=.26; g.add(body);
+  // Arms
+  const larm=new THREE.Mesh(new THREE.BoxGeometry(.06,.16,.06),new THREE.MeshLambertMaterial({color:tc}));
+  larm.position.set(-.13,.24,0); g.add(larm);
+  const rarm=new THREE.Mesh(new THREE.BoxGeometry(.06,.16,.06),new THREE.MeshLambertMaterial({color:tc}));
+  rarm.position.set(.13,.24,0); g.add(rarm);
   // Head
-  const head=new THREE.Mesh(new THREE.BoxGeometry(.14,.13,.13),new THREE.MeshLambertMaterial({color:0xf0b060}));
-  head.position.y=.38; g.add(head);
-  // Shadow
-  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.12,8),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.2}));
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.15,.14,.13),new THREE.MeshLambertMaterial({color:sc}));
+  head.position.y=.43; g.add(head);
+  // Hat (every other worker)
+  if(workerIdx%2===0){
+    const hat=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,.08,8),new THREE.MeshLambertMaterial({color:0x3a2808}));
+    hat.position.y=.53; g.add(hat);
+  }
+  // Tool — pickaxe stub (small box on arm)
+  const tool=new THREE.Mesh(new THREE.BoxGeometry(.04,.14,.04),new THREE.MeshLambertMaterial({color:0x806040}));
+  tool.position.set(.18,.24,.04); g.add(tool);
+
+  // Ground shadow
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.14,8),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.18,depthWrite:false}));
   shadow.rotation.x=-Math.PI/2; shadow.position.y=.01; g.add(shadow);
-  // Walk orbit around building
-  const angle=((workerIdx/6)*Math.PI*2)+(Math.random()*.5);
-  const r=1.2+Math.random()*.6;
-  g.userData={bx,bz,angle,r,speed:(.3+Math.random()*.4)*(Math.random()>.5?1:-1),phase:Math.random()*Math.PI*2};
-  const wx=bx+Math.cos(angle)*r, wz=bz+Math.sin(angle)*r;
-  g.position.set(wx,sampleH(wx,wz),wz);
+
+  // Orbit params
+  const angle=((workerIdx/6)*Math.PI*2)+(Math.random()*.8);
+  const r=1.4+Math.random()*.8;
+  const speed=(.25+Math.random()*.35)*(Math.random()>.5?1:-1);
+  g.userData={bx,bz,angle,r,speed,phase:Math.random()*Math.PI*2,lleg,rleg,larm,rarm};
+  g.position.set(bx+Math.cos(angle)*r, sampleH(bx+Math.cos(angle)*r,bz+Math.sin(angle)*r), bz+Math.sin(angle)*r);
+  g.scale.setScalar(.85+Math.random()*.25);
   scene.add(g);
   return g;
 }
 
 function updateWorkerNPCs(){
-  // Remove all existing worker NPCs
   workerNPCs.forEach(w=>scene.remove(w));
   workerNPCs=[];
   if(!scene) return;
-  // Spawn workers for each active economy building that has workers assigned
-  E.buildings.forEach(b=>{
-    if(!b.active||b.wx===undefined) return;
-    const workerCount=Math.min(b.workers||0, MBLD[b.type]?.workers||0, 6); // max 6 visible
-    for(let i=0;i<workerCount;i++){
-      workerNPCs.push(createWorkerNPC(b.wx,b.wz,i));
+
+  const totalPop=(E.pop?.workers||0)+(E.pop?.merchants||0)+(E.pop?.nobles||0);
+  const visiblePop=Math.max(4, Math.min(totalPop, 20)); // always show at least 4
+
+  // Collect all placed buildings from G.bld
+  const builtBlds=Object.entries(G.bld)
+    .filter(([id,v])=>v===true&&buildingMeshes[id]&&BLD_DEF[id])
+    .map(([id])=>({id, pos:buildingMeshes[id].position, def:BLD_DEF[id]}));
+
+  if(builtBlds.length===0){
+    // No buildings yet — workers wander near player spawn
+    const spawnPoints=[
+      [4,0],[-4,0],[0,4],[0,-4],[6,4],[-5,3],[3,-5],[-4,-4],
+    ];
+    for(let i=0;i<Math.min(visiblePop,8);i++){
+      const [sx,sz]=spawnPoints[i%spawnPoints.length];
+      workerNPCs.push(createWorkerNPC(sx,sz,i));
+    }
+    return;
+  }
+
+  // Distribute workers across buildings — 2-4 per building
+  const perBld=Math.max(2, Math.min(4, Math.ceil(visiblePop/builtBlds.length)));
+  let spawned=0;
+  const maxTotal=Math.min(visiblePop, builtBlds.length*4, 20);
+
+  builtBlds.forEach(({pos,def})=>{
+    if(spawned>=maxTotal) return;
+    const count=Math.min(perBld, def.workers||2, 4, maxTotal-spawned);
+    for(let i=0;i<count;i++){
+      workerNPCs.push(createWorkerNPC(pos.x, pos.z, spawned));
+      spawned++;
     }
   });
 }
 
 function animateWorkers(){
   workerNPCs.forEach(w=>{
-    w.userData.angle+=.004*w.userData.speed;
+    w.userData.angle+=.003*w.userData.speed;
     const wx=w.userData.bx+Math.cos(w.userData.angle)*w.userData.r;
     const wz=w.userData.bz+Math.sin(w.userData.angle)*w.userData.r;
-    const gy=sampleH(wx,wz);
-    w.position.set(wx,gy,wz);
-    // Face direction of movement
+    w.position.set(wx, sampleH(wx,wz)+.28, wz);
     w.rotation.y=-(w.userData.angle+Math.PI/2)*Math.sign(w.userData.speed);
-    // Bob up/down while walking
-    w.children[0].position.y=.22+Math.sin(animT*8+w.userData.phase)*.015;
-    w.children[1].position.y=.38+Math.sin(animT*8+w.userData.phase)*.015;
+    // Walk cycle — swing legs and arms
+    const swing=Math.sin(animT*7+w.userData.phase);
+    if(w.userData.lleg) w.userData.lleg.rotation.x= swing*.35;
+    if(w.userData.rleg) w.userData.rleg.rotation.x=-swing*.35;
+    if(w.userData.larm) w.userData.larm.rotation.x=-swing*.3;
+    if(w.userData.rarm) w.userData.rarm.rotation.x= swing*.3;
+    // Slight body bob
+    w.position.y+=Math.abs(swing)*.02;
   });
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+
+
+// ─── Ambient World Details ────────────────────────────────────────────────────
+function buildAmbientDetails(){
+  // Campfire near spawn
+  buildCampfire(3, sampleH(3,3)+.02, 3);
+  buildCampfire(-4, sampleH(-4,5)+.02, 5);
+
+  // Scattered mushrooms
+  for(let i=0;i<18;i++){
+    const mx=(Math.random()-.5)*50, mz=(Math.random()-.5)*50;
+    if(Math.abs(mx)<4&&Math.abs(mz)<4) continue;
+    const gy=sampleH(mx,mz);
+    if(gy<0.4||gy>2.8) continue;
+    const stemH=.12+Math.random()*.1;
+    const g=new THREE.Group();
+    const stem=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,stemH,6),
+      new THREE.MeshLambertMaterial({color:0xe0d8b0}));
+    stem.position.y=stemH/2; g.add(stem);
+    const capCols=[0xcc3820,0xc84010,0xaa5028,0xd86030];
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(.1+Math.random()*.06,7,5),
+      new THREE.MeshLambertMaterial({color:capCols[~~(Math.random()*capCols.length)]}));
+    cap.scale.y=.55; cap.position.y=stemH+.04; g.add(cap);
+    g.position.set(mx,gy,mz);
+    g.rotation.y=Math.random()*Math.PI;
+    g.scale.setScalar(.7+Math.random()*.5);
+    scene.add(g);
+  }
+
+  // Small flower patches
+  const flowerCols=[0xff6688,0xffee44,0xffffff,0x88ddff,0xff9944];
+  for(let i=0;i<30;i++){
+    const fx=(Math.random()-.5)*48, fz=(Math.random()-.5)*48;
+    const gy=sampleH(fx,fz);
+    if(gy<0.5||gy>2.2) continue;
+    const fc=flowerCols[~~(Math.random()*flowerCols.length)];
+    const flower=new THREE.Mesh(
+      new THREE.SphereGeometry(.06,5,4),
+      new THREE.MeshLambertMaterial({color:fc})
+    );
+    flower.position.set(fx,gy+.08,fz);
+    flower.scale.set(1.4,.7,1.4);
+    scene.add(flower);
+  }
+}
+
+function buildCampfire(cx,cy,cz){
+  const g=new THREE.Group();
+  // Stone ring
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2;
+    const stone=new THREE.Mesh(new THREE.DodecahedronGeometry(.12,0),
+      new THREE.MeshLambertMaterial({color:0x707060}));
+    stone.position.set(Math.cos(a)*.28,0,Math.sin(a)*.28);
+    stone.scale.set(1,.6,1); g.add(stone);
+  }
+  // Logs
+  for(let i=0;i<3;i++){
+    const a=(i/3)*Math.PI*2;
+    const log=new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,.4,6),
+      new THREE.MeshLambertMaterial({color:0x4a2808}));
+    log.position.set(Math.cos(a)*.15,.04,Math.sin(a)*.15);
+    log.rotation.z=Math.PI/2+a; g.add(log);
+  }
+  // Fire glow (warm point light)
+  const fire=new THREE.PointLight(0xff6620,1.2,5);
+  fire.position.y=.3; g.add(fire);
+  // Ember sphere
+  const ember=new THREE.Mesh(new THREE.SphereGeometry(.06,6,4),
+    new THREE.MeshBasicMaterial({color:0xff8820}));
+  ember.position.y=.15; g.add(ember);
+  window._campfires=window._campfires||[];
+  window._campfires.push({light:fire,ember,base:cy});
+  g.position.set(cx,cy,cz);
+  scene.add(g);
+}
+// ──────────────────────────────────────────────────────────────────────────────
 
 // ─── Clouds ───────────────────────────────────────────────────────────────
 function buildClouds(){
@@ -1276,7 +1416,8 @@ function buildClouds(){
 
 // ─── Birds (simple V-shapes that flap) ────────────────────────────────────
 function buildBirds(){
-  for(let i=0;i<6;i++){
+  const birdCount=window.devicePixelRatio>1?4:6;
+  for(let i=0;i<birdCount;i++){
     const g=new THREE.Group();
     const bx=(Math.random()-.5)*70, by=10+Math.random()*8, bz=(Math.random()-.5)*70;
     // Wing pair
@@ -1466,6 +1607,7 @@ function confirmPlace(wx,wz){
   }
   G.bld[id]=true;removeSuperseded(id);buildBldMesh(id,snap.x,snap.z);startPassive();updateEra();updateHUD();renderBuildGrid();checkQuestProgress('build',1);
   toast('✅ '+BLD_DEF[id].name+' built!');addLog(BLD_DEF[id].ico+' '+BLD_DEF[id].name+' built','good');
+  setTimeout(updateWorkerNPCs,200);
 }
 
 
@@ -1694,7 +1836,7 @@ function showPlacementBar(id,def){
 function hidePlacementBar(){const bar=document.getElementById('placement-bar');if(bar)bar.remove();}
 
 function buyUpgrade(id){
-  if(!G.bld[id]){toast('Bouw eerst '+BLD_DEF[id]?.name);return;}
+  if(!G.bld[id]){toast('Build '+BLD_DEF[id]?.name+' first');return;}
   const lvl=G.upgrades[id]||0,defs=UPG_DEF[id];if(!defs||lvl>=defs.length){toast('Max level!');return;}
   const cost=defs[lvl].cost;for(const[res,amt]of Object.entries(cost))if((G.res[res]||0)<amt){toast('Not enough '+res+' (need '+amt+')');return;}
   for(const[res,amt]of Object.entries(cost))G.res[res]-=amt;G.upgrades[id]=lvl+1;toast('⬆️ '+BLD_DEF[id].name+' Lv '+(lvl+2)+'! '+defs[lvl].bonus,3500);updateHUD();
@@ -1702,7 +1844,7 @@ function buyUpgrade(id){
 
 function canPrestige(){return G.bld.empirebank&&Object.values(G.bld).filter(v=>v===true).length>=18;}
 function doPrestige(){
-  if(!canPrestige()){toast('Bouw meer gebouwen + Rijksbank!');return;}if(G.prestige>=10){toast('Max Prestige! 👑');return;}
+  if(!canPrestige()){toast('Build 18+ buildings + Empire Bank first!');return;}if(G.prestige>=10){toast('Max Prestige! 👑');return;}
   G.prestige++;G.prestigeBonus=G.prestige*0.10;const keptEMP=Math.floor(G.res.emp/10);
   Object.keys(G.res).forEach(k=>G.res[k]=0);Object.keys(G.bld).forEach(k=>G.bld[k]=false);Object.keys(G.upgrades).forEach(k=>G.upgrades[k]=0);
   Object.values(buildingMeshes).forEach(m=>scene.remove(m));buildingMeshes={};
@@ -1850,19 +1992,36 @@ function renderBuildGrid(){if(document.getElementById('cp-empire')?.classList.co
 // ═══ HUD ═══
 function updateHUD(){
   const rp=document.getElementById('res-compact');
-  if(rp){const econActive=E.buildings&&E.buildings.length>0;const list=[
-    {ico:'🪨',v:G.res.stone},
-    {ico:'🪵',v:G.res.wood},
-    {ico:'🥇',v:G.res.gold},
-    {ico:'⚙️',v:G.res.iron||0,   hide:!(G.res.iron>0)&&!G.bld.mine},
-    {ico:'💎',v:G.res.crystal||0, hide:!(G.res.crystal>0)},
-    {ico:'🔮',v:G.res.mana||0,    hide:!(G.res.mana>0)},
-    {ico:'⭐',v:G.res.starstone||0,hide:!(G.res.starstone>0)},
-    {ico:'🌑',v:G.res.darkore||0, hide:!(G.res.darkore>0)},
-    {ico:'🍖',v:E.res.food||0,    hide:!(econActive||(E.res.food||0)>0)},
-    {ico:'🔨',v:E.res.tools||0,   hide:!(econActive||(E.res.tools||0)>0)},
-  ];rp.innerHTML=list.filter(r=>!r.hide).map(r=>`<div class="rcp"><span>${r.ico}</span><span class="rv">${Math.floor(r.v)}</span></div>`).join('');}
+  if(rp){
+    const list=[
+      {ico:'🪨',v:G.res.stone,      always:true},
+      {ico:'🪵',v:G.res.wood,       always:true},
+      {ico:'🥇',v:G.res.gold,       always:true},
+      {ico:'⚙️',v:G.res.iron||0,    always:G.bld.mine||G.bld.smelter},
+      {ico:'💎',v:G.res.crystal||0, always:false},
+      {ico:'🔮',v:G.res.mana||0,    always:false},
+      {ico:'⭐',v:G.res.starstone||0,always:false},
+      {ico:'🌑',v:G.res.darkore||0, always:false},
+      {ico:'🍖',v:E.res.food||0,    always:G.bld.farm||G.bld.mill},
+      {ico:'🔨',v:E.res.tools||0,   always:G.bld.workshop||G.bld.smithy},
+    ];
+    rp.innerHTML=list
+      .filter(r=>r.always||Math.floor(r.v)>0)
+      .map(r=>{
+        const v=Math.floor(r.v);
+        const low=r.always&&v<5;
+        return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':'var(--txt)'}">${v}</span></div>`;
+      }).join('');
+  }
   const ep=document.getElementById('emp-val');if(ep)ep.textContent=Math.floor(E.res.emp||G.res.emp||0);
+  // Show passive EMP rate in topbar
+  const pr=document.getElementById('passive-rate');
+  const prv=document.getElementById('passive-rate-val');
+  if(pr&&prv){
+    const ph2=passPerHour();
+    const empPerHr=Math.round((ph2.emp||0)+(Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0);},0)*450*(E.empMult||1)));
+    if(empPerHr>0){pr.style.display='flex';prv.textContent='+'+empPerHr;}else{pr.style.display='none';}
+  }
   // Show multiplier on emp pill if above 1
   const empPill=document.getElementById('emp-pill');
   if(empPill&&(E.empMult||1)>1){
@@ -2368,7 +2527,7 @@ function launch(){
       addRes('stone',30); addRes('wood',30); addRes('gold',10); addRes('emp',15);
       E.res.gold+=150; E.res.wood+=80; E.res.stone+=60;
       updateHUD();
-      toast('🏰 Welkom bij Empyria v0.2.1! Mijn resources · Bouw stad · Verdien $EMP!', 4000);
+      toast('🏰 Welcome to Empyria! Mine · Build · Earn $EMP!', 4000);
     } else {
       toast('⚔️ Welcome back! Your economy is running.', 2500);
     }
@@ -2538,7 +2697,7 @@ function eTick(){
 
 function eUpdatePop(){
   // Refresh worker NPCs every 5th pop update (~100 ticks)
-  if(E.tick%100===0) setTimeout(updateWorkerNPCs,0);
+  if(E.tick%60===0) setTimeout(updateWorkerNPCs,0);
   const pop=ePop(),foodSupply=E.res.food/Math.max(1,pop*.25);
   const hd=(Math.min(1,foodSupply)*20-10)+(E.defense>20?3:-2);
   E.happiness=Math.max(0,Math.min(100,E.happiness+hd*.1));
@@ -2641,7 +2800,10 @@ function eResolveExpedition(ex){const fail=Math.random()<ex.risk;if(fail){eEarn(
 function eSave(){try{localStorage.setItem('empyria_eco',JSON.stringify({res:E.res,pop:E.pop,happiness:E.happiness,stability:E.stability,defense:E.defense,year:E.year,day:E.day,tick:E.tick,season:E.season,buildings:E.buildings,nextId:E.nextId,prices:E.prices,log:E.log.slice(0,20),upgradesDone:E.upgradesDone,priceBonus:E.priceBonus,logBonusExtra:E.logBonusExtra,raidResist:E.raidResist,prestigeBonus:E.prestigeBonus,empRate:E.empRate,empMult:E.empMult||1,totalEmpEarned:E.totalEmpEarned||0,empMult:E.empMult,totalEmpEarned:E.totalEmpEarned}));}catch(ex){}}
 function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);if(s.res)Object.assign(E.res,s.res);if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=s.empMult??1.0;E.totalEmpEarned=s.totalEmpEarned??0;
   // Rebuild 3D meshes for saved economy buildings
-  setTimeout(()=>{E.buildings.forEach(b=>{if(b.wx!==undefined&&!econMeshes[b.id])buildEconMesh(b);});setTimeout(updateWorkerNPCs,600);},500);
+  setTimeout(()=>{
+    E.buildings.forEach(b=>{if(b.wx!==undefined&&!econMeshes[b.id])buildEconMesh(b);});
+    setTimeout(updateWorkerNPCs,800);
+  },500);
 }catch(ex){console.warn('eLoad:',ex);}}
 setInterval(eSave,30000);
 
