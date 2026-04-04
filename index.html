@@ -10,115 +10,326 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0e0a06;--bg2:#181009;--bg3:#22160c;--bdr:rgba(180,130,60,.25);--gold:#886020;--gold-b:#c9a84c;--gold-d:#5a3a10;--txt:#d4c090;--txt-d:#806840;--txt2:#a09060;--grn:#4a8a4a;--red:#c04040}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:Rajdhani,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
-#splash{position:fixed;inset:0;z-index:500;background:radial-gradient(ellipse at 50% 35%,#1e1206,#0a0602);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
-.sp-logo{font-family:Cinzel,serif;font-size:42px;font-weight:900;color:var(--gold-b);letter-spacing:6px;margin-bottom:4px}
-.sp-tag{font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:24px}
-.sp-story{font-size:13px;color:var(--txt2);line-height:1.6;max-width:300px;margin-bottom:28px}
-.sp-btn{padding:14px 36px;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:1px solid var(--gold-b);border-radius:10px;color:#000;font-family:Cinzel,serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:20px}
+
+/* ── Design tokens ─────────────────────────────────────────────────────── */
+:root{
+  --bg:  #0c1018;
+  --bg2: #141c26;
+  --bg3: #1c2836;
+  --bg4: #243040;
+  --bdr: rgba(255,255,255,.09);
+  --gold:  #f0b840;
+  --gold-b:#ffd870;
+  --gold-d:#7a5010;
+  --grn:  #40c870;
+  --grn2: #80ee9a;
+  --blue: #6090e8;
+  --red:  #e05858;
+  --purple:#a070e0;
+  --txt:  #dce8f0;
+  --txt-d:#8aa4b8;
+  --txt2: #a8c0d0;
+  --emp:  #f5d840;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);
+  font-family:Rajdhani,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
+
+/* ── Splash screen ─────────────────────────────────────────────────────── */
+#splash{position:fixed;inset:0;z-index:500;
+  background:radial-gradient(ellipse at 50% 35%,#0e1e28 0%,#081018 55%,#050c14 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.sp-logo{font-family:Cinzel,serif;font-size:46px;font-weight:900;
+  background:linear-gradient(135deg,#f0c060,#ffeaa0,#c89030);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:6px;margin-bottom:2px}
+.sp-tag{font-size:11px;letter-spacing:4px;color:rgba(240,192,96,.6);margin-bottom:20px;text-transform:uppercase}
+.sp-story{font-size:13px;color:var(--txt2);line-height:1.7;max-width:300px;margin-bottom:28px}
+.sp-btn{padding:15px 40px;
+  background:linear-gradient(135deg,#2a5a1a,#3a8a28);
+  border:1.5px solid rgba(80,200,80,.5);
+  border-radius:14px;color:#e8fce8;
+  font-family:Cinzel,serif;font-size:15px;font-weight:700;
+  cursor:pointer;margin-bottom:20px;
+  box-shadow:0 4px 24px rgba(60,160,60,.3);
+  transition:transform .15s,box-shadow .15s}
+.sp-btn:active{transform:scale(.97);box-shadow:0 2px 12px rgba(60,160,60,.2)}
 .sp-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.sp-chip{padding:5px 12px;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:20px;font-size:11px;color:var(--txt2)}
+.sp-chip{padding:5px 14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;font-size:11px;color:var(--txt2)}
+
+/* ── World HUD ─────────────────────────────────────────────────────────── */
 #world-view{position:fixed;inset:0}
 #three-canvas{display:block;width:100%;height:100%}
 #world-hud{position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none}
-#topbar{background:rgba(10,7,3,.93);border-bottom:1px solid var(--bdr);backdrop-filter:blur(6px)}
-#topbar-row1{display:flex;align-items:center;gap:6px;padding:5px 10px 3px;pointer-events:all}
-#topbar-row2{display:flex;align-items:center;gap:3px;padding:3px 10px 5px;pointer-events:all;overflow-x:auto;scrollbar-width:none}
+
+/* Topbar */
+#topbar{
+  background:rgba(10,14,18,.92);
+  border-bottom:1px solid rgba(100,180,120,.2);
+  backdrop-filter:blur(10px)}
+#topbar-row1{display:flex;align-items:center;gap:6px;padding:6px 10px 3px;pointer-events:all}
+#topbar-row2{display:flex;align-items:center;gap:4px;padding:3px 10px 6px;pointer-events:all;overflow-x:auto;scrollbar-width:none}
 #topbar-row2::-webkit-scrollbar{display:none}
-#logo{font-family:Cinzel,serif;font-size:13px;font-weight:700;color:var(--gold-b);flex-shrink:0;display:flex;align-items:baseline;gap:2px}
-#logo .v{font-size:7px;color:var(--txt-d)}
-#logo small{font-size:7px;color:var(--txt-d);letter-spacing:1px;margin-left:4px}
+
+/* Logo */
+#logo{font-family:Cinzel,serif;font-size:14px;font-weight:700;
+  background:linear-gradient(90deg,#f0c060,#ffeaa0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  flex-shrink:0;display:flex;align-items:baseline;gap:3px}
+#logo .v{font-size:7px;color:var(--txt-d);-webkit-text-fill-color:var(--txt-d)}
+#logo small{font-size:7px;color:var(--txt-d);-webkit-text-fill-color:var(--txt-d);letter-spacing:1px;margin-left:4px}
+
+/* Resource pills */
 #res-compact{display:flex;gap:4px;flex-wrap:wrap}
-.rcp{min-width:44px}
-.rcp{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:3px 6px;white-space:nowrap;flex-shrink:0;font-size:11px}
-.rcp.emp{border-color:rgba(201,168,76,.35);background:rgba(180,140,60,.1)}
+.rcp{display:flex;align-items:center;gap:3px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:9px;padding:3px 7px;
+  white-space:nowrap;flex-shrink:0;font-size:11px;font-weight:600;
+  transition:border-color .2s}
+.rcp:hover{border-color:rgba(240,192,96,.3)}
+.rcp.emp{border-color:rgba(245,216,64,.35);background:rgba(240,184,64,.1)}
 .rv{font-weight:700;color:var(--txt)}
-#action-hint{position:fixed;top:54px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);border:1px solid var(--bdr);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--txt2);opacity:0;transition:opacity .3s;z-index:25;pointer-events:none;white-space:nowrap}
+
+/* Action hint */
+#action-hint{position:fixed;top:58px;left:50%;transform:translateX(-50%);
+  background:rgba(10,14,20,.92);
+  border:1px solid rgba(100,180,120,.3);
+  border-radius:22px;padding:6px 16px;font-size:11px;color:#a8d8b0;
+  opacity:0;transition:opacity .3s;z-index:25;pointer-events:none;white-space:nowrap;
+  backdrop-filter:blur(6px)}
+
+/* ── Controls ──────────────────────────────────────────────────────────── */
 #mode-toggle{display:none}
+
 #dpad{position:fixed;bottom:84px;right:8px;z-index:30}
 .dp-grid{display:grid;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:2px}
-.dp{display:flex;align-items:center;justify-content:center;background:rgba(14,10,4,.85);border:1px solid var(--bdr);border-radius:8px;font-size:14px;color:var(--txt2);cursor:pointer;touch-action:none;transition:background .1s}
-.dp:active,.dp.pr{background:rgba(180,140,60,.25);border-color:var(--gold-b);color:var(--gold-b)}
+.dp{display:flex;align-items:center;justify-content:center;
+  background:rgba(10,16,22,.85);
+  border:1px solid rgba(100,150,200,.2);
+  border-radius:9px;font-size:14px;color:var(--txt-d);
+  cursor:pointer;touch-action:none;transition:all .1s}
+.dp:active,.dp.pr{background:rgba(60,140,80,.3);border-color:rgba(80,200,100,.5);color:#80ee90}
 .dp.empty{background:transparent;border:none;pointer-events:none}
+
 #cam-ctrl{position:fixed;bottom:212px;right:8px;z-index:30;display:flex;flex-direction:column;gap:2px}
-.cc{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(14,10,4,.85);border:1px solid var(--bdr);border-radius:8px;font-size:16px;color:var(--txt2);cursor:pointer}
-.cc:active{background:rgba(180,140,60,.2)}
-#action-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:30;padding:0 8px}
-.ab{padding:10px 18px;border-radius:22px;font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:transform .1s;border:1px solid transparent}
-.mine-btn{background:rgba(80,50,10,.88);border-color:rgba(200,150,60,.4);color:var(--gold-b)}
-.city-btn{background:rgba(20,40,80,.88);border-color:rgba(60,100,200,.4);color:#6aaaff}
-.sell-btn{background:rgba(30,70,30,.88);border-color:rgba(60,150,60,.4);color:#66dd66}
-.ab:active{transform:scale(.95)}
-#city-panel{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
-#city-panel.open{background:rgba(0,0,0,.55);pointer-events:all}
-.cp-sheet{position:absolute;bottom:0;left:0;right:0;height:62vh;max-height:88vh;min-height:30vh;background:var(--bg);border-radius:16px 16px 0 0;border-top:2px solid var(--bdr);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow:hidden}
+.cc{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  background:rgba(10,16,22,.85);
+  border:1px solid rgba(100,150,200,.2);
+  border-radius:9px;font-size:16px;color:var(--txt-d);cursor:pointer}
+.cc:active{background:rgba(60,140,80,.25)}
+
+/* Action bar */
+#action-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:30;padding:0 8px}
+.ab{padding:11px 20px;border-radius:24px;
+  font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;transition:transform .1s,box-shadow .1s;
+  border:1.5px solid transparent;letter-spacing:.5px}
+.ab:active{transform:scale(.93)}
+.mine-btn{
+  background:linear-gradient(135deg,#2a3a10,#3a5818);
+  border-color:rgba(100,200,80,.4);color:#a8ee80;
+  box-shadow:0 3px 14px rgba(80,180,60,.2)}
+.mine-btn:active{box-shadow:0 1px 6px rgba(80,180,60,.15)}
+#city-panel .city-btn,
+.ab.city-btn-style{
+  background:linear-gradient(135deg,#102030,#183850);
+  border-color:rgba(80,160,240,.35);color:var(--blue)}
+/* Default city/trade/sell styling via inline styles on HTML */
+
+/* ── City panel ────────────────────────────────────────────────────────── */
+#city-panel{position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
+#city-panel.open{background:rgba(0,0,8,.6);pointer-events:all}
+
+.cp-sheet{position:absolute;bottom:0;left:0;right:0;
+  height:62vh;max-height:88vh;min-height:30vh;
+  background:var(--bg2);
+  border-radius:20px 20px 0 0;
+  border-top:1.5px solid rgba(255,255,255,.1);
+  display:flex;flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.34,1.1,.64,1);
+  overflow:hidden;
+  box-shadow:0 -8px 40px rgba(0,0,0,.5)}
 #city-panel.open .cp-sheet{transform:translateY(0)}
-.cp-drag{width:48px;height:5px;background:rgba(255,255,255,.25);border-radius:3px;margin:8px auto 4px;flex-shrink:0;cursor:grab;touch-action:none}
-.cp-tabs{display:flex;border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+
+.cp-drag{width:44px;height:4px;
+  background:rgba(255,255,255,.2);
+  border-radius:2px;margin:10px auto 5px;flex-shrink:0;cursor:grab;touch-action:none}
+
+/* Tabs */
+.cp-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.07);
+  flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+  background:rgba(0,0,0,.2)}
 .cp-tabs::-webkit-scrollbar{display:none}
-.cp-tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 12px;cursor:pointer;flex-shrink:0;font-size:8px;font-weight:700;letter-spacing:1px;color:var(--txt-d);border-bottom:2px solid transparent;white-space:nowrap}
-.cp-tab i{font-size:15px;font-style:normal}
+.cp-tab{display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 13px;cursor:pointer;flex-shrink:0;
+  font-size:8px;font-weight:700;letter-spacing:1px;
+  color:rgba(255,255,255,.35);
+  border-bottom:2px solid transparent;white-space:nowrap;
+  transition:color .2s}
+.cp-tab i{font-size:16px;font-style:normal}
+.cp-tab:hover{color:rgba(255,255,255,.6)}
 .cp-tab.on{color:var(--gold-b);border-bottom-color:var(--gold-b)}
-.cp-page{display:none;flex:1;overflow-y:auto;padding:10px 12px 28px;scrollbar-width:thin;scrollbar-color:var(--bdr) transparent}
+
+.cp-page{display:none;flex:1;overflow-y:auto;
+  padding:12px 12px 32px;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent}
 .cp-page.on{display:block}
-.bld-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
-.bc{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:8px;cursor:pointer;transition:border-color .15s;position:relative}
-.bc:active{transform:scale(.97)}
-.bc.built{border-color:rgba(70,140,70,.5);background:rgba(30,70,30,.2);cursor:default}
-.bc.superseded{border-color:rgba(180,150,80,.3);opacity:.55;cursor:default}
-.bc-ico{font-size:24px;margin-bottom:3px}
-.bc-name{font-family:Cinzel,serif;font-size:10px;color:var(--txt);margin-bottom:2px}
-.bc-eff{font-size:8px;color:var(--txt-d);margin-bottom:4px}
+
+/* ── Building grid ─────────────────────────────────────────────────────── */
+.bld-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.bc{background:var(--bg3);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:10px;cursor:pointer;
+  transition:all .15s;position:relative}
+.bc:hover{border-color:rgba(240,192,96,.3);background:var(--bg4)}
+.bc:active{transform:scale(.96)}
+.bc.built{
+  border-color:rgba(58,170,90,.4);
+  background:rgba(20,60,30,.35);cursor:default}
+.bc.superseded{border-color:rgba(255,255,255,.06);opacity:.45;cursor:default}
+.bc-ico{font-size:26px;margin-bottom:4px}
+.bc-name{font-family:Cinzel,serif;font-size:10px;color:var(--txt);margin-bottom:2px;font-weight:600}
+.bc-eff{font-size:8px;color:var(--txt-d);margin-bottom:5px}
 .bc-costs{display:flex;flex-wrap:wrap;gap:3px}
-.bct{font-size:9px;padding:1px 4px;border-radius:4px;border:1px solid}
-.bct.ok{color:var(--grn);border-color:rgba(70,140,70,.4)}
-.bct.no{color:var(--red);border-color:rgba(200,60,60,.4)}
-.bc-lock{position:absolute;top:6px;right:6px;font-size:12px;opacity:.7}
+.bct{font-size:9px;padding:2px 5px;border-radius:5px;border:1px solid;font-weight:600}
+.bct.ok{color:#6aee8a;border-color:rgba(58,170,90,.4);background:rgba(58,170,90,.08)}
+.bct.no{color:#ee8888;border-color:rgba(208,72,72,.4);background:rgba(208,72,72,.08)}
+.bc-lock{position:absolute;top:7px;right:7px;font-size:12px;opacity:.6}
+
+/* ── Game cards ────────────────────────────────────────────────────────── */
 .gl{display:flex;flex-direction:column;gap:8px}
-.gc{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:10px;position:relative}
-.gc-ico{font-size:28px;flex-shrink:0}
+.gc{display:flex;align-items:center;gap:12px;
+  background:var(--bg3);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:12px;position:relative;
+  transition:border-color .2s}
+.gc:hover{border-color:rgba(240,192,96,.2)}
+.gc-ico{font-size:30px;flex-shrink:0}
 .gc-body{flex:1;min-width:0}
-.gc-name{font-family:Cinzel,serif;font-size:11px;color:var(--txt)}
+.gc-name{font-family:Cinzel,serif;font-size:12px;color:var(--txt);font-weight:600}
 .gc-desc{font-size:9px;color:var(--txt-d);margin:2px 0}
 .gc-tags{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0}
-.gt{font-size:8px;padding:1px 5px;border:1px solid var(--bdr);border-radius:10px;color:var(--txt2)}
+.gt{font-size:8px;padding:2px 7px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;color:var(--txt2);
+  background:rgba(255,255,255,.04)}
 .gc-cd{font-size:9px;color:var(--txt-d)}
-.gc-play{padding:8px 14px;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:none;border-radius:8px;color:#000;font-family:Rajdhani,sans-serif;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
-.gc-play:disabled{background:rgba(255,255,255,.08);color:var(--txt-d);cursor:default}
-.gc-lock{position:absolute;bottom:6px;right:10px;font-size:9px;color:var(--red);display:none}
-.sh-sec{margin-bottom:12px}.sh-t{font-size:9px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px}
+.gc-play{padding:9px 16px;
+  background:linear-gradient(135deg,#1a4a10,#2a7a18);
+  border:1px solid rgba(80,200,80,.4);
+  border-radius:10px;color:#c8fcc8;
+  font-family:Rajdhani,sans-serif;font-size:11px;font-weight:700;
+  cursor:pointer;flex-shrink:0;
+  box-shadow:0 2px 10px rgba(60,160,60,.2)}
+.gc-play:disabled{background:rgba(255,255,255,.06);color:rgba(255,255,255,.25);
+  border-color:rgba(255,255,255,.08);cursor:default;box-shadow:none}
+.gc-lock{position:absolute;bottom:7px;right:10px;font-size:9px;color:rgba(224,88,88,.8);display:none}
+
+/* ── Shop ──────────────────────────────────────────────────────────────── */
+.sh-sec{margin-bottom:14px}
+.sh-t{font-size:9px;letter-spacing:2px;color:var(--txt-d);margin-bottom:8px;text-transform:uppercase}
 .sh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.sh-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:10px;cursor:pointer}
-.sh-card.feat{border-color:rgba(201,168,76,.4)}
-.sh-ico{font-size:22px;margin-bottom:4px}.sh-name{font-size:10px;font-weight:700;color:var(--txt);margin-bottom:2px}
-.sh-desc{font-size:8px;color:var(--txt-d);margin-bottom:6px}.sh-p{display:flex;gap:4px;flex-wrap:wrap}
-.pr{font-size:8px;padding:2px 5px;border-radius:5px;border:1px solid}
-.pr-t{color:#6aaaff;border-color:rgba(100,170,255,.3)}.pr-s{color:#f5c830;border-color:rgba(245,200,48,.3)}
+.sh-card{background:var(--bg3);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:11px;cursor:pointer;
+  transition:all .15s}
+.sh-card:hover{border-color:rgba(240,192,96,.25);background:var(--bg4)}
+.sh-card.feat{border-color:rgba(240,192,96,.3);background:rgba(180,130,30,.08)}
+.sh-ico{font-size:24px;margin-bottom:5px}
+.sh-name{font-size:10px;font-weight:700;color:var(--txt);margin-bottom:2px}
+.sh-desc{font-size:8px;color:var(--txt-d);margin-bottom:7px}
+.sh-p{display:flex;gap:4px;flex-wrap:wrap}
+.pr{font-size:8px;padding:2px 6px;border-radius:5px;border:1px solid;font-weight:600}
+.pr-t{color:var(--blue);border-color:rgba(100,170,255,.3);background:rgba(100,170,255,.06)}
+.pr-s{color:var(--emp);border-color:rgba(245,216,64,.3);background:rgba(245,216,64,.06)}
+
+/* ── Game modal ────────────────────────────────────────────────────────── */
 #gmod{position:fixed;inset:0;z-index:200;background:var(--bg);display:none;flex-direction:column}
 #gmod.on{display:flex}
-#gmod-hdr{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,0,0,.4);border-bottom:1px solid var(--bdr);flex-shrink:0}
-#gmod-back{background:rgba(255,255,255,.08);border:1px solid var(--bdr);border-radius:7px;padding:5px 12px;color:var(--txt2);font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700}
-#gmod-title{flex:1;text-align:center;font-family:Cinzel,serif;font-size:13px;color:var(--gold-b)}
+#gmod-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:rgba(0,0,0,.3);
+  border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+#gmod-back{background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;padding:6px 14px;color:var(--txt2);
+  font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700}
+#gmod-back:hover{background:rgba(255,255,255,.12)}
+#gmod-title{flex:1;text-align:center;font-family:Cinzel,serif;font-size:14px;
+  background:linear-gradient(90deg,#f0c060,#ffeaa0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
 #gmod-body{flex:1;overflow:hidden;display:flex;flex-direction:column}
-#result{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center}
+
+/* ── Result screen ─────────────────────────────────────────────────────── */
+#result{position:fixed;inset:0;z-index:250;background:rgba(0,0,8,.9);
+  display:none;align-items:center;justify-content:center}
 #result.on{display:flex}
-.res-panel{background:linear-gradient(160deg,#1e1808,#0e0b07);border:2px solid var(--gold);border-radius:16px;padding:24px;width:88%;max-width:340px;text-align:center}
-.rp-t{font-family:Cinzel,serif;font-size:18px;color:var(--gold-b);margin-bottom:4px}
-.rp-s{font-size:11px;color:var(--txt2);margin-bottom:12px}
-.rp-rws{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:16px}
-.rp-rw{background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px}
-.rp-rw-v{font-size:18px;font-weight:900;color:var(--gold-b)}.rp-rw-l{font-size:9px;color:var(--txt-d)}
-.rp-c{width:100%;padding:11px;background:linear-gradient(135deg,var(--gold-d),var(--gold));border:none;border-radius:9px;color:#000;font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:6px}
-.rp-a{width:100%;padding:9px;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:9px;color:var(--txt2);font-size:12px;cursor:pointer;font-family:Rajdhani,sans-serif}
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(20,14,6,.97);border:1px solid var(--bdr);border-radius:20px;padding:8px 18px;font-size:12px;color:var(--txt);opacity:0;transition:opacity .2s;z-index:999;pointer-events:none;max-width:92%;text-align:center}
-#mystery-box{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-.bc2{width:56px;height:48px;display:flex;align-items:center;justify-content:center;background:rgba(20,14,6,.9);border:1px solid var(--bdr);border-radius:9px;font-size:18px;color:var(--txt2);cursor:pointer;touch-action:none}
-.bc2:active{background:rgba(180,140,60,.2)}
-::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+.res-panel{
+  background:linear-gradient(160deg,var(--bg2),var(--bg));
+  border:1.5px solid rgba(240,192,96,.4);
+  border-radius:20px;padding:26px;
+  width:88%;max-width:340px;text-align:center;
+  box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.rp-t{font-family:Cinzel,serif;font-size:20px;
+  background:linear-gradient(90deg,#f0c060,#ffeaa0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:4px}
+.rp-s{font-size:11px;color:var(--txt2);margin-bottom:14px}
+.rp-rws{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:18px}
+.rp-rw{background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:8px 14px}
+.rp-rw-v{font-size:20px;font-weight:900;color:var(--emp)}
+.rp-rw-l{font-size:9px;color:var(--txt-d)}
+.rp-c{width:100%;padding:12px;
+  background:linear-gradient(135deg,#2a5a10,#3a8a20);
+  border:1px solid rgba(80,200,80,.4);
+  border-radius:11px;color:#d8fcd8;
+  font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;margin-bottom:8px;
+  box-shadow:0 3px 14px rgba(60,160,60,.25)}
+.rp-a{width:100%;padding:10px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:11px;color:var(--txt2);font-size:12px;cursor:pointer;
+  font-family:Rajdhani,sans-serif}
+
+/* ── Toast ─────────────────────────────────────────────────────────────── */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:rgba(14,20,26,.96);
+  border:1px solid rgba(100,180,120,.3);
+  border-radius:22px;padding:8px 20px;font-size:12px;color:var(--txt);
+  opacity:0;transition:opacity .2s;z-index:999;
+  pointer-events:none;max-width:92%;text-align:center;
+  backdrop-filter:blur(8px)}
+
+/* ── Mystery box ───────────────────────────────────────────────────────── */
+#mystery-box{position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.88);
+  display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px}
+.bc2{width:56px;height:48px;display:flex;align-items:center;justify-content:center;
+  background:rgba(20,28,36,.9);
+  border:1px solid rgba(100,180,120,.2);
+  border-radius:10px;font-size:18px;color:var(--txt2);cursor:pointer;touch-action:none}
+.bc2:active{background:rgba(60,140,80,.2)}
+
+/* ── Scrollbars ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px}
+
+/* ── Animations ────────────────────────────────────────────────────────── */
 @keyframes bounce{0%{transform:scale(1) rotate(-5deg)}100%{transform:scale(1.15) rotate(5deg)}}
 @keyframes fall{0%{top:-60px;opacity:1}80%{opacity:1}100%{top:110%;opacity:0}}
 @keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-60px);opacity:0}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(240,192,96,.2)}50%{box-shadow:0 0 20px rgba(240,192,96,.5)}}
 </style>
 </head>
 <body>
@@ -144,10 +355,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div id="logo">EMPYRIA<span class="v">&nbsp;v0.2</span><small id="era-label">ERA I — STONE AGE</small></div>
       <div style="flex:1"></div>
       <div id="db-badge" title="Cloud sync" style="font-size:13px;flex-shrink:0;cursor:default;pointer-events:all" onclick="showLeaderboard()">☁️</div>
-      <div id="wallet-btn" onclick="toggleWallet()" style="display:flex;align-items:center;gap:3px;background:rgba(15,20,35,.8);border:1px solid rgba(80,120,200,.4);border-radius:10px;padding:3px 9px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:#6aaaff;white-space:nowrap">💼 Connect</div>
-      <div id="worker-badge" onclick="openEconomy()" style="display:flex;align-items:center;gap:3px;background:rgba(40,30,10,.7);border:1px solid rgba(180,140,60,.3);border-radius:10px;padding:3px 8px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:rgba(200,175,130,.8)">👷 20</div>
-      <div id="emp-pill" onclick="openCity()" style="display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#1a1200,#2a1e00);border:1.5px solid var(--gold);border-radius:12px;padding:4px 11px;cursor:pointer;flex-shrink:0;pointer-events:all">
-        <span id="emp-val" style="color:#f5dd40;font-weight:900;font-size:15px;min-width:20px">0</span>
+      <div id="wallet-btn" onclick="toggleWallet()" style="display:flex;align-items:center;gap:3px;background:rgba(16,24,48,.85);border:1px solid rgba(80,140,255,.3);border-radius:10px;padding:4px 10px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:var(--blue);white-space:nowrap;font-weight:600">💼 Connect</div>
+      <div id="worker-badge" onclick="openEconomy()" style="display:flex;align-items:center;gap:3px;background:rgba(20,30,20,.8);border:1px solid rgba(80,160,80,.25);border-radius:10px;padding:4px 9px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:rgba(140,220,140,.8);font-weight:600">👷 20</div>
+      <div id="emp-pill" onclick="openCity()" style="display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#201800,#362400);border:1.5px solid rgba(240,192,96,.5);border-radius:12px;padding:4px 12px;cursor:pointer;flex-shrink:0;pointer-events:all;box-shadow:0 2px 10px rgba(240,192,96,.15)">
+        <span id="emp-val" style="color:var(--emp);font-weight:900;font-size:15px;min-width:20px">0</span>
         <span style="font-size:8px;color:var(--gold);letter-spacing:1px">$EMP</span>
       </div>
     </div>
@@ -184,9 +395,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
 <div id="action-bar">
   <div class="ab mine-btn" onclick="doMine()">MINE</div>
-  <div class="ab" style="background:rgba(40,30,10,.88);border-color:rgba(180,140,60,.4);color:var(--gold-b)" onclick="openCity()">CITY</div>
-  <div class="ab" style="background:rgba(20,40,80,.88);border-color:rgba(60,100,200,.4);color:#6aaaff" onclick="openEconomy()">TRADE</div>
-  <div class="ab sell-btn" onclick="doSell()">SELL</div>
+  <div class="ab" style="background:linear-gradient(135deg,#10203a,#183860);border:1.5px solid rgba(80,160,240,.35);color:var(--blue)" onclick="openCity()">CITY</div>
+  <div class="ab" style="background:linear-gradient(135deg,#16103a,#221850);border:1.5px solid rgba(160,112,224,.4);color:#c0a0ff" onclick="openEconomy()">TRADE</div>
+  <div class="ab" style="background:linear-gradient(135deg,#0e2818,#165a28);border:1.5px solid rgba(64,200,112,.4);color:#80f0a8" onclick="doSell()">SELL</div>
 </div>
 
 <div id="city-panel" onclick="cityBgClick(event)">
@@ -194,7 +405,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div class="cp-drag"></div>
     <div class="cp-tabs">
       <div class="cp-tab on" onclick="cpTab('empire')"><i>👑</i>EMPIRE</div>
-      <div class="cp-tab" onclick="cpTab('economy')"><i>🏛</i>ECONOMY</div>
       <div class="cp-tab" onclick="cpTab('games')"><i>🎮</i>GAMES</div>
       <div class="cp-tab" onclick="cpTab('quest')"><i>📋</i>QUESTS</div>
       <div class="cp-tab" onclick="cpTab('upg')"><i>&#x2B06;&#xFE0F;</i>UPGR</div>
@@ -203,14 +413,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div class="cp-tab" onclick="cpTab('stats')"><i>📊</i>STATS</div>
     </div>
     <div class="cp-page on" id="cp-empire"></div>
-    <div class="cp-page" id="cp-economy" data-tab="econ-build"></div>
     <div class="cp-page" id="cp-games">
       <div class="gl">
         <div class="gc"><div class="gc-ico">&#x26CF;&#xFE0F;</div><div class="gc-body"><div class="gc-name">Mine Dash</div><div class="gc-desc">Tik de vallende erts! Bouw combos voor bonus.</div><div class="gc-tags"><span class="gt">&#x1FAA8; Stone</span><span class="gt">&#x1FAB5; Wood</span><span class="gt">30 min</span></div><div class="gc-cd" id="cd-tap">&#x23F1; <span style="color:var(--grn)">READY!</span></div></div><button class="gc-play" id="btn-tap" onclick="playGame('tap')">PLAY</button></div>
         <div class="gc"><div class="gc-ico">&#x1F3AF;</div><div class="gc-body"><div class="gc-name">Tower Defense</div><div class="gc-desc">Shoot enemy waves! Defend your castle.</div><div class="gc-tags"><span class="gt">&#x1F947; Gold</span><span class="gt">&#x1FAA8; Stone</span><span class="gt">45 min</span></div><div class="gc-cd" id="cd-aim">&#x23F1; <span style="color:var(--grn)">READY!</span></div></div><button class="gc-play" id="btn-aim" onclick="playGame('aim')">PLAY</button></div>
         <div class="gc"><div class="gc-ico">&#x1F0CF;</div><div class="gc-body"><div class="gc-name">Rune Match</div><div class="gc-desc">Find all 8 pairs. Fewer moves = more reward!</div><div class="gc-tags"><span class="gt">&#x1FAB5; Wood</span><span class="gt">&#x1F947; Gold</span><span class="gt">60 min</span></div><div class="gc-cd" id="cd-mem">&#x23F1; <span style="color:var(--grn)">READY!</span></div></div><button class="gc-play" id="btn-mem" onclick="playGame('mem')">PLAY</button></div>
         <div class="gc" id="gc-block"><div class="gc-ico">&#x1F9F1;</div><div class="gc-body"><div class="gc-name">Block Builder</div><div class="gc-desc">Tetris-style. Clear lines = resources!</div><div class="gc-tags"><span class="gt">Alles</span><span class="gt">90 min</span></div><div class="gc-cd" id="cd-block">&#x23F1; 90 min</div></div><button class="gc-play" id="btn-block" onclick="playGame('block')" disabled>&#x1F512;</button><div class="gc-lock" id="lk-block">&#x1F512; Build Lumber Mill</div></div>
-        <div class="gc" id="gc-react"><div class="gc-ico">&#x26A1;</div><div class="gc-body"><div class="gc-name">Lightning Forge</div><div class="gc-desc">React to the golden signal for $EMP!</div><div class="gc-tags"><span class="gt" style="border-color:rgba(201,168,76,.4);color:var(--gold)">&#x1FA99; $EMP</span><span class="gt">120 min</span></div><div class="gc-cd" id="cd-react">&#x23F1; 120 min</div></div><button class="gc-play" id="btn-react" onclick="playGame('react')" disabled>&#x1F512;</button><div class="gc-lock" id="lk-react">&#x1F512; Bouw Smederij</div></div>
+        <div class="gc" id="gc-react"><div class="gc-ico">&#x26A1;</div><div class="gc-body"><div class="gc-name">Lightning Forge</div><div class="gc-desc">React to the golden signal for $EMP!</div><div class="gc-tags"><span class="gt" style="border-color:rgba(240,184,64,.4);color:var(--gold)">&#x1FA99; $EMP</span><span class="gt">120 min</span></div><div class="gc-cd" id="cd-react">&#x23F1; 120 min</div></div><button class="gc-play" id="btn-react" onclick="playGame('react')" disabled>&#x1F512;</button><div class="gc-lock" id="lk-react">&#x1F512; Bouw Smederij</div></div>
       </div>
     </div>
     <div class="cp-page" id="cp-quest"><div id="cp-quests"></div></div>
@@ -259,7 +468,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div id="gmod-score"></div>
   </div>
   <div id="gmod-body">
-    <div id="g-tap" style="display:none;flex-direction:column;height:100%;background:radial-gradient(ellipse at 50% 0%,#1a1200,#05070e)">
+    <div id="g-tap" style="display:none;flex-direction:column;height:100%;background:radial-gradient(ellipse at 50% 0%,#141c26,#0c1018)">
       <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;font-weight:700">
         <div>&#x26CF;&#xFE0F; <span id="ts-combo" style="color:var(--gold-b)">x1</span> COMBO</div>
         <div id="ts-timer" style="color:var(--red)">30s</div>
@@ -273,7 +482,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--gold-b)" id="ts-e">0</div><div style="font-size:9px;color:var(--txt-d)">&#x1FA99; EMP</div></div>
       </div>
     </div>
-    <div id="g-aim" style="display:none;flex-direction:column;height:100%;background:#05070e">
+    <div id="g-aim" style="display:none;flex-direction:column;height:100%;background:#0c1018">
       <canvas id="aim-canvas" style="flex:1;width:100%;touch-action:none"></canvas>
       <div style="display:flex;justify-content:space-around;padding:8px 16px;background:rgba(0,0,0,.6)">
         <div style="text-align:center"><div style="font-size:16px;font-weight:900;color:#ff4444" id="aim-lives">&#x2764;&#xFE0F;&#x2764;&#xFE0F;&#x2764;&#xFE0F;</div><div style="font-size:9px;color:var(--txt-d)">LIVES</div></div>
@@ -282,24 +491,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div style="text-align:center"><div style="font-size:16px;font-weight:900;color:#44ffaa" id="aim-gold">0&#x1F947;</div><div style="font-size:9px;color:var(--txt-d)">GOUD</div></div>
       </div>
     </div>
-    <div id="g-mem" style="display:none;flex-direction:column;height:100%;background:radial-gradient(ellipse at 50% 30%,#0a0820,#05070e)">
+    <div id="g-mem" style="display:none;flex-direction:column;height:100%;background:radial-gradient(ellipse at 50% 30%,#0a0820,#0c1018)">
       <div style="display:flex;justify-content:space-around;padding:10px 16px">
         <div style="text-align:center"><div style="font-size:20px;font-weight:900;color:var(--gold-b)" id="mh-mv">0</div><div style="font-size:9px;color:var(--txt-d)">MOVES</div></div>
         <div style="text-align:center"><div style="font-size:20px;font-weight:900;color:var(--gold-b)" id="mh-pr">0/8</div><div style="font-size:9px;color:var(--txt-d)">PAIRS</div></div>
         <div style="text-align:center"><div style="font-size:20px;font-weight:900;color:var(--gold-b)" id="mh-tm">0s</div><div style="font-size:9px;color:var(--txt-d)">TIME</div></div>
-        <div style="text-align:center"><div id="mem-streak" style="font-size:20px;font-weight:900;color:#ff8800">x1</div><div style="font-size:9px;color:var(--txt-d)">STREAK</div></div>
+        <div style="text-align:center"><div id="mem-streak" style="font-size:20px;font-weight:900;color:#e09030">x1</div><div style="font-size:9px;color:var(--txt-d)">STREAK</div></div>
       </div>
       <div id="mem-grid" style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;align-content:center"></div>
       <div id="mem-msg" style="text-align:center;padding:8px;font-size:12px;color:var(--gold-b);font-weight:700;min-height:28px"></div>
     </div>
-    <div id="g-block" style="display:none;flex-direction:column;height:100%;background:#05070e;align-items:center">
+    <div id="g-block" style="display:none;flex-direction:column;height:100%;background:#0c1018;align-items:center">
       <div style="display:flex;gap:20px;padding:10px 16px;width:100%;justify-content:center">
         <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--gold-b)" id="bh-sc">0</div><div style="font-size:9px;color:var(--txt-d)">SCORE</div></div>
         <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--gold-b)" id="bh-ln">0</div><div style="font-size:9px;color:var(--txt-d)">LINES</div></div>
         <div style="text-align:center"><div style="font-size:18px;font-weight:900;color:var(--gold-b)" id="bh-lv">1</div><div style="font-size:9px;color:var(--txt-d)">LEVEL</div></div>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-start">
-        <canvas id="bcanvas" width="180" height="320" style="border:1px solid rgba(201,168,76,.2);border-radius:4px"></canvas>
+        <canvas id="bcanvas" width="180" height="320" style="border:1px solid rgba(240,184,64,.2);border-radius:4px"></canvas>
         <div style="display:flex;flex-direction:column;gap:8px">
           <div style="font-size:9px;color:var(--txt-d);letter-spacing:1px">NEXT</div>
           <canvas id="bnext" width="70" height="70" style="border:1px solid rgba(255,255,255,.1);border-radius:4px"></canvas>
@@ -313,13 +522,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <div class="bc2" ontouchstart="bMv(1);event.preventDefault()" onmousedown="bMv(1)">&#x25BA;</div>
       </div>
     </div>
-    <div id="g-react" style="display:none;flex-direction:column;height:100%;background:radial-gradient(ellipse at 50% 80%,#1a0800,#05070e);align-items:center;justify-content:space-around">
+    <div id="g-react" style="display:none;flex-direction:column;height:100%;background:radial-gradient(ellipse at 50% 80%,#1a0800,#0c1018);align-items:center;justify-content:space-around">
       <div style="text-align:center">
         <div id="react-rnd" style="font-size:11px;letter-spacing:3px;color:var(--txt-d)">ROUND 1 / 6</div>
         <div style="font-family:Cinzel,serif;font-size:18px;color:var(--gold-b);margin-top:4px">&#x26A1; LIGHTNING FORGE</div>
       </div>
       <div style="position:relative;width:200px;height:200px">
-        <div id="react-c" style="width:100%;height:100%;border-radius:50%;background:#1a1008;border:3px solid #333;display:flex;align-items:center;justify-content:center;font-size:64px;cursor:pointer;transition:all .1s;user-select:none" ontouchstart="reactTap();event.preventDefault()" onclick="reactTap()">&#x2692;&#xFE0F;</div>
+        <div id="react-c" style="width:100%;height:100%;border-radius:50%;background:#141c26;border:3px solid #333;display:flex;align-items:center;justify-content:center;font-size:64px;cursor:pointer;transition:all .1s;user-select:none" ontouchstart="reactTap();event.preventDefault()" onclick="reactTap()">&#x2692;&#xFE0F;</div>
         <div id="react-ring" style="position:absolute;inset:-8px;border-radius:50%;border:3px solid transparent;transition:all .15s;pointer-events:none"></div>
       </div>
       <div id="react-fb" style="font-size:22px;font-weight:900;min-height:32px;text-align:center"></div>
@@ -349,7 +558,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
 <!-- LEADERBOARD MODAL -->
 <div id="leaderboard-modal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.92);display:none;align-items:flex-end;justify-content:center">
-  <div style="background:linear-gradient(180deg,#0f0c06,#0a0803);border-radius:16px 16px 0 0;border-top:1.5px solid var(--gold);width:100%;max-width:480px;padding:20px;padding-bottom:36px;max-height:70vh;overflow-y:auto">
+  <div style="background:linear-gradient(180deg,var(--bg2),var(--bg));border-radius:16px 16px 0 0;border-top:1.5px solid var(--gold);width:100%;max-width:480px;padding:20px;padding-bottom:36px;max-height:70vh;overflow-y:auto">
     <div style="width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 12px"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-family:Cinzel,serif;font-size:16px;color:var(--gold-b)">🏆 Leaderboard</div>
@@ -360,7 +569,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   </div>
 </div>
 <div id="wallet-modal" style="position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.88);display:none;align-items:flex-end;justify-content:center">
-  <div style="background:linear-gradient(180deg,#0f121c,#0b0d14);border-radius:16px 16px 0 0;border-top:1.5px solid rgba(80,120,200,.4);width:100%;max-width:480px;padding:20px;padding-bottom:36px">
+  <div style="background:linear-gradient(180deg,var(--bg2),var(--bg));border-radius:16px 16px 0 0;border-top:1.5px solid rgba(80,120,200,.4);width:100%;max-width:480px;padding:20px;padding-bottom:36px">
     <div style="width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 16px"></div>
     <div style="font-family:Cinzel,serif;font-size:16px;color:var(--gold-b);margin-bottom:4px;text-align:center">💼 TON Wallet</div>
     <div id="wallet-modal-content">
@@ -372,18 +581,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div id="wallet-connected-info" style="display:none;padding:8px 0">
       <div style="background:rgba(255,255,255,.04);border:1px solid rgba(80,120,200,.3);border-radius:10px;padding:12px;margin-bottom:10px">
         <div style="font-size:8px;color:rgba(100,150,255,.6);letter-spacing:2px;margin-bottom:4px">CONNECTED WALLET</div>
-        <div id="wallet-address-display" style="font-size:12px;color:#6aaaff;word-break:break-all"></div>
+        <div id="wallet-address-display" style="font-size:12px;color:var(--blue);word-break:break-all"></div>
         <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px">
           <span style="color:var(--txt-d)">TON Balance:</span>
           <span id="ton-balance-display" style="color:var(--gold-b);font-weight:700">Loading...</span>
         </div>
       </div>
-      <div style="background:linear-gradient(135deg,#1a1200,#2a1e00);border:1.5px solid var(--gold);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">
+      <div style="background:linear-gradient(135deg,#141c28,#1c2838);border:1.5px solid rgba(240,184,64,.35);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">
         <div style="font-size:8px;color:var(--gold);letter-spacing:2px;margin-bottom:4px">$EMP EARNED IN GAME</div>
-        <div id="wallet-emp-display" style="font-size:28px;font-weight:900;color:#f5dd40;font-family:Georgia,serif"></div>
-        <div style="font-size:9px;color:rgba(180,150,80,.5);margin-top:4px">Token distribution coming soon</div>
+        <div id="wallet-emp-display" style="font-size:28px;font-weight:900;color:var(--emp);font-family:Georgia,serif"></div>
+        <div style="font-size:9px;color:var(--txt-d);margin-top:4px">Token distribution coming soon</div>
       </div>
-      <button onclick="disconnectWallet()" style="width:100%;padding:10px;background:rgba(200,60,60,.15);border:1px solid rgba(200,60,60,.4);border-radius:8px;color:#e05555;font-size:12px;cursor:pointer;font-family:Rajdhani,sans-serif">Disconnect Wallet</button>
+      <button onclick="disconnectWallet()" style="width:100%;padding:10px;background:rgba(200,60,60,.15);border:1px solid rgba(224,88,88,.35);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer;font-family:Rajdhani,sans-serif">Disconnect Wallet</button>
     </div>
     <button onclick="document.getElementById('wallet-modal').style.display='none'" style="width:100%;margin-top:10px;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:var(--txt-d);cursor:pointer;font-size:12px">Close</button>
   </div>
@@ -401,38 +610,48 @@ const SEASONS=['SPRING','SUMMER','AUTUMN','WINTER'];
 const RES_ICO={stone:'🪨',wood:'🪵',gold:'🥇',iron:'⚙️',crystal:'💎',mana:'🔮',starstone:'⭐',darkore:'🌑',emp:'🪙'};
 
 const BLD_DEF={
-  mine:     {ico:'⛏️',name:'Mine Shaft',      cost:{emp:10,stone:15},         req:[],                              mult:'+25% Stone',   passive:'+5🪨/u'},
-  lumber:   {ico:'🪵',name:'Lumber Mill',     cost:{emp:10,wood:12},           req:['mine'],                        mult:'+25% Wood',    passive:'+4🪵/u'},
-  forge:    {ico:'🔥',name:'Forge',        cost:{emp:18,stone:10,wood:10},  req:['mine','lumber'],               mult:'+15% ALLES',   passive:'+3🥇/u'},
-  market:   {ico:'🏪',name:'Market Post',       cost:{emp:20,gold:8},            req:['forge'],                       mult:'+50% Gold',    passive:'+10🥇/u'},
-  smelter:  {ico:'⚙️',name:'Smelter',         cost:{emp:22,stone:18},          req:['mine'],                        mult:'+40% Iron',    passive:'+6⚙️/u'},
-  workshop: {ico:'🔨',name:'Workshop',        cost:{emp:30,wood:12,iron:8},    req:['lumber','smelter'],            mult:'+20% ALLES',   passive:'+3🪨+3🪵/u'},
-  academy:  {ico:'🎓',name:'Academy',        cost:{emp:40,stone:25},          req:['forge','market'],              mult:'+50% Crystal', passive:'+2💎/u'},
-  temple:   {ico:'⛩️',name:'Temple',          cost:{emp:45,gold:12},           req:['academy'],                     mult:'+10% $EMP',    passive:'+20🪙/u'},
-  hq:       {ico:'🏛️',name:'Headquarters',  cost:{emp:60,stone:25,wood:25},  req:['mine','lumber','forge','market'],mult:'+100% $EMP',  passive:'+50🪙/u'},
-  treasury: {ico:'🏦',name:'Treasury',      cost:{emp:80,gold:30},           req:['hq','temple'],                 mult:'+75% $EMP',    passive:'+80🪙/u'},
-  observatory:{ico:'🔭',name:'Observatory', cost:{emp:55,crystal:15},        req:['academy','hq'],                mult:'+60% Mana',    passive:'+5🔮/u'},
-  alchemist:{ico:'⚗️',name:'Alchemist Lab',   cost:{emp:70,iron:20,crystal:12},req:['smelter','observatory'],       mult:'+80% Gold',    passive:'+15🥇/u'},
-  citadel:  {ico:'🏯',name:'Citadel',         cost:{emp:120,stone:40,iron:25}, req:['hq','observatory'],            mult:'+150% $EMP',   passive:'+120🪙/u'},
-  dragonforge:{ico:'🐉',name:'Dragon Forge',cost:{emp:100,iron:35},          req:['citadel','smelter'],           mult:'+100% Iron',   passive:'+12⚙️/u'},
-  vault:    {ico:'🗄️',name:'EMP Vault',       cost:{emp:150,gold:35,crystal:20},req:['treasury','citadel'],         mult:'+100% $EMP',   passive:'+200🪙/u'},
-  starforge:{ico:'🌟',name:'Star Forge',  cost:{emp:200,crystal:25,mana:15},req:['vault','citadel'],            mult:'+80% Starstone',passive:'+8⭐/u'},
-  portal:   {ico:'🌀',name:'Void Portal',     cost:{emp:300,mana:40},          req:['starforge'],                   mult:'+200% $EMP',   passive:'+300🪙/u'},
-  nexus:    {ico:'💠',name:'Crystal Nexus',   cost:{emp:400,crystal:40,starstone:20},req:['portal','academy'],      mult:'+100% Crystal',passive:'+5💎/u'},
-  shadowkeep:{ico:'🏰',name:'Shadow Keep',  cost:{emp:500,darkore:30,starstone:25},req:['nexus'],                 mult:'+90% Darkore', passive:'+150🪙/u'},
-  empirebank:{ico:'🏦',name:'Empire Bank',      cost:{emp:2000,darkore:80,starstone:80},req:['shadowkeep','vault'],   mult:'+300% $EMP',   passive:'+1000🪙/u'},
+  // ── ERA I — STONE AGE (resource focus, small EMP costs) ─────────────────
+  mine:      {ico:'⛏️',name:'Mine Shaft',    era:1,cost:{emp:5, stone:20},         req:[],                  passive:'+1🪨/tick', empOut:0,   workers:2, desc:'Produces stone'},
+  lumber:    {ico:'🪵',name:'Lumber Mill',   era:1,cost:{emp:5, wood:18},           req:['mine'],            passive:'+1🪵/tick', empOut:0,   workers:2, desc:'Chops wood'},
+  farm:      {ico:'🌾',name:'Farm',          era:1,cost:{emp:5, wood:10,stone:8},   req:[],                  passive:'+2🍖/tick', empOut:0,   workers:2, desc:'Feeds workers'},
+  marketplace:{ico:'⚖️',name:'Marketplace', era:1,cost:{emp:40,gold:8},            req:['mine','lumber'],   passive:'+0.09💰/tick',empOut:.09,workers:2,desc:'💰 Generates $EMP'},
+
+  // ── ERA II — IRON AGE ────────────────────────────────────────────────────
+  smelter:   {ico:'⚙️',name:'Smelter',       era:2,cost:{emp:10,stone:22,iron:5},  req:['mine'],            passive:'+1⚙️/tick', empOut:0,   workers:2, desc:'Smelts iron ore'},
+  forge:     {ico:'🔥',name:'Forge',          era:2,cost:{emp:12,stone:15,wood:15}, req:['mine','lumber'],   passive:'+1🥇/tick', empOut:0,   workers:2, desc:'Forges metals'},
+  barracks:  {ico:'⚔️',name:'Barracks',       era:2,cost:{emp:15,stone:25,iron:12}, req:['smelter'],         passive:'Defense +20',empOut:0,  workers:3, defense:20,desc:'Protects routes'},
+  tradepost: {ico:'🐪',name:'Trade Post',     era:2,cost:{emp:80,wood:20,stone:15}, req:['forge','marketplace'],passive:'+0.22💰/tick',empOut:.22,workers:3,logBonus:.15,desc:'💰💰 Trade income'},
+
+  // ── ERA III — ARCANE AGE ─────────────────────────────────────────────────
+  workshop:  {ico:'🔨',name:'Workshop',       era:3,cost:{emp:20,wood:18,iron:12},  req:['lumber','smelter'],passive:'+1🔨/tick', empOut:0,   workers:3, desc:'Crafts tools'},
+  academy:   {ico:'🎓',name:'Academy',        era:3,cost:{emp:25,stone:30},         req:['forge'],           passive:'+1💎/tick', empOut:0,   workers:3, desc:'Unlocks crystal'},
+  townhall:  {ico:'🏠',name:'Town Hall',      era:3,cost:{emp:30,stone:20,wood:15}, req:['farm','barracks'], passive:'+pop',      empOut:0,   workers:4, desc:'Grows population'},
+  harbour:   {ico:'⚓',name:'Harbour',         era:3,cost:{emp:150,wood:30,stone:25},req:['tradepost'],       passive:'+0.40💰/tick',empOut:.40,workers:5,desc:'💰💰💰 Sea trade'},
+
+  // ── ERA IV — STELLAR AGE ─────────────────────────────────────────────────
+  observatory:{ico:'🔭',name:'Observatory',  era:4,cost:{emp:35,crystal:20},       req:['academy'],         passive:'+1🔮/tick', empOut:0,   workers:3, desc:'Generates mana'},
+  alchemist:  {ico:'⚗️',name:'Alchemist Lab',era:4,cost:{emp:40,iron:25,crystal:15},req:['smelter','observatory'],passive:'+2🥇/tick',empOut:0,workers:3,desc:'Converts to gold'},
+  guildhall:  {ico:'🏛️',name:'Guild Hall',   era:4,cost:{emp:250,stone:35,iron:25},req:['harbour','academy'],passive:'+0.55💰/tick',empOut:.55,workers:6,guildBonus:true,desc:'💰💰💰💰 Best $EMP'},
+  fortress:   {ico:'🏯',name:'Fortress',      era:4,cost:{emp:50,stone:45,iron:35}, req:['barracks','townhall'],passive:'Defense +40',empOut:0,workers:5,defense:40,desc:'Maximum defense'},
+
+  // ── ERA V — SHADOW EMPIRE ─────────────────────────────────────────────────
+  citadel:    {ico:'🗼',name:'Citadel',       era:5,cost:{emp:500,stone:50,iron:40},req:['guildhall','fortress'],passive:'+0.80💰/tick',empOut:.80,workers:6,desc:'💰 Military income'},
+  starforge:  {ico:'🌟',name:'Star Forge',    era:5,cost:{emp:400,crystal:30,mana:20},req:['observatory','alchemist'],passive:'+1⭐/tick',empOut:0,workers:4,desc:'Starstone forge'},
+  vault:      {ico:'🗄️',name:'EMP Vault',     era:5,cost:{emp:800,gold:50,crystal:25},req:['guildhall'],      passive:'+1.20💰/tick',empOut:1.20,workers:5,desc:'💰💰💰💰💰 Vault income'},
+  portal:     {ico:'🌀',name:'Void Portal',   era:5,cost:{emp:1200,mana:50,starstone:15},req:['starforge'],   passive:'+2.0💰/tick', empOut:2.0, workers:6,desc:'💰 Dimensional trade'},
+  empirebank: {ico:'🏦',name:'Empire Bank',   era:5,cost:{emp:3000,darkore:60,starstone:60},req:['vault','portal'],passive:'+5.0💰/tick',empOut:5.0,workers:8,desc:'💰💰💰💰💰 End-game'},
 };
 
 const ERA_SECTIONS={
-  'ERA I':['mine','lumber','forge','market','smelter'],
-  'ERA II':['workshop','academy','temple','hq','treasury'],
-  'ERA III':['observatory','alchemist','citadel','dragonforge','vault'],
-  'ERA IV':['starforge','portal','nexus'],
-  'ERA V':['shadowkeep','empirebank'],
+  'ERA I — Stone Age':   ['mine','lumber','farm','marketplace'],
+  'ERA II — Iron Age':   ['smelter','forge','barracks','tradepost'],
+  'ERA III — Arcane Age':['workshop','academy','townhall','harbour'],
+  'ERA IV — Stellar Age':['observatory','alchemist','guildhall','fortress'],
+  'ERA V — Shadow Empire':['citadel','starforge','vault','portal','empirebank'],
 };
-const ERA_COLORS={'ERA I':'#a09060','ERA II':'#8899aa','ERA III':'#8844cc','ERA IV':'#4488ff','ERA V':'#cc44ff'};
+const ERA_COLORS={'ERA I':'#5090d0','ERA II':'#60b870','ERA III':'#a070e0','ERA IV':'#f0b840','ERA V':'#e05858'};
 
-const PASS_DEF={mine:{stone:5},lumber:{wood:4},forge:{gold:3},market:{gold:10},smelter:{iron:6},workshop:{stone:3,wood:3},academy:{crystal:2},temple:{emp:20},hq:{emp:50},treasury:{emp:80},observatory:{mana:5},alchemist:{gold:15},citadel:{emp:120},dragonforge:{iron:12},vault:{emp:200},starforge:{starstone:8},portal:{emp:300},nexus:{crystal:5},shadowkeep:{emp:150},empirebank:{emp:1000}};
+const PASS_DEF={mine:{stone:1},lumber:{wood:1},farm:{food:2},smelter:{iron:1},forge:{gold:1},workshop:{tools:1},academy:{crystal:1},observatory:{mana:1},alchemist:{gold:2},starforge:{starstone:1},barracks:{},townhall:{},fortress:{},guildhall:{},harbour:{},marketplace:{},tradepost:{},citadel:{},vault:{},portal:{},empirebank:{}};
 
 const UPG_DEF={
   mine:[{cost:{stone:200,emp:30},bonus:'Stone ×1.5'},{cost:{stone:500,iron:50,emp:100},bonus:'Stone ×2.0'}],
@@ -450,12 +669,12 @@ const UPG_DEF={
 const RARE_DROPS={
   stone:[{res:'crystal',amt:1,chance:.04,msg:'💎 Crystal found in stone!'},{res:'iron',amt:3,chance:.12,msg:'⚙️ Iron vein found!'}],
   wood:[{res:'crystal',amt:1,chance:.03,msg:'💎 Crystal in the wood!'},{res:'gold',amt:2,chance:.10,msg:'🥇 Gold!'}],
-  gold:[{res:'emp',amt:5,chance:.15,msg:'🪙 $EMP gevonden!'},{res:'crystal',amt:2,chance:.06,msg:'💎 Cluster!'}],
-  iron:[{res:'emp',amt:3,chance:.12,msg:'🪙 Iron → $EMP!'},{res:'crystal',amt:1,chance:.05,msg:'💎 Crystal!'}],
-  crystal:[{res:'emp',amt:8,chance:.20,msg:'🪙 Kristal → $EMP!'},{res:'mana',amt:2,chance:.10,msg:'🔮 Mana!'}],
-  mana:[{res:'emp',amt:12,chance:.18,msg:'🪙 Mana condensed!'},{res:'starstone',amt:1,chance:.05,msg:'⭐ Starstone!'}],
-  starstone:[{res:'emp',amt:25,chance:.22,msg:'🪙 Stellaire energie!'},{res:'darkore',amt:1,chance:.04,msg:'🌑 Dark ore!'}],
-  darkore:[{res:'emp',amt:50,chance:.25,msg:'🪙 Dark energy!'},{res:'starstone',amt:2,chance:.08,msg:'⭐ Reversed!'}],
+  gold:[{res:'emp',amt:1,chance:.12,msg:'🪙 $EMP gevonden!'},{res:'crystal',amt:2,chance:.06,msg:'💎 Cluster!'}],
+  iron:[{res:'emp',amt:1,chance:.10,msg:'🪙 Iron → $EMP!'},{res:'crystal',amt:1,chance:.05,msg:'💎 Crystal!'}],
+  crystal:[{res:'emp',amt:2,chance:.18,msg:'🪙 Kristal → $EMP!'},{res:'mana',amt:2,chance:.10,msg:'🔮 Mana!'}],
+  mana:[{res:'emp',amt:2,chance:.15,msg:'🪙 Mana condensed!'},{res:'starstone',amt:1,chance:.05,msg:'⭐ Starstone!'}],
+  starstone:[{res:'emp',amt:5,chance:.20,msg:'🪙 Stellaire energie!'},{res:'darkore',amt:1,chance:.04,msg:'🌑 Dark ore!'}],
+  darkore:[{res:'emp',amt:8,chance:.22,msg:'🪙 Dark energy!'},{res:'starstone',amt:2,chance:.08,msg:'⭐ Reversed!'}],
 };
 
 const MYSTERY_REWARDS=[
@@ -471,16 +690,16 @@ const MYSTERY_REWARDS=[
 ];
 
 const QUEST_POOL=[
-  {id:'mine_stone',label:'⛏️ Mine 50 stone',type:'mine',res:'stone',need:50,reward:{emp:25}},
-  {id:'mine_wood',label:'🪵 Chop 40 wood',type:'mine',res:'wood',need:40,reward:{emp:20}},
-  {id:'mine_gold',label:'🥇 Mine 10 gold',type:'mine',res:'gold',need:10,reward:{emp:30,crystal:1}},
-  {id:'mine_iron',label:'⚙️ Mine 15 iron',type:'mine',res:'iron',need:15,reward:{emp:35}},
-  {id:'play_games',label:'🎮 Play 2 mini-games',type:'play',need:2,reward:{emp:15,stone:20}},
-  {id:'earn_emp',label:'🪙 Verdien 100 $EMP',type:'earn',need:100,reward:{emp:20,crystal:2}},
-  {id:'sell_res',label:'💰 Verkoop (×3)',type:'sell',need:3,reward:{emp:18,gold:5}},
-  {id:'open_box',label:'📦 Open 1 Mystery Box',type:'open_box',need:1,reward:{emp:12,stone:30}},
-  {id:'build_any',label:'🏗️ Build any building',type:'build',need:1,reward:{emp:60}},
-  {id:'mine_crystal',label:'💎 Mine 5 crystal',type:'mine',res:'crystal',need:5,reward:{emp:40,mana:2}},
+  {id:'mine_stone',label:'⛏️ Mine 50 stone',type:'mine',res:'stone',need:50,reward:{emp:6}},
+  {id:'mine_wood',label:'🪵 Chop 40 wood',type:'mine',res:'wood',need:40,reward:{emp:5}},
+  {id:'mine_gold',label:'🥇 Mine 10 gold',type:'mine',res:'gold',need:10,reward:{emp:7,crystal:1}},
+  {id:'mine_iron',label:'⚙️ Mine 15 iron',type:'mine',res:'iron',need:15,reward:{emp:8}},
+  {id:'play_games',label:'🎮 Play 2 mini-games',type:'play',need:2,reward:{emp:4,stone:10}},
+  {id:'earn_emp',label:'🪙 Verdien 100 $EMP',type:'earn',need:100,reward:{emp:5,crystal:1}},
+  {id:'sell_res',label:'💰 Verkoop (×3)',type:'sell',need:3,reward:{emp:4,gold:3}},
+  {id:'open_box',label:'📦 Open 1 Mystery Box',type:'open_box',need:1,reward:{emp:3,stone:15}},
+  {id:'build_any',label:'🏗️ Build any building',type:'build',need:1,reward:{emp:15}},
+  {id:'mine_crystal',label:'💎 Mine 5 crystal',type:'mine',res:'crystal',need:5,reward:{emp:10,mana:1}},
 ];
 
 const PRESTIGE_TITLES=['Settler','Pioneer','Builder','Merchant','Knight','Warlord','Archmage','Starborn','Shadow Lord','Empire God'];
@@ -488,7 +707,7 @@ const PRESTIGE_BADGES=['🏠','⛏️','🏗️','🏪','⚔️','🏯','🔮','
 
 // ═══ STATE ═══
 const G={
-  res:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:30},
+  res:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:15},
   bld:{},cd:{tap:0,aim:0,mem:0,block:0,react:0},upgrades:{},
   stats:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:0},
   era:1,quests:[],questsDate:'',streak:0,lastLogin:'',streakClaimed:false,
@@ -563,7 +782,17 @@ let pPos={x:0,z:0},playerGroup,animT=0,walkT=0;
 const moving={};const SPD=0.16;
 const TX={};
 
-function sampleH(x,z){return Math.sin(x*.13)*2.2+Math.cos(z*.11)*1.8+Math.sin(x*.27+z*.19)*.9+Math.cos(x*.09-z*.22)*1.1;}
+function sampleH(x,z){
+  // Multi-octave heightmap — large hills + fine detail
+  const h1=Math.sin(x*.10)*2.8+Math.cos(z*.09)*2.4;           // large hills
+  const h2=Math.sin(x*.22+z*.16)*.9+Math.cos(x*.15-z*.24)*1.0; // mid ridges
+  const h3=Math.sin(x*.44+z*.38)*.35+Math.cos(x*.52-z*.41)*.3; // surface detail
+  const h4=Math.sin(x*.9+z*.7)*.12;                             // micro bumps
+  // Valley bias — flatten centre slightly
+  const dist2=Math.sqrt(x*x+z*z);
+  const valley=Math.max(0,1-dist2/28)*.6;
+  return h1+h2+h3+h4-valley;
+}
 function mkTex(fn,s=64){const cv=document.createElement('canvas');cv.width=cv.height=s;fn(cv.getContext('2d'),s);return new THREE.CanvasTexture(cv);}
 function lm(col,tex){return new THREE.MeshLambertMaterial({color:col,map:tex||null});}
 function bx(w,h,d){return new THREE.BoxGeometry(w,h,d);}
@@ -578,72 +807,219 @@ function buildTextures(){
 }
 
 function buildTerrain(){
-  const geo=new THREE.PlaneGeometry(80,80,48,48);geo.rotateX(-Math.PI/2);
+  // Higher res mesh for smoother hills
+  const geo=new THREE.PlaneGeometry(90,90,72,72);geo.rotateX(-Math.PI/2);
   const pos=geo.attributes.position;
   for(let i=0;i<pos.count;i++)pos.setY(i,sampleH(pos.getX(i),pos.getZ(i)));
   geo.computeVertexNormals();
-  const colors=[];
+
+  // Vertex colours — slope-aware: steep faces get stone tones
+  const colors=[], norms=geo.attributes.normal;
   for(let i=0;i<pos.count;i++){
     const x=pos.getX(i), z=pos.getZ(i), y=pos.getY(i);
-    const n=Math.random()*.04;
-    const dist=Math.sqrt(x*x+z*z);
+    const ny=norms?norms.getY(i):1;  // normal Y: 1=flat, 0=cliff
+    const slope=1-Math.abs(ny);       // 0=flat, 1=vertical cliff
+    const n=Math.random()*.03;
+
+    // Winding dirt paths
+    const pathA=Math.abs(Math.sin(x*.18+z*.12))<.09;
+    const pathB=Math.abs(Math.sin(x*.10-z*.17))<.07;
+    const onPath=(pathA||pathB)&&y>-0.2&&y<3.2;
+
     let r,g,b;
-    // Small winding sand paths using sine pattern
-    const pathA=Math.abs(Math.sin(x*.18+z*.12))<.10;
-    const pathB=Math.abs(Math.sin(x*.12-z*.20))<.08;
-    const onPath=(pathA||pathB)&&y>-0.3&&y<2.8;
     if(onPath){
-      // Sandy dirt path
-      r=.62+n; g=.52+n; b=.30+n;
-    } else if(y<-0.5){   // shore edge → medium green
-      r=.10+n; g=.38+n*.3; b=.08+n;
-    } else if(y<0.8){    // low ground → dark green
-      r=.08+n; g=.32+n*.3; b=.06+n;
-    } else if(y<1.6){    // mid → dark green
-      r=.10+n; g=.35+n*.3; b=.07+n;
-    } else if(y<2.4){    // upper → medium dark green
-      r=.12+n; g=.38+n*.3; b=.09+n;
-    } else if(y<3.0){    // high → green (was rocky scrub)
-      r=.14+n; g=.40+n*.3; b=.10+n;
-    } else {              // stone peaks only
-      r=.44+n; g=.42+n; b=.38+n;
+      // Worn dirt path — warm tan/brown
+      r=.52+n; g=.40+n; b=.22+n;
+    } else if(slope>.52){
+      // Cliff face — dark grey rock
+      const rock=.22+slope*.12+n*.5;
+      r=rock+.04; g=rock; b=rock-.02;
+    } else if(y<-0.4){
+      // Water edge — very dark green
+      r=.06+n*.5; g=.22+n*.3; b=.06+n*.5;
+    } else if(y<0.7){
+      // Low ground — deep dark green
+      r=.07+n*.5; g=.28+n*.3; b=.06+n*.5;
+    } else if(y<1.5){
+      // Mid terrain — medium dark green
+      r=.08+n*.5; g=.32+n*.3; b=.07+n*.5;
+    } else if(y<2.5){
+      // Upper terrain — dark forest green
+      r=.10+n*.5; g=.30+n*.3; b=.08+n*.5;
+    } else if(y<3.2){
+      // Rocky scrub — dark green/grey
+      r=.18+n*.5; g=.28+n*.3; b=.12+n*.5;
+    } else {
+      // Stone peaks — dark grey
+      r=.38+n*.5; g=.36+n*.5; b=.32+n*.5;
     }
     colors.push(r,g,b);
   }
   geo.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
-  terrainMesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true}));terrainMesh.receiveShadow=true;scene.add(terrainMesh);
-  const water=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshLambertMaterial({color:0x2a7aaa,transparent:true,opacity:.82}));water.rotation.x=-Math.PI/2;water.position.y=-1.8;scene.add(water);
-  // Sandy shore
-  const shore=new THREE.Mesh(new THREE.PlaneGeometry(90,90),new THREE.MeshLambertMaterial({color:0x9a7e50}));shore.rotation.x=-Math.PI/2;shore.position.y=-1.1;scene.add(shore);
-  // Stone patches (random boulders on terrain)
-  for(let i=0;i<12;i++){
-    const sx=(Math.random()-.5)*60, sz=(Math.random()-.5)*60;
-    if(Math.abs(sx)<6&&Math.abs(sz)<6) continue;
-    const gy=sampleH(sx,sz);
-    if(gy<0.4||gy>3.5) continue;
-    const sm=new THREE.Mesh(new THREE.DodecahedronGeometry(.35+Math.random()*.25,0),new THREE.MeshLambertMaterial({color:0x888878}));
-    sm.position.set(sx,gy+.1,sz); sm.rotation.y=Math.random()*Math.PI; scene.add(sm);
+  terrainMesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true}));
+  terrainMesh.receiveShadow=true;terrainMesh.castShadow=false;
+  scene.add(terrainMesh);
+
+  // Animated water (stored globally for animate loop)
+  window._waterMat=new THREE.MeshLambertMaterial({color:0x2878a8,transparent:true,opacity:.78});
+  const waterGeo=new THREE.PlaneGeometry(130,130,1,1);
+  window._waterMesh=new THREE.Mesh(waterGeo,window._waterMat);
+  window._waterMesh.rotation.x=-Math.PI/2;window._waterMesh.position.y=-1.75;
+  scene.add(window._waterMesh);
+
+  // Narrow shore strip — just the water edge, not a big blob
+  const shoreMesh=new THREE.Mesh(
+    new THREE.RingGeometry(28,36,48),
+    new THREE.MeshLambertMaterial({color:0x7a6035,side:THREE.DoubleSide})
+  );
+  shoreMesh.rotation.x=-Math.PI/2;shoreMesh.position.y=-1.4;scene.add(shoreMesh);
+
+  // Rocky cliff outcrops — clusters of angular stones
+  const rockColors=[0x6a6858,0x5c5848,0x787060,0x686054];
+  for(let i=0;i<22;i++){
+    const rx=(Math.random()-.5)*70, rz=(Math.random()-.5)*70;
+    if(Math.abs(rx)<5&&Math.abs(rz)<5) continue;
+    const gy=sampleH(rx,rz); if(gy<0.3) continue;
+    const rc=rockColors[Math.floor(Math.random()*rockColors.length)];
+    const size=.28+Math.random()*.55;
+    // Mix dodecahedron and box for variety
+    const geo2=Math.random()>.5
+      ? new THREE.DodecahedronGeometry(size,0)
+      : new THREE.BoxGeometry(size*1.6,size,size*1.4);
+    const sm=new THREE.Mesh(geo2,new THREE.MeshLambertMaterial({color:rc}));
+    sm.position.set(rx,gy+size*.4,rz);
+    sm.rotation.set(Math.random()*.3,Math.random()*Math.PI,Math.random()*.3);
+    sm.castShadow=true;scene.add(sm);
+    // Small companion rock
+    if(Math.random()>.4){
+      const sm2=new THREE.Mesh(
+        new THREE.DodecahedronGeometry(size*.55,0),
+        new THREE.MeshLambertMaterial({color:rc})
+      );
+      sm2.position.set(rx+Math.random()-.5,gy+size*.2,rz+Math.random()-.5);
+      sm2.rotation.y=Math.random()*Math.PI;
+      sm2.castShadow=true;scene.add(sm2);
+    }
+  }
+
+  // Low bushes — replace bright grass tufts
+  const bushCols=[0x1a4a0a,0x164008,0x1e520c,0x124006,0x226010];
+  for(let i=0;i<55;i++){
+    const bx2=(Math.random()-.5)*58, bz2=(Math.random()-.5)*58;
+    if(Math.abs(bx2)<4&&Math.abs(bz2)<4) continue;
+    const gy=sampleH(bx2,bz2);
+    if(gy<0.4||gy>2.8) continue;
+    const bc=bushCols[Math.floor(Math.random()*bushCols.length)];
+    const bs=.25+Math.random()*.4;
+    // Round bush shape — icosahedron or sphere
+    const bushGeo=Math.random()>.5
+      ? new THREE.IcosahedronGeometry(bs,0)
+      : new THREE.SphereGeometry(bs,.5>.3?5:4,4);
+    const bush=new THREE.Mesh(bushGeo,new THREE.MeshLambertMaterial({color:bc}));
+    bush.position.set(bx2,gy+bs*.6,bz2);
+    bush.scale.set(1,.65+Math.random()*.3,1);
+    bush.castShadow=true;
+    scene.add(bush);
+    // Small companion bush
+    if(Math.random()>.5){
+      const bs2=bs*.6;
+      const b2=new THREE.Mesh(
+        new THREE.IcosahedronGeometry(bs2,0),
+        new THREE.MeshLambertMaterial({color:bushCols[(Math.floor(Math.random()*bushCols.length))]})
+      );
+      b2.position.set(bx2+(Math.random()-.5)*1.2,gy+bs2*.5,bz2+(Math.random()-.5)*1.2);
+      b2.castShadow=true;scene.add(b2);
+    }
   }
 }
 
 function buildDecorations(){
-  const spots=[[-16,-4,1],[-14,-10,0],[-20,0,1],[-18,8,0],[-14,14,1],[-8,18,0],[18,8,0],[20,14,1],[14,18,1],[8,20,0],[10,-20,0],[16,4,0],[-16,4,0]];
-  spots.forEach(([tx,tz,big])=>{
-    if(Math.abs(tx)<4&&Math.abs(tz)<4)return;
-    const g=new THREE.Group(),th=big?4+Math.random()*2.5:2.5+Math.random()*2;
-    place(g,mk(cyl(big?.28:.18,th,6),big?0x3a1e08:0x4a2810,TX.wood),0,th/2,0);
-    const cols=[0x1c4010,0x163210,0x1e4810,0x153010];
-    for(let ci=0;ci<(big?3:2);ci++){const cr=big?1.8-ci*.35:1.2-ci*.25;place(g,mk(cone(cr,cr*1.5,7),cols[ci%cols.length]),0,th+ci*.95,0);}
-    g.position.set(tx,sampleH(tx,tz),tz);g.rotation.y=Math.random()*Math.PI*2;scene.add(g);
+  // Tree groups — clusters feel more natural
+  const treeClusters=[
+    [-16,-4],[-14,-10],[-20,0],[-18,8],[-14,14],[-8,18],
+    [18,8],[20,14],[14,18],[8,20],[10,-20],[16,4],[-16,4],
+    [-22,-14],[22,-8],[-10,24],[12,-16],[-18,-18],[24,4]
+  ];
+  const barkCols=[0x3a2008,0x4a2810,0x5a3015,0x2e1808];
+  const leafCols=[0x1a4008,0x164010,0x1e4a08,0x124208,0x206010,0x184808];
+
+  treeClusters.forEach(([tx,tz])=>{
+    if(Math.abs(tx)<6&&Math.abs(tz)<6)return;
+    const gy=sampleH(tx,tz);
+    if(gy<-0.2)return; // don't put trees in water
+    // Main tree
+    const g=new THREE.Group();
+    const big=Math.random()>.45;
+    const th=big?4.5+Math.random()*3:2.2+Math.random()*2;
+    const trunk=mk(cyl(big?.26:.16,th,7),barkCols[Math.floor(Math.random()*barkCols.length)]);
+    trunk.position.y=th/2;trunk.castShadow=true;g.add(trunk);
+    // Layered foliage cones — 2-4 tiers
+    const tiers=big?3:2;
+    for(let ci=0;ci<tiers;ci++){
+      const cr=(big?2.2:1.4)-ci*(big?.5:.35);
+      const ch=cr*(big?1.4:1.6);
+      const lc=leafCols[Math.floor(Math.random()*leafCols.length)];
+      const foliage=mk(cone(cr,ch,8),lc);
+      foliage.position.y=th+ci*(big?.9:.75);
+      foliage.castShadow=true;g.add(foliage);
+    }
+    // Top spike
+    const top=mk(cone(big?.35:.22,big?.9:.65,6),leafCols[0]);
+    top.position.y=th+(tiers*(big?.9:.75))+.2;g.add(top);
+    g.position.set(tx,gy,tz);g.rotation.y=Math.random()*Math.PI*2;
+    g.scale.setScalar(.85+Math.random()*.35);
+    scene.add(g);
+    // Companion small trees (50% chance)
+    for(let t=0;t<(big?2:1);t++){
+      if(Math.random()>.6)continue;
+      const ox=tx+(Math.random()-.5)*4.5,oz=tz+(Math.random()-.5)*4.5;
+      if(Math.abs(ox)<5&&Math.abs(oz)<5)continue;
+      const gy2=sampleH(ox,oz);if(gy2<0)continue;
+      const g2=new THREE.Group();
+      const h2=1.8+Math.random()*1.8;
+      const tr2=mk(cyl(.12,h2,6),barkCols[0]);tr2.position.y=h2/2;g2.add(tr2);
+      const f2=mk(cone(.9+Math.random()*.4,1.4,7),leafCols[Math.floor(Math.random()*leafCols.length)]);
+      f2.position.y=h2+.1;g2.add(f2);
+      g2.position.set(ox,gy2,oz);g2.rotation.y=Math.random()*Math.PI*2;
+      g2.scale.setScalar(.7+Math.random()*.3);
+      scene.add(g2);
+    }
   });
+
+  // Lantern posts along paths
   for(let i=-8;i<=8;i+=4){
     [[i,3],[i,-3],[3,i],[-3,i]].forEach(([lx,lz])=>{
       const gy=sampleH(lx,lz),g=new THREE.Group();
-      place(g,mk(cyl(.09,4,6),0x8a7a60),0,2,0);place(g,mk(bx(.4,.3,.4),0x605040),0,4.1,0);
-      const lb=mk(new THREE.SphereGeometry(.22,8,8),0xffee80);lb.position.set(0,4.1,0);g.add(lb);
-      const ll=new THREE.PointLight(0xff6820,1.4,8);ll.position.y=4.1;g.add(ll);
+      // Stone base
+      const base=mk(bx(.35,.35,.35),0x4a5058);base.position.y=.18;g.add(base);
+      // Pole
+      const pole=mk(cyl(.07,3.6,8),0x6a6858);pole.position.y=2;g.add(pole);
+      // Lamp bracket
+      const brk=mk(bx(.5,.12,.12),0x6a6858);brk.position.set(.22,3.7,0);g.add(brk);
+      // Lantern box
+      const lbox=mk(bx(.32,.3,.32),0x303828);lbox.position.set(.22,3.4,0);g.add(lbox);
+      // Warm light
+      const lb=new THREE.Mesh(new THREE.SphereGeometry(.14,8,6),
+        new THREE.MeshBasicMaterial({color:0xffdd88}));
+      lb.position.set(.22,3.5,0);g.add(lb);
+      const ll=new THREE.PointLight(0xffaa33,0.8,6);ll.position.set(.22,3.5,0);g.add(ll);
       g.position.set(lx,gy,lz);scene.add(g);
     });
+  }
+
+  // Wooden fence patches near centre
+  const fenceSpots=[[6,2,0],[-6,2,Math.PI],[2,6,Math.PI/2],[-2,-6,-Math.PI/2]];
+  for(const [fx,fz,fy] of fenceSpots){
+    for(let fi=0;fi<4;fi++){
+      const fg=new THREE.Group();
+      const gy=sampleH(fx+fi*.9,fz);
+      const post=new THREE.Mesh(bx(.12,1.1,.12),new THREE.MeshLambertMaterial({color:0x5a3a18}));
+      post.position.y=.55;fg.add(post);
+      const rail=new THREE.Mesh(bx(.8,.08,.08),new THREE.MeshLambertMaterial({color:0x4a3010}));
+      rail.position.set(.45,.7,0);fg.add(rail);
+      fg.position.set(fx+fi*.9,gy,fz);fg.rotation.y=fy;
+      scene.add(fg);
+    }
   }
 }
 
@@ -679,7 +1055,7 @@ function buildPlayer(){
   const lr=mk(bx(.18,.44,.18),0x2a1805);lr.position.set(.13,.09,0);playerGroup.add(lr);
   const head=mk(bx(.4,.4,.36),0xf0b060);head.position.y=1.08;playerGroup.add(head);
   const helm=mk(bx(.46,.18,.42),0xc9a84c);helm.position.y=1.3;playerGroup.add(helm);
-  playerGroup.position.set(0,sampleH(0,0),0);scene.add(playerGroup);
+  playerGroup.position.set(0,sampleH(0,0)+.28,0);scene.add(playerGroup);
 }
 
 function buildBldMesh(id,wx,wz){
@@ -709,12 +1085,16 @@ function initThree(){
   const canvas=document.getElementById('three-canvas');
   renderer=new THREE.WebGLRenderer({canvas,antialias:true});
   renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.setClearColor(0x6ab8e8);
-  scene=new THREE.Scene();scene.fog=new THREE.Fog(0x90c8e0,55,120);
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.setClearColor(0x7ab8d8);
+  renderer.toneMapping=1;// LinearToneMapping
+  scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x9acce0,.016);
   initCamera();
-  scene.add(new THREE.AmbientLight(0xc8e8c8,.65));
-  const sun=new THREE.DirectionalLight(0xfff5e0,1.3);sun.position.set(30,50,20);sun.castShadow=true;sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;sun.shadow.camera.left=sun.shadow.camera.bottom=-60;sun.shadow.camera.right=sun.shadow.camera.top=60;sun.shadow.camera.far=180;sun.shadow.bias=-.0004;scene.add(sun);
-  scene.add(new THREE.HemisphereLight(0x80c8e8,0x1a4a12,.75));
+  scene.add(new THREE.AmbientLight(0xc0d8e8,.40));
+  const sun=new THREE.DirectionalLight(0xfff0d0,1.15);sun.position.set(40,60,25);sun.castShadow=true;sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;sun.shadow.camera.left=sun.shadow.camera.bottom=-55;sun.shadow.camera.right=sun.shadow.camera.top=55;sun.shadow.camera.far=200;sun.shadow.bias=-.0003;scene.add(sun);
+  const fill=new THREE.DirectionalLight(0x8ab8e8,.3);fill.position.set(-30,20,-20);scene.add(fill);
+  scene.add(new THREE.HemisphereLight(0x88c0d8,0x183a0c,.65));
   buildTerrain();buildDecorations();buildResourceNodes();buildPlayer();
   canvas.addEventListener('pointerdown',onWorldTap,{passive:false});
   animate();
@@ -774,7 +1154,14 @@ function animateWorkers(){
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-function animate(){requestAnimationFrame(animate);animT+=.016;processMove();updateCam();updateHints();animateWorkers();resourceNodes.forEach(n=>{n.traverse(cv=>{if(cv.userData&&cv.userData.isGoldCrystal)cv.rotation.y+=.025;});});renderer.render(scene,camera);}
+function animate(){requestAnimationFrame(animate);animT+=.016;processMove();updateCam();updateHints();animateWorkers();
+  resourceNodes.forEach(n=>{n.traverse(cv=>{if(cv.userData&&cv.userData.isGoldCrystal)cv.rotation.y+=.025;});});
+  // Animate water
+  if(window._waterMesh){
+    window._waterMesh.position.y=-1.75+Math.sin(animT*.4)*.04;
+    if(window._waterMat){const pulse=.75+Math.sin(animT*.3)*.06;window._waterMat.opacity=pulse;}
+  }
+  renderer.render(scene,camera);}
 
 function onWorldTap(e){
   if(!e.target||typeof e.target.closest!=='function')return;
@@ -801,7 +1188,7 @@ function doMine(){
   if(n.userData.hp<=0){let sc=1;const sv2=setInterval(()=>{sc-=.16;n.scale.setScalar(Math.max(0,sc));if(sc<=0){clearInterval(sv2);scene.remove(n);resourceNodes=resourceNodes.filter(x=>x!==n);}},55);}
   const bonus=(G.bld.mine&&type==='stone')?.8:(G.bld.lumber&&type==='wood')?.8:(G.bld.smelter&&type==='iron')?1:(G.bld.academy&&type==='crystal')?.8:(G.bld.observatory&&type==='mana')?1.2:(G.bld.starforge&&type==='starstone')?1.5:(G.bld.shadowkeep&&type==='darkore')?2:0;
   const amt=Math.ceil(Math.random()*2+bonus);const earned=applyMult(amt,type);
-  addRes(type,earned);addRes('emp',Math.floor(earned*.5));
+  addRes(type,earned);if(Math.random()<.3)addRes('emp',1); // rare 1 EMP per mine
   eMineBridge(type, earned);
   const rare=rollRareDrop(type);
   if(rare){addRes(rare.res,rare.amt);toast(rare.msg+' +'+rare.amt,3000);}
@@ -811,7 +1198,7 @@ function doMine(){
 
 function doSell(){
   // Sell all resources for $EMP
-  const rates={stone:.8,wood:.8,gold:1.5,iron:2,crystal:6,mana:12,starstone:30,darkore:60};
+  const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
   let t=0;
   Object.entries(rates).forEach(([k,v])=>{if((G.res[k]||0)>0){t+=G.res[k]*v;G.res[k]=0;}});
   // Also sell economy resources
@@ -837,7 +1224,7 @@ function processMove(){
   const fwdX=-Math.sin(camAngle),fwdZ=-Math.cos(camAngle),rgtX=Math.cos(camAngle),rgtZ=-Math.sin(camAngle);
   let dx=0,dz=0;
   if(moving['w']){dx+=fwdX*SPD;dz+=fwdZ*SPD;}if(moving['s']){dx-=fwdX*SPD;dz-=fwdZ*SPD;}if(moving['a']){dx-=rgtX*SPD;dz-=rgtZ*SPD;}if(moving['d']){dx+=rgtX*SPD;dz+=rgtZ*SPD;}
-  if(dx||dz){pPos.x=Math.max(-35,Math.min(35,pPos.x+dx));pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));const gy=sampleH(pPos.x,pPos.z);playerGroup.position.set(pPos.x,gy,pPos.z);playerGroup.rotation.y=Math.atan2(-dx,-dz);walkT+=.28;playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;camTarget.x+=(pPos.x-camTarget.x)*.08;camTarget.z+=(pPos.z-camTarget.z)*.08;if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);}
+  if(dx||dz){pPos.x=Math.max(-35,Math.min(35,pPos.x+dx));pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));const gy=sampleH(pPos.x,pPos.z);playerGroup.position.set(pPos.x,gy+.28,pPos.z);playerGroup.rotation.y=Math.atan2(-dx,-dz);walkT+=.28;playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;camTarget.x+=(pPos.x-camTarget.x)*.08;camTarget.z+=(pPos.z-camTarget.z)*.08;if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);}
 }
 function updateHints(){const n=nearestNode(),hint=document.getElementById('action-hint');if(!hint)return;if(placingBld){hint.textContent='🏗️ Tap to place · ESC cancels';hint.style.opacity='1';return;}if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
 
@@ -1063,33 +1450,33 @@ function cancelPlacing(){
   const hint=document.getElementById('action-hint');if(hint)hint.style.opacity='0';
 }
 
-const ERA_REPLACES={academy:['lumber'],hq:['market'],treasury:['forge'],temple:['smelter'],observatory:['academy'],citadel:['hq'],vault:['treasury'],dragonforge:['workshop'],alchemist:['market','smelter'],starforge:['dragonforge','observatory'],portal:['citadel'],nexus:['vault','alchemist'],shadowkeep:['portal','starforge'],empirebank:['nexus','temple']};
+const ERA_REPLACES={}; // Buildings no longer supersede each other
 function removeSuperseded(id){const rem=ERA_REPLACES[id];if(!rem)return;rem.forEach(old=>{if(!G.bld[old])return;if(buildingMeshes[old]){scene.remove(buildingMeshes[old]);delete buildingMeshes[old];}G.bld[old]='superseded';toast('🔄 '+BLD_DEF[old].name+' replaced',2000);});}
 
 function showPlacementBar(id,def){
   let bar=document.getElementById('placement-bar');
   if(!bar){bar=document.createElement('div');bar.id='placement-bar';document.body.appendChild(bar);}
   const topH=(document.getElementById('topbar')?.offsetHeight||60)+'px';
-  bar.style.cssText='position:fixed;top:'+topH+';left:0;right:0;z-index:50;background:rgba(10,7,3,.98);border-bottom:2px solid #c9a84c;font-family:Rajdhani,sans-serif;overflow:hidden';
+  bar.style.cssText='position:fixed;top:'+topH+';left:0;right:0;z-index:50;background:rgba(12,16,24,.98);border-bottom:2px solid var(--gold);font-family:Rajdhani,sans-serif;overflow:hidden';
   const costStr=Object.entries(def.cost||{}).map(([r,a])=>r==='emp'?a+'💰':(RES_ICO[r]||r)+a).join(' ')||'';
   const bname=def.name||def.n||'';
   bar.innerHTML=
     '<div style="display:flex;align-items:center;gap:8px;padding:7px 12px 5px">'+
       '<span style="font-size:20px">'+def.ico+'</span>'+
       '<div style="flex:1">'+
-        '<div style="font-size:12px;font-weight:700;color:#c9a84c">'+bname+'</div>'+
-        '<div style="font-size:9px;color:rgba(200,170,100,.5)">'+costStr+' · tap to move ghost</div>'+
+        '<div style="font-size:12px;font-weight:700;color:var(--gold-b)">'+bname+'</div>'+
+        '<div style="font-size:9px;color:var(--txt-d)">'+costStr+' · tap to move ghost</div>'+
       '</div>'+
-      '<button onclick="cancelPlacing()" style="padding:5px 11px;background:rgba(200,60,60,.2);border:1px solid rgba(200,60,60,.5);border-radius:6px;color:#e05555;font-size:11px;cursor:pointer;font-weight:700">✕ Cancel</button>'+
+      '<button onclick="cancelPlacing()" style="padding:5px 11px;background:rgba(224,88,88,.15);border:1px solid rgba(224,88,88,.4);border-radius:6px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700">✕ Cancel</button>'+
     '</div>'+
     '<div style="display:flex;border-top:1px solid rgba(255,255,255,.07)">'+
-      '<div id="pb-ok" style="display:flex;flex:1;align-items:center;justify-content:center;padding:10px;background:rgba(20,80,20,.6);cursor:pointer;gap:6px" onclick="confirmGhostPlacement()">'+
+      '<div id="pb-ok" style="display:flex;flex:1;align-items:center;justify-content:center;padding:10px;background:rgba(20,80,40,.6);cursor:pointer;gap:6px" onclick="confirmGhostPlacement()">'+
         '<span style="font-size:16px">✅</span>'+
-        '<span style="font-size:14px;font-weight:900;color:#44ff88;letter-spacing:1px">PLACE HERE</span>'+
+        '<span style="font-size:14px;font-weight:900;color:var(--grn2);letter-spacing:1px">PLACE HERE</span>'+
       '</div>'+
-      '<div id="pb-blocked" style="display:none;flex:1;align-items:center;justify-content:center;padding:10px;background:rgba(80,20,20,.6);gap:6px">'+
+      '<div id="pb-blocked" style="display:none;flex:1;align-items:center;justify-content:center;padding:10px;background:rgba(80,24,24,.6);gap:6px">'+
         '<span style="font-size:14px">⛔</span>'+
-        '<span style="font-size:12px;font-weight:700;color:#ff6666">BLOCKED — move away</span>'+
+        '<span style="font-size:12px;font-weight:700;color:var(--red)">BLOCKED — move away</span>'+
       '</div>'+
     '</div>';
 }
@@ -1139,7 +1526,7 @@ function cpTab(name){
   document.querySelectorAll('.cp-tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.cp-page').forEach(p=>p.classList.remove('on'));
   const page=document.getElementById('cp-'+name);if(page)page.classList.add('on');
-  const tabMap=['empire','economy','games','quest','upg','prestige','shop','stats'];
+  const tabMap=['empire','games','quest','upg','prestige','shop','stats'];
   const idx=tabMap.indexOf(name);if(idx>=0){const tabs=document.querySelectorAll('.cp-tab');if(tabs[idx])tabs[idx].classList.add('on');}
   if(name==='empire')renderEmpirePanel();
   if(name==='quest')renderQuestsTab();
@@ -1152,13 +1539,28 @@ function empTab(s){empireSection=s;renderEmpirePanel();const el=document.getElem
 
 function renderEmpirePanel(){
   const el=document.getElementById('cp-empire');if(!el)return;
-  const TABS=[{id:'build',ico:'🏗️',label:'BUILD'},{id:'upgrades',ico:'⬆️',label:'UPGR'},{id:'passive',ico:'⏰',label:'PASSIVE'},{id:'log',ico:'📜',label:'LOG'}];
-  const tabBar=`<div style="display:flex;gap:3px;margin-bottom:10px;padding:3px;background:rgba(0,0,0,.3);border-radius:9px">${TABS.map(t=>`<div onclick="empTab('${t.id}')" style="flex:1;text-align:center;padding:6px 2px;border-radius:7px;cursor:pointer;background:${empireSection===t.id?'rgba(180,140,60,.25)':'transparent'};border:1px solid ${empireSection===t.id?'rgba(180,140,60,.4)':'transparent'}"><div style="font-size:13px">${t.ico}</div><div style="font-size:7px;color:${empireSection===t.id?'#c9a84c':'rgba(180,150,100,.45)'};font-weight:${empireSection===t.id?'700':'400'}">${t.label}</div></div>`).join('')}</div>`;
+  const TABS=[{id:'build',ico:'🏗️',label:'BUILD'},{id:'market',ico:'⚖️',label:'MARKET'},{id:'upgrades',ico:'⬆️',label:'UPGR'},{id:'passive',ico:'⏰',label:'PASSIVE'},{id:'log',ico:'📜',label:'LOG'}];
+  const tabBar=`<div style="display:flex;gap:3px;margin-bottom:10px;padding:3px;background:rgba(0,0,0,.25);border-radius:10px">${TABS.map(t=>`<div onclick="empTab('${t.id}')" style="flex:1;text-align:center;padding:7px 2px;border-radius:8px;cursor:pointer;transition:all .15s;background:${empireSection===t.id?'rgba(240,184,64,.18)':'transparent'};border:1px solid ${empireSection===t.id?'rgba(240,184,64,.35)':'transparent'}"><div style="font-size:14px">${t.ico}</div><div style="font-size:7px;color:${empireSection===t.id?'var(--gold-b)':'var(--txt-d)'};font-weight:${empireSection===t.id?'700':'400'};letter-spacing:.5px">${t.label}</div></div>`).join('')}</div>`;
   const ph=passPerHour();const bcount=Object.values(G.bld).filter(v=>v===true).length;
-  const header=`<div style="background:linear-gradient(135deg,#1a1200,#2a1e00);border:1.5px solid var(--gold);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="font-size:8px;color:var(--gold);letter-spacing:2px">💰 $EMP TOKENS</div><div style="font-size:26px;font-weight:900;color:#f5dd40;font-family:Georgia,serif;line-height:1.1">${Math.floor(G.res.emp||0)}</div></div><div style="text-align:right"><div style="font-size:8px;color:rgba(180,140,50,.6)">+${Math.round(ph.emp)}/u passief</div><div style="font-size:9px;color:rgba(200,175,130,.6);margin-top:2px">ERA ${G.era} · ${bcount} gebouwen</div><div style="font-size:9px;margin-top:2px;color:rgba(180,160,120,.5)">Prestige ×${G.prestige}${G.prestigeBonus>0?' (+'+Math.round(G.prestigeBonus*100)+'%)':''}</div></div></div>`;
+  // No separate header card — info shown in topbar EMP pill + compact strip
+  const passEmp=ph.emp||0;
+  const empRate=passEmp>0?`+${passEmp<1?passEmp.toFixed(2):Math.round(passEmp)}/hr`:'no passive yet';
+  const header=`<div style="display:flex;align-items:center;gap:6px;padding:6px 2px 8px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:8px">
+    <div style="flex:1;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+      <span style="font-size:9px;font-weight:700;color:var(--gold-b)">ERA ${G.era}</span>
+      <span style="font-size:9px;color:var(--txt-d)">·</span>
+      <span style="font-size:9px;color:var(--txt-d)">${bcount} building${bcount!==1?'s':''}</span>
+      ${G.prestige>0?`<span style="font-size:9px;color:var(--txt-d)">·</span><span style="font-size:9px;color:var(--gold)">Prestige ${G.prestige}</span>`:''}
+    </div>
+    <div style="display:flex;align-items:center;gap:4px;background:rgba(64,200,112,.1);border:1px solid rgba(64,200,112,.25);border-radius:8px;padding:3px 8px">
+      <span style="font-size:9px;color:var(--grn2)">${empRate}</span>
+      <span style="font-size:8px;color:var(--txt-d)">$EMP</span>
+    </div>
+  </div>`;
   let content='';
   if(empireSection==='build')content=renderBuildSection();
   else if(empireSection==='upgrades')content=renderUpgradeSection();
+  else if(empireSection==='market')content=renderEconMarket();
   else if(empireSection==='passive')content=renderPassiveSection();
   else if(empireSection==='log')content=renderLogSection();
   el.innerHTML=`<div style="padding:4px 0 24px">${header}${tabBar}${content}</div>`;
@@ -1168,27 +1570,27 @@ function renderBuildSection(){
   let html='';
   const active=Object.entries(G.bld).filter(([,v])=>v===true);
   if(active.length>0){
-    html+=`<div style="margin-bottom:10px"><div style="font-size:8px;color:rgba(180,150,80,.55);letter-spacing:1.5px;margin-bottom:5px">⚙️ ACTIEF (${active.length})</div><div style="display:flex;flex-wrap:wrap;gap:4px">`;
-    active.forEach(([id])=>{const def=BLD_DEF[id];if(!def)return;html+=`<div style="background:rgba(50,100,50,.25);border:1px solid rgba(70,140,70,.4);border-radius:7px;padding:4px 8px;font-size:9px;display:inline-flex;align-items:center;gap:4px">${def.ico} <span style="color:var(--txt)">${def.name}</span></div>`;});
+    html+=`<div style="margin-bottom:10px"><div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:5px">⚙️ ACTIVE (${active.length})</div><div style="display:flex;flex-wrap:wrap;gap:4px">`;
+    active.forEach(([id])=>{const def=BLD_DEF[id];if(!def)return;html+=`<div style="background:rgba(50,100,50,.25);border:1px solid rgba(40,160,80,.3);border-radius:7px;padding:4px 8px;font-size:9px;display:inline-flex;align-items:center;gap:4px">${def.ico} <span style="color:var(--txt)">${def.name}</span></div>`;});
     html+='</div></div>';
   }
   Object.entries(ERA_SECTIONS).forEach(([eraKey,ids])=>{
     const eraNum=parseInt(eraKey.split(' ')[1]);const locked=eraNum>G.era+1;
-    html+=`<div style="font-size:8px;color:${ERA_COLORS[eraKey]||'#a09060'};letter-spacing:2px;margin:10px 0 6px;padding-top:7px;border-top:1px solid rgba(255,255,255,.07)">${locked?'🔒 ':''}${eraKey}${locked?' — Unlock vorige era':''}</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">`;
+    html+=`<div style="font-size:8px;color:${ERA_COLORS[eraKey]||'#a8c0d0'};letter-spacing:2px;margin:10px 0 6px;padding-top:7px;border-top:1px solid rgba(255,255,255,.07)">${locked?'🔒 ':''}${eraKey}${locked?' — Unlock previous era':''}</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">`;
     ids.forEach(id=>{
       const def=BLD_DEF[id];if(!def)return;
-      if(locked){html+=`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px;opacity:.3;cursor:default"><div style="font-size:22px">${def.ico}</div><div style="font-family:Cinzel,serif;font-size:10px;color:var(--txt-d)">${def.name}</div><div style="font-size:8px;color:var(--txt-d)">🔒</div></div>`;return;}
+      if(locked){html+=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:8px;opacity:.3;cursor:default"><div style="font-size:22px">${def.ico}</div><div style="font-family:Cinzel,serif;font-size:10px;color:var(--txt-d)">${def.name}</div><div style="font-size:8px;color:var(--txt-d)">🔒</div></div>`;return;}
       const built=G.bld[id]===true,sup=G.bld[id]==='superseded';
       const prereq=def.req.every(r=>G.bld[r]||G.bld[r]==='superseded');
       let costsHtml='',canBuild=true;
-      for(const[res,amt]of Object.entries(def.cost)){const ok=(G.res[res]||0)>=amt;if(!ok)canBuild=false;costsHtml+=`<span style="font-size:8px;padding:1px 4px;border-radius:4px;border:1px solid ${ok?'rgba(70,140,70,.4)':'rgba(200,60,60,.4)'};color:${ok?'var(--grn)':'var(--red)'}">${RES_ICO[res]||'?'}${amt}</span>`;}
+      for(const[res,amt]of Object.entries(def.cost)){const ok=(G.res[res]||0)>=amt;if(!ok)canBuild=false;costsHtml+=`<span style="font-size:8px;padding:1px 4px;border-radius:4px;border:1px solid ${ok?'rgba(64,200,112,.35)':'rgba(224,88,88,.35)'};color:${ok?'var(--grn2)':'var(--red)'};background:${ok?'rgba(64,200,112,.06)':'rgba(224,88,88,.06)'}">${RES_ICO[res]||'?'}${amt}</span>`;}
       const lockHtml=!built&&!sup&&!prereq?`<div style="position:absolute;top:6px;right:6px;font-size:12px">🔒</div>`:'';
       const onclick=built||sup?'':`startBuild('${id}')`;
-      html+=`<div onclick="${onclick}" style="background:${built?'rgba(30,70,30,.2)':sup?'rgba(80,70,30,.2)':canBuild&&prereq?'rgba(40,30,8,.4)':'rgba(0,0,0,.15)'};border:1px solid ${built?'rgba(70,140,70,.5)':sup?'rgba(180,150,80,.3)':canBuild&&prereq?'rgba(180,140,60,.35)':'rgba(255,255,255,.07)'};border-radius:10px;padding:8px;cursor:${built||sup?'default':'pointer'};opacity:${!prereq&&!built&&!sup?.4:1};position:relative">
+      html+=`<div onclick="${onclick}" style="background:${built?'rgba(32,80,40,.25)':sup?'rgba(60,60,40,.2)':canBuild&&prereq?'rgba(240,184,64,.06)':'rgba(255,255,255,.02)'};border:1px solid ${built?'rgba(64,200,112,.4)':sup?'rgba(240,184,64,.35)':canBuild&&prereq?'rgba(240,184,64,.3)':'rgba(255,255,255,.07)'};border-radius:10px;padding:8px;cursor:${built||sup?'default':'pointer'};opacity:${!prereq&&!built&&!sup?.4:1};position:relative">
         <div style="font-size:22px;margin-bottom:2px">${def.ico}</div>
         <div style="font-family:Cinzel,serif;font-size:10px;color:var(--txt);margin-bottom:2px">${def.name}</div>
-        <div style="font-size:8px;color:var(--txt-d);margin-bottom:4px">${def.mult}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:2px">${built?'<span style="color:var(--grn);font-size:10px">✓ Gebouwd</span>':sup?'<span style="color:var(--txt-d);font-size:10px">🔄 Vervangen</span>':costsHtml}</div>${lockHtml}</div>`;
+        <div style="font-size:8px;color:var(--txt-d);margin-bottom:4px">${def.passive||def.desc||''}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px">${built?'<span style="color:var(--grn);font-size:10px">✓ Built</span>':sup?'<span style="color:var(--txt-d);font-size:10px">↩ Replaced</span>':costsHtml}</div>${lockHtml}</div>`;
     });
     html+='</div>';
   });
@@ -1197,36 +1599,36 @@ function renderBuildSection(){
 
 function renderUpgradeSection(){
   const builtAny=Object.values(G.bld).some(v=>v===true);
-  if(!builtAny)return'<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Bouw eerst gebouwen om te upgraden</div>';
-  let html='<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">⬆️ GEBOUW UPGRADES</div>';
+  if(!builtAny)return'<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Bouw first to unlock upgrades</div>';
+  let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⬆️ BUILDING UPGRADES</div>';
   Object.entries(UPG_DEF).forEach(([id,defs])=>{
     if(!G.bld[id])return;const lvl=G.upgrades[id]||0,maxed=lvl>=defs.length,def=BLD_DEF[id];if(!def)return;
     let pips='';for(let i=0;i<=defs.length;i++)pips+=`<div style="width:11px;height:11px;border-radius:3px;background:${i<lvl?'var(--gold)':'rgba(255,255,255,.06)'};border:1px solid ${i<lvl?'var(--gold-b)':'rgba(255,255,255,.1)'}"></div>`;
     let next='';
-    if(!maxed){const nd=defs[lvl];let can=true,chips='';Object.entries(nd.cost).forEach(([r,a])=>{const ok=(G.res[r]||0)>=a;if(!ok)can=false;chips+=`<span style="font-size:8px;padding:1px 4px;border-radius:4px;border:1px solid ${ok?'rgba(70,140,70,.4)':'rgba(200,60,60,.4)'};color:${ok?'var(--grn)':'var(--red)'}">${RES_ICO[r]||r}${a}</span>`;});next=`<div style="font-size:8px;color:#44ff88;margin-bottom:4px">⬆️ ${nd.bonus}</div><div style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:5px">${chips}</div><button data-upg="${id}" style="width:100%;padding:6px;border-radius:6px;border:none;font-family:Rajdhani,sans-serif;font-size:11px;font-weight:700;${can?'background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#000;cursor:pointer':'opacity:.4;cursor:default;background:rgba(255,255,255,.05);color:var(--txt-d)'}">UPGRADE</button>`;}
+    if(!maxed){const nd=defs[lvl];let can=true,chips='';Object.entries(nd.cost).forEach(([r,a])=>{const ok=(G.res[r]||0)>=a;if(!ok)can=false;chips+=`<span style="font-size:8px;padding:1px 4px;border-radius:4px;border:1px solid ${ok?'rgba(64,200,112,.35)':'rgba(224,88,88,.35)'};color:${ok?'var(--grn2)':'var(--red)'};background:${ok?'rgba(64,200,112,.06)':'rgba(224,88,88,.06)'}">${RES_ICO[r]||r}${a}</span>`;});next=`<div style="font-size:8px;color:var(--grn2);margin-bottom:4px">⬆️ ${nd.bonus}</div><div style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:5px">${chips}</div><button data-upg="${id}" style="width:100%;padding:6px;border-radius:6px;border:none;font-family:Rajdhani,sans-serif;font-size:11px;font-weight:700;${can?'background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#000;cursor:pointer':'opacity:.4;cursor:default;background:rgba(255,255,255,.05);color:var(--txt-d)'}">UPGRADE</button>`;}
     else next=`<div style="font-size:9px;color:var(--grn);text-align:center">✓ Max — ${defs[defs.length-1].bonus}</div>`;
-    html+=`<div style="background:var(--bg3);border:1px solid ${maxed?'rgba(201,168,76,.4)':'var(--bdr)'};border-radius:9px;padding:10px;margin-bottom:6px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="font-size:16px">${def.ico}</span><div><div style="font-size:10px;font-weight:700;color:var(--gold-b)">${def.name}</div><div style="font-size:8px;color:var(--txt-d)">Lv ${lvl+1}/${defs.length+1}${maxed?' MAX':''}</div></div><div style="margin-left:auto;display:flex;gap:2px">${pips}</div></div>${next}</div>`;
+    html+=`<div style="background:var(--bg3);border:1px solid ${maxed?'rgba(240,184,64,.4)':'var(--bdr)'};border-radius:9px;padding:10px;margin-bottom:6px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="font-size:16px">${def.ico}</span><div><div style="font-size:10px;font-weight:700;color:var(--gold-b)">${def.name}</div><div style="font-size:8px;color:var(--txt-d)">Lv ${lvl+1}/${defs.length+1}${maxed?' MAX':''}</div></div><div style="margin-left:auto;display:flex;gap:2px">${pips}</div></div>${next}</div>`;
   });
   setTimeout(()=>{document.querySelectorAll('button[data-upg]').forEach(btn=>{btn.onclick=()=>buyUpgrade(btn.dataset.upg);});},0);
   return html;
 }
 
 function renderPassiveSection(){
-  const ph=passPerHour();let html='<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">⏰ PASSIEF PER UUR</div>';
+  const ph=passPerHour();let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⏰ PASSIEF PER UUR</div>';
   const activeKeys=Object.keys(ph).filter(k=>ph[k]>0);
   if(!activeKeys.length)return html+'<div style="text-align:center;padding:16px;color:var(--txt-d);font-size:11px">Bouw gebouwen voor passief inkomen</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">';
-  activeKeys.forEach(k=>{html+=`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:7px;text-align:center"><div style="font-size:16px">${RES_ICO[k]||k}</div><div style="font-size:13px;font-weight:700;color:var(--gold-b)">+${ph[k]}</div><div style="font-size:7px;color:rgba(180,160,120,.4)">${k}</div></div>`;});
+  activeKeys.forEach(k=>{html+=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:7px;text-align:center"><div style="font-size:16px">${RES_ICO[k]||k}</div><div style="font-size:13px;font-weight:700;color:var(--gold-b)">+${ph[k]}</div><div style="font-size:7px;color:var(--txt-d)">${k}</div></div>`;});
   html+='</div>';
-  html+=`<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin:12px 0 8px">✖️ MULTIPLIERS</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px">`;
-  ['stone','wood','gold','iron','crystal','emp'].forEach(k=>{const m=mult(k);if(m<=1.0)return;html+=`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:5px 8px;display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--txt2)">${RES_ICO[k]} ${k}</span><span style="color:var(--gold-b);font-weight:700">×${m.toFixed(2)}</span></div>`;});
+  html+=`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:12px 0 8px">✖️ MULTIPLIERS</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px">`;
+  ['stone','wood','gold','iron','crystal','emp'].forEach(k=>{const m=mult(k);if(m<=1.0)return;html+=`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:5px 8px;display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--txt2)">${RES_ICO[k]} ${k}</span><span style="color:var(--gold-b);font-weight:700">×${m.toFixed(2)}</span></div>`;});
   html+='</div>';return html;
 }
 
 function renderLogSection(){
-  let html='<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOGLOG</div>';
+  let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOGLOG</div>';
   if(!G.log.length)return html+'<div style="font-size:9px;color:rgba(180,160,120,.3);text-align:center;padding:12px">Nog geen activiteit</div>';
-  G.log.slice(0,40).forEach(e=>{html+=`<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}"><span style="color:rgba(180,150,80,.4)">[${e.time||''}]</span> ${e.msg}</div>`;});
+  G.log.slice(0,40).forEach(e=>{html+=`<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}"><span style="color:var(--txt-d)">[${e.time||''}]</span> ${e.msg}</div>`;});
   return html;
 }
 
@@ -1248,6 +1650,13 @@ function updateHUD(){
     {ico:'🔨',v:E.res.tools||0,   hide:!(econActive||(E.res.tools||0)>0)},
   ];rp.innerHTML=list.filter(r=>!r.hide).map(r=>`<div class="rcp"><span>${r.ico}</span><span class="rv">${Math.floor(r.v)}</span></div>`).join('');}
   const ep=document.getElementById('emp-val');if(ep)ep.textContent=Math.floor(E.res.emp||G.res.emp||0);
+  // Show multiplier on emp pill if above 1
+  const empPill=document.getElementById('emp-pill');
+  if(empPill&&(E.empMult||1)>1){
+    let mEl=document.getElementById('emp-mult-badge');
+    if(!mEl){mEl=document.createElement('span');mEl.id='emp-mult-badge';mEl.style.cssText='font-size:7px;color:var(--grn2);font-weight:700;margin-left:1px';empPill.appendChild(mEl);}
+    mEl.textContent='×'+((E.empMult||1).toFixed(1));
+  }
   // Update worker badge in topbar
   const wb=document.getElementById('worker-badge');
   if(wb){const pop=E.pop.workers+(E.pop.merchants||0)+(E.pop.nobles||0);wb.textContent='👷 '+pop;}
@@ -1276,21 +1685,21 @@ function initDailyQuests(){const today=getTodayStr();if(G.questsDate!==today){G.
 function checkQuestProgress(type,amount,res){if(!G.quests)return;G.quests.forEach(q=>{if(q.done)return;if(q.type===type){if(type==='mine'&&res&&q.res&&q.res!==res)return;q.progress=Math.min(q.need,(q.progress||0)+amount);if(q.progress>=q.need){q.done=true;Object.entries(q.reward).forEach(([k,v])=>addRes(k,v));toast('✅ Quest: '+q.label,4000);updateHUD();addLog('✅ '+q.label,'good');}}});}
 function renderQuestsTab(){
   const el=document.getElementById('cp-quests');if(!el)return;
-  const bonus=Math.min(G.streak*5,150),sc=G.streak>=7?'#ffaa00':G.streak>=3?'#f0c96e':'#a09060';
+  const bonus=Math.min(G.streak*5,150),sc=G.streak>=7?'#f0b040':G.streak>=3?'#f0c96e':'#a8c0d0';
   const btnTxt=G.streakClaimed?'✓ Claimed':'🎁 Claim +'+bonus+' $EMP';const btnSt=G.streakClaimed?'opacity:.5;pointer-events:none':'cursor:pointer;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#000';
   let fires='';for(let i=1;i<=7;i++)fires+=`<span style="font-size:14px;opacity:${G.streak>=i?1:.25}">🔥</span>`;
   let qhtml='';
   (G.quests||[]).forEach(q=>{const pct=Math.min(100,Math.round((q.progress||0)/q.need*100));const rwTxt=Object.entries(q.reward).map(([k,v])=>'+'+v+' '+(RES_ICO[k]||k)).join(' ');qhtml+=`<div style="background:var(--bg3);border:1px solid ${q.done?'rgba(76,175,122,.5)':'var(--bdr)'};border-radius:9px;padding:9px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><div style="font-size:12px;font-weight:700;color:${q.done?'var(--grn)':'var(--txt)'}">${q.label}</div><div style="font-size:10px;color:var(--txt-d)">${q.progress||0}/${q.need}</div></div><div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:4px"><div style="height:100%;width:${pct}%;background:${q.done?'var(--grn)':'linear-gradient(90deg,var(--gold-d),var(--gold-b))'};border-radius:2px;transition:width .3s"></div></div><div style="font-size:9px;color:var(--txt-d)">Reward: ${rwTxt}${q.done?' ✓':''}</div></div>`;});
   el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b)">🔥 Daily Streak</div><div style="font-size:18px;font-weight:900;color:${sc}">×${G.streak}</div></div><div style="display:flex;gap:3px;margin-bottom:8px">${fires}</div><button onclick="claimStreakBonus()" style="width:100%;padding:8px;border-radius:7px;border:none;font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;${btnSt}">${btnTxt}</button></div><div style="font-family:Cinzel,serif;font-size:10px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">📋 DAILY QUESTS</div>${qhtml}`;
 }
-function claimStreakBonus(){if(G.streakClaimed){toast('Already claimed!');return;}const bonus=Math.min(G.streak*8,200);addRes('emp',bonus);if(G.streak>=5)addRes('emp',G.streak*2);G.streakClaimed=true;toast('🔥 Streak ×'+G.streak+' — +'+bonus+' $EMP!',3500);updateHUD();renderQuestsTab();}
+function claimStreakBonus(){if(G.streakClaimed){toast('Already claimed!');return;}const bonus=Math.min(G.streak*2,40);addRes('emp',bonus);G.streakClaimed=true;toast('🔥 Streak ×'+G.streak+' — +'+bonus+' $EMP!',3500);updateHUD();renderQuestsTab();}
 function renderUpgradesTab(){const el=document.getElementById('cp-upgrades');if(!el)return;el.innerHTML=renderUpgradeSection();setTimeout(()=>{el.querySelectorAll('button[data-upg]').forEach(btn=>{btn.onclick=()=>buyUpgrade(btn.dataset.upg);});},0);}
 function renderPrestigeTab(){
   const el=document.getElementById('cp-prestige');if(!el)return;
   const title=G.prestige>0?PRESTIGE_TITLES[G.prestige-1]:'Beginner',badge=G.prestige>0?PRESTIGE_BADGES[G.prestige-1]:'🌱',can=canPrestige();
   let pips='';for(let i=0;i<10;i++)pips+=`<div style="width:20px;height:20px;border-radius:4px;background:${i<G.prestige?'var(--gold)':'rgba(255,255,255,.06)'};border:1px solid ${i<G.prestige?'var(--gold-b)':'rgba(255,255,255,.1)'};font-size:10px;display:flex;align-items:center;justify-content:center">${i<G.prestige?PRESTIGE_BADGES[i]:''}</div>`;
   let hist='';for(let i=0;i<G.prestige;i++)hist+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px"><span>${PRESTIGE_BADGES[i]}</span><span style="color:var(--txt)">${PRESTIGE_TITLES[i]}</span><span style="margin-left:auto;color:var(--gold-b);font-size:9px">+${(i+1)*10}%</span></div>`;
-  el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:8px;text-align:center"><div style="font-size:36px;margin-bottom:4px">${badge}</div><div style="font-family:Cinzel,serif;font-size:14px;color:var(--gold-b)">${title}</div><div style="font-size:10px;color:var(--txt-d);margin:2px 0">Prestige Level ${G.prestige}/10</div>${G.prestigeBonus>0?`<div style="font-size:12px;font-weight:700;color:#44ff88;margin-top:4px">+${Math.round(G.prestigeBonus*100)}% permanent bonus</div>`:''}<div style="display:flex;gap:4px;margin:10px 0;justify-content:center;flex-wrap:wrap">${pips}</div></div>${G.prestige<10?`<div style="background:var(--bg3);border:1px solid ${can?'rgba(201,168,76,.5)':'var(--bdr)'};border-radius:9px;padding:12px;margin-bottom:8px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b);margin-bottom:6px">Next: ${PRESTIGE_BADGES[G.prestige]||'?'} ${PRESTIGE_TITLES[G.prestige]||''}</div><div style="font-size:10px;color:var(--txt-d);margin-bottom:8px">Vereist: 18+ gebouwen + Rijksbank<br>Behoudt: 10% $EMP · +10% permanente bonus</div><button onclick="doPrestige()" style="width:100%;padding:10px;border-radius:8px;border:none;font-family:Cinzel,serif;font-size:12px;font-weight:700;${can?'background:linear-gradient(135deg,#6a00aa,#aa00ff);color:#fff;cursor:pointer':'opacity:.4;cursor:default;background:rgba(255,255,255,.05);color:var(--txt-d)'}">${can?'🌟 PRESTIGE NOW':'🔒 Build more buildings first'}</button></div>`:''}${G.prestige>0?`<div style="font-size:9px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">BEHAALDE TITELS</div>${hist}`:''}`;
+  el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:8px;text-align:center"><div style="font-size:36px;margin-bottom:4px">${badge}</div><div style="font-family:Cinzel,serif;font-size:14px;color:var(--gold-b)">${title}</div><div style="font-size:10px;color:var(--txt-d);margin:2px 0">Prestige Level ${G.prestige}/10</div>${G.prestigeBonus>0?`<div style="font-size:12px;font-weight:700;color:var(--grn2);margin-top:4px">+${Math.round(G.prestigeBonus*100)}% permanent bonus</div>`:''}<div style="display:flex;gap:4px;margin:10px 0;justify-content:center;flex-wrap:wrap">${pips}</div></div>${G.prestige<10?`<div style="background:var(--bg3);border:1px solid ${can?'rgba(240,184,64,.5)':'var(--bdr)'};border-radius:9px;padding:12px;margin-bottom:8px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b);margin-bottom:6px">Next: ${PRESTIGE_BADGES[G.prestige]||'?'} ${PRESTIGE_TITLES[G.prestige]||''}</div><div style="font-size:10px;color:var(--txt-d);margin-bottom:8px">Vereist: 18+ gebouwen + Rijksbank<br>Behoudt: 10% $EMP · +10% permanente bonus</div><button onclick="doPrestige()" style="width:100%;padding:10px;border-radius:8px;border:none;font-family:Cinzel,serif;font-size:12px;font-weight:700;${can?'background:linear-gradient(135deg,#6a00aa,#aa00ff);color:#fff;cursor:pointer':'opacity:.4;cursor:default;background:rgba(255,255,255,.05);color:var(--txt-d)'}">${can?'🌟 PRESTIGE NOW':'🔒 Build more buildings first'}</button></div>`:''}${G.prestige>0?`<div style="font-size:9px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">BEHAALDE TITELS</div>${hist}`:''}`;
 }
 function buyShop(id){if(!walletAddr){toast('Connect your wallet first!');toggleWallet();return;}toast('📱 TON payment coming soon — wallet: '+walletAddr.slice(0,8)+'…');}
 
@@ -1315,10 +1724,10 @@ function playAgain(){document.getElementById('result').classList.remove('on');if
 // GAME 1: MINE DASH
 let _tap={},_tapT=null,_tapSpawnT=null;
 function initTap(){_tap={stone:0,wood:0,gold:0,iron:0,crystal:0,emp:0,combo:0,comboT:null,taps:0,timeLeft:30,active:false};document.getElementById('g-tap').style.display='flex';document.getElementById('ts-combo').textContent='×1';document.getElementById('ts-timer').textContent='30s';['ts-s','ts-w','ts-g','ts-e','ts-rare'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='0';});document.getElementById('tap-arena').innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style="font-family:Cinzel,serif;font-size:22px;color:var(--gold-b)">⛏️ MINE DASH</div><div style="font-size:12px;color:var(--txt-d);text-align:center">Tik de vallende erts!<br>Bouw combos voor grotere beloningen</div><button onclick="startMineDash()" style="padding:12px 28px;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#000;font-family:Cinzel,serif;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer">▶ START</button></div>';}
-const ORE_TYPES=[{emoji:'🪨',res:'stone',val:1,color:'#a09080',size:52},{emoji:'🪵',res:'wood',val:1,color:'#8B5E3C',size:48},{emoji:'🥇',res:'gold',val:1,color:'#f5c830',size:44},{emoji:'⚙️',res:'iron',val:1,color:'#8899aa',size:44},{emoji:'💎',res:'crystal',val:1,color:'#8855ff',size:40},{emoji:'🪙',res:'emp',val:3,color:'#c9a84c',size:44},{emoji:'💣',res:null,val:0,color:'#cc2200',size:46}];
+const ORE_TYPES=[{emoji:'🪨',res:'stone',val:1,color:'#a09080',size:52},{emoji:'🪵',res:'wood',val:1,color:'#8B5E3C',size:48},{emoji:'🥇',res:'gold',val:1,color:'#f5c830',size:44},{emoji:'⚙️',res:'iron',val:1,color:'#8aa4b8',size:44},{emoji:'💎',res:'crystal',val:1,color:'#8855ff',size:40},{emoji:'🪙',res:'emp',val:3,color:'var(--gold-b)',size:44},{emoji:'💣',res:null,val:0,color:'#cc2200',size:46}];
 function startMineDash(){const arena=document.getElementById('tap-arena');arena.innerHTML='';_tap.active=true;_tap.timeLeft=30;_tapT=setInterval(()=>{_tap.timeLeft--;const el=document.getElementById('ts-timer');if(el){el.textContent=_tap.timeLeft+'s';el.style.color=_tap.timeLeft<=5?'#ff2222':'var(--red)';}if(_tap.timeLeft<=0){clearInterval(_tapT);clearInterval(_tapSpawnT);endTap();}},1000);_tapSpawnT=setInterval(spawnOre,600);spawnOre();spawnOre();}
 function spawnOre(){if(!_tap.active)return;const arena=document.getElementById('tap-arena'),W=arena.offsetWidth||300;const wts=[25,25,20,15,8,10,Math.max(2,15-_tap.combo*2)],total=wts.reduce((a,b)=>a+b,0);let roll=Math.random()*total,type=ORE_TYPES[0];for(let i=0;i<ORE_TYPES.length;i++){roll-=wts[i];if(roll<=0){type=ORE_TYPES[i];break;}}const el=document.createElement('div'),x=Math.random()*(W-type.size),dur=1.8+Math.random()*1.2;el.style.cssText=`position:absolute;left:${x}px;top:-60px;width:${type.size}px;height:${type.size}px;font-size:${type.size-8}px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;filter:drop-shadow(0 2px 6px ${type.color});animation:fall ${dur}s linear forwards`;el.textContent=type.emoji;el.dataset.t=JSON.stringify(type);el.addEventListener('pointerdown',e=>{e.stopPropagation();if(!_tap.active)return;const t=JSON.parse(el.dataset.t);el.style.transform='scale(1.4)';el.style.opacity='0';setTimeout(()=>el.remove(),150);clearTimeout(_tap.comboT);_tap.combo=Math.min(_tap.combo+1,10);_tap.comboT=setTimeout(()=>{_tap.combo=0;const tc=document.getElementById('ts-combo');if(tc)tc.textContent='×1';},1500);const m2=1+_tap.combo*.15;const tc2=document.getElementById('ts-combo');if(tc2)tc2.textContent='×'+_tap.combo.toFixed(1);if(t.res===null){_tap.combo=0;const tc3=document.getElementById('ts-combo');if(tc3){tc3.style.color='#ff4444';setTimeout(()=>tc3.style.color='var(--gold-b)',400);}}else if(t.res){const earned=Math.ceil(t.val*m2);_tap[t.res]=(_tap[t.res]||0)+earned;const sid=document.getElementById(t.res==='emp'?'ts-e':'ts-'+t.res[0]);if(sid)sid.textContent=_tap[t.res]||0;if(t.res==='crystal'){const rc=document.getElementById('ts-rare');if(rc)rc.textContent=_tap.crystal||0;}}_tap.taps++;checkMysteryBox();});arena.appendChild(el);setTimeout(()=>{if(el.parentNode)el.remove();},dur*1000+200);}
-function endTap(){_tap.active=false;clearInterval(_tapT);clearInterval(_tapSpawnT);const rws={};if(_tap.stone>0)rws.stone=_tap.stone;if(_tap.wood>0)rws.wood=_tap.wood;if(_tap.gold>0)rws.gold=_tap.gold;if(_tap.iron>0)rws.iron=_tap.iron;if(_tap.crystal>0)rws.crystal=_tap.crystal;rws.emp=Math.max(8,_tap.emp||0)+Math.floor(_tap.taps*.8);setCd('tap');showResult('⛏️ Mine Dash Complete!',`${_tap.taps} erts getikt · max combo ×${_tap.combo.toFixed(1)}`,rws);}
+function endTap(){_tap.active=false;clearInterval(_tapT);clearInterval(_tapSpawnT);const rws={};if(_tap.stone>0)rws.stone=_tap.stone;if(_tap.wood>0)rws.wood=_tap.wood;if(_tap.gold>0)rws.gold=_tap.gold;if(_tap.iron>0)rws.iron=_tap.iron;if(_tap.crystal>0)rws.crystal=_tap.crystal;rws.emp=Math.max(2,Math.floor((_tap.emp||0)*.25))+Math.floor(_tap.taps*.12);setCd('tap');showResult('⛏️ Mine Dash Complete!',`${_tap.taps} erts getikt · max combo ×${_tap.combo.toFixed(1)}`,rws);}
 
 // GAME 2: TOWER DEFENSE
 let _aim={},_aimT=null,_aimST=null,_aimOn=false,_aimAF=null,_aimCtx=null;
@@ -1327,24 +1736,24 @@ function aimAim(e){if(!_aimOn)return;const cv=document.getElementById('aim-canva
 function aimShoot(e){if(!_aimOn)return;const cv=document.getElementById('aim-canvas'),r=cv.getBoundingClientRect(),tx=e.clientX-r.left,ty=e.clientY-r.top,now=Date.now();if(now-(_aim.lastShot||0)<150)return;_aim.lastShot=now;const dx=tx-_aim.tower.x,dy=ty-_aim.tower.y,len=Math.sqrt(dx*dx+dy*dy);_aim.bullets.push({x:_aim.tower.x,y:_aim.tower.y,vx:(dx/len)*14,vy:(dy/len)*14,r:5,life:60});checkMysteryBox();}
 const ENEMY_TYPES=[{emoji:'👹',hp:1,spd:1.2,r:18,val:1,color:'#cc2200'},{emoji:'🧟',hp:2,spd:.8,r:22,val:2,color:'#446622'},{emoji:'🐉',hp:5,spd:.6,r:30,val:5,color:'#8800cc'},{emoji:'💀',hp:8,spd:1.5,r:20,val:3,color:'#888'}];
 function startAimWave(){const count=3+_aim.wave*2;const cv=document.getElementById('aim-canvas');let spawned=0;_aimST=setInterval(()=>{if(!_aimOn||spawned>=count){clearInterval(_aimST);_aimST=null;return;}const type=ENEMY_TYPES[Math.min(Math.floor(Math.random()*(_aim.wave+1)),3)];_aim.enemies.push({x:Math.random()*cv.width,y:-30,hp:type.hp+(_aim.wave-1),maxHp:type.hp+(_aim.wave-1),spd:type.spd,r:type.r,val:type.val,emoji:type.emoji,color:type.color,hit:0});spawned++;},800);if(!_aimAF)aimLoop();}
-function aimLoop(){if(!_aimOn){_aimAF=null;return;}_aimAF=requestAnimationFrame(aimLoop);const cv=document.getElementById('aim-canvas'),ctx=_aimCtx;if(!ctx)return;ctx.fillStyle='#05070e';ctx.fillRect(0,0,cv.width,cv.height);ctx.strokeStyle='rgba(100,100,150,.08)';ctx.lineWidth=1;for(let x=0;x<cv.width;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}for(let y=0;y<cv.height;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}ctx.font='32px serif';ctx.textAlign='center';ctx.fillText('🏰',_aim.tower.x,_aim.tower.y+10);if(_aim.aimX){ctx.strokeStyle='rgba(201,168,76,.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(_aim.tower.x,_aim.tower.y-10);ctx.lineTo(_aim.aimX,_aim.aimY);ctx.stroke();ctx.setLineDash([]);}
-_aim.enemies=_aim.enemies.filter(e=>{e.y+=e.spd;if(e.y>cv.height+30){_aim.lives--;const lv=['❤️❤️❤️','❤️❤️','❤️','💔'][Math.max(0,3-_aim.lives)];document.getElementById('aim-lives').textContent=lv;if(_aim.lives<=0){endAim();return false;}return false;}if(e.hit>0)e.hit--;ctx.font=(e.r*2)+'px serif';ctx.textAlign='center';ctx.fillText(e.emoji,e.x,e.y);if(e.maxHp>1){const bw=e.r*2,bx=e.x-e.r;ctx.fillStyle='#333';ctx.fillRect(bx,e.y-e.r-8,bw,5);ctx.fillStyle=e.hit?'#ff4400':'#44ff88';ctx.fillRect(bx,e.y-e.r-8,bw*(e.hp/e.maxHp),5);}return true;});
+function aimLoop(){if(!_aimOn){_aimAF=null;return;}_aimAF=requestAnimationFrame(aimLoop);const cv=document.getElementById('aim-canvas'),ctx=_aimCtx;if(!ctx)return;ctx.fillStyle='#0c1018';ctx.fillRect(0,0,cv.width,cv.height);ctx.strokeStyle='rgba(100,100,150,.08)';ctx.lineWidth=1;for(let x=0;x<cv.width;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}for(let y=0;y<cv.height;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}ctx.font='32px serif';ctx.textAlign='center';ctx.fillText('🏰',_aim.tower.x,_aim.tower.y+10);if(_aim.aimX){ctx.strokeStyle='rgba(240,184,64,.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(_aim.tower.x,_aim.tower.y-10);ctx.lineTo(_aim.aimX,_aim.aimY);ctx.stroke();ctx.setLineDash([]);}
+_aim.enemies=_aim.enemies.filter(e=>{e.y+=e.spd;if(e.y>cv.height+30){_aim.lives--;const lv=['❤️❤️❤️','❤️❤️','❤️','💔'][Math.max(0,3-_aim.lives)];document.getElementById('aim-lives').textContent=lv;if(_aim.lives<=0){endAim();return false;}return false;}if(e.hit>0)e.hit--;ctx.font=(e.r*2)+'px serif';ctx.textAlign='center';ctx.fillText(e.emoji,e.x,e.y);if(e.maxHp>1){const bw=e.r*2,bx=e.x-e.r;ctx.fillStyle='#333';ctx.fillRect(bx,e.y-e.r-8,bw,5);ctx.fillStyle=e.hit?'#e06030':'#44ff88';ctx.fillRect(bx,e.y-e.r-8,bw*(e.hp/e.maxHp),5);}return true;});
 _aim.bullets=_aim.bullets.filter(b=>{b.x+=b.vx;b.y+=b.vy;b.life--;if(b.life<=0||b.x<0||b.x>cv.width||b.y<0||b.y>cv.height)return false;let hit=false;_aim.enemies.forEach(e=>{const dx=b.x-e.x,dy=b.y-e.y;if(Math.sqrt(dx*dx+dy*dy)<e.r+b.r){e.hp--;e.hit=5;if(e.hp<=0){_aim.sc+=e.val;_aim.gold+=e.val;document.getElementById('aim-sc').textContent=_aim.sc;document.getElementById('aim-gold').textContent=_aim.gold+'🥇';for(let i=0;i<6;i++){const a=Math.random()*Math.PI*2;_aim.bullets.push({x:e.x,y:e.y,vx:Math.cos(a)*4,vy:Math.sin(a)*4,r:2,life:15,particle:true,color:e.color});}_aim.enemies=_aim.enemies.filter(en=>en!==e);}hit=true;}});if(b.particle){ctx.fillStyle=b.color||'#f5c830';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();}else{ctx.fillStyle='#f5c830';ctx.shadowBlur=8;ctx.shadowColor='#f5c830';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}return!hit||b.particle;});
 if(_aim.enemies.length===0&&!_aimST){_aim.wave++;document.getElementById('aim-wave').textContent='Wave '+_aim.wave;if(_aim.wave>5){endAim();return;}setTimeout(()=>{if(_aimOn)startAimWave();},1500);}}
-function endAim(){_aimOn=false;if(_aimAF){cancelAnimationFrame(_aimAF);_aimAF=null;}clearInterval(_aimST);const wave=_aim.wave,bonus=wave>=5?20:wave>=3?10:0;const rws={emp:_aim.sc*3+bonus*2};if(wave>=5){rws.emp+=15;rws.crystal=1;}if(_aim.gold>0)rws.gold=Math.floor(_aim.gold*.5);setCd('aim');showResult('🎯 Tower Defense!',`${_aim.sc} vijanden · wave ${wave}`,rws);}
+function endAim(){_aimOn=false;if(_aimAF){cancelAnimationFrame(_aimAF);_aimAF=null;}clearInterval(_aimST);const wave=_aim.wave,bonus=wave>=5?20:wave>=3?10:0;const rws={emp:Math.floor(_aim.sc*.6)+Math.floor(bonus*.4)};if(wave>=5){rws.emp+=3;rws.crystal=1;}if(_aim.gold>0)rws.gold=Math.floor(_aim.gold*.2);setCd('aim');showResult('🎯 Tower Defense!',`${_aim.sc} vijanden · wave ${wave}`,rws);}
 
 // GAME 3: RUNE MATCH
 let _mem={};
 const RUNE_PAIRS=['🔥','💧','🌿','⚡','🌑','⭐','💎','🔮'];
-function initMem(){_mem={fl:[],mv:0,pairs:0,streak:0,startT:Date.now(),lk:false};document.getElementById('g-mem').style.display='flex';['mh-mv','mh-pr','mem-streak'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent={'mh-mv':'0','mh-pr':'0/8','mem-streak':'×1'}[id];});const el2=document.getElementById('mem-msg');if(el2)el2.textContent='Match all 8 rune pairs!';const deck=[...RUNE_PAIRS,...RUNE_PAIRS].sort(()=>Math.random()-.5);const grid=document.getElementById('mem-grid');grid.innerHTML='';deck.forEach((rune,i)=>{const card=document.createElement('div');card.dataset.val=rune;card.style.cssText='aspect-ratio:1;background:linear-gradient(135deg,#0f1225,#1a1f35);border:1px solid rgba(201,168,76,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:rgba(201,168,76,.3);cursor:pointer;transition:all .25s';card.textContent='?';card.addEventListener('click',()=>flipCard(card));grid.appendChild(card);});_mem.timerT=setInterval(()=>{const el3=document.getElementById('mh-tm');if(el3)el3.textContent=Math.floor((Date.now()-_mem.startT)/1000)+'s';},1000);}
-function flipCard(card){if(_mem.lk||card.dataset.flipped)return;card.dataset.flipped='1';card.style.background='linear-gradient(135deg,#1a1035,#2a1850)';card.style.border='1px solid rgba(136,85,255,.5)';card.style.fontSize='28px';card.style.color='#fff';card.textContent=card.dataset.val;_mem.fl.push(card);if(_mem.fl.length===2){_mem.lk=true;_mem.mv++;const el4=document.getElementById('mh-mv');if(el4)el4.textContent=_mem.mv;const[a,b]=_mem.fl;if(a.dataset.val===b.dataset.val){_mem.streak++;const sel=document.getElementById('mem-streak');if(sel)sel.textContent='×'+_mem.streak;[a,b].forEach(c=>{c.style.background='linear-gradient(135deg,#0a2818,#144028)';c.style.border='1px solid rgba(76,175,122,.6)';c.style.boxShadow='0 0 12px rgba(76,175,122,.3)';});_mem.pairs++;const pl=document.getElementById('mh-pr');if(pl)pl.textContent=_mem.pairs+'/8';const ml=document.getElementById('mem-msg');if(ml)ml.textContent=['🔥 Match!','⚡ Geweldig!','💎 Perfect!','🌟 On fire!'][Math.floor(Math.random()*4)]+' ×'+_mem.streak;_mem.fl=[];_mem.lk=false;if(_mem.pairs===8)setTimeout(endMem,500);}else{_mem.streak=0;const sel2=document.getElementById('mem-streak');if(sel2)sel2.textContent='×1';[a,b].forEach(c=>{c.style.background='linear-gradient(135deg,#1a0808,#280808)';c.style.border='1px solid rgba(224,85,85,.4)';});setTimeout(()=>{[a,b].forEach(c=>{delete c.dataset.flipped;c.style.background='linear-gradient(135deg,#0f1225,#1a1f35)';c.style.border='1px solid rgba(201,168,76,.2)';c.style.fontSize='18px';c.style.color='rgba(201,168,76,.3)';c.textContent='?';});_mem.fl=[];_mem.lk=false;},900);}}}
-function endMem(){clearInterval(_mem.timerT);const mv=_mem.mv;let rws={};if(mv<=12)rws={stone:8,wood:6,gold:4,emp:30};else if(mv<=16)rws={stone:5,wood:4,gold:2,emp:20};else rws={emp:12,stone:2};rws.emp+=(Math.floor(_mem.streak/2)*3);if(_mem.streak>=8)rws.crystal=1;setCd('mem');showResult('🃏 Rune Match!',`${mv} moves · max streak ×${_mem.streak}`,rws);}
+function initMem(){_mem={fl:[],mv:0,pairs:0,streak:0,startT:Date.now(),lk:false};document.getElementById('g-mem').style.display='flex';['mh-mv','mh-pr','mem-streak'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent={'mh-mv':'0','mh-pr':'0/8','mem-streak':'×1'}[id];});const el2=document.getElementById('mem-msg');if(el2)el2.textContent='Match all 8 rune pairs!';const deck=[...RUNE_PAIRS,...RUNE_PAIRS].sort(()=>Math.random()-.5);const grid=document.getElementById('mem-grid');grid.innerHTML='';deck.forEach((rune,i)=>{const card=document.createElement('div');card.dataset.val=rune;card.style.cssText='aspect-ratio:1;background:linear-gradient(135deg,#0f1225,#1a1f35);border:1px solid rgba(240,184,64,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:rgba(240,184,64,.35);cursor:pointer;transition:all .25s';card.textContent='?';card.addEventListener('click',()=>flipCard(card));grid.appendChild(card);});_mem.timerT=setInterval(()=>{const el3=document.getElementById('mh-tm');if(el3)el3.textContent=Math.floor((Date.now()-_mem.startT)/1000)+'s';},1000);}
+function flipCard(card){if(_mem.lk||card.dataset.flipped)return;card.dataset.flipped='1';card.style.background='linear-gradient(135deg,#1a1035,#2a1850)';card.style.border='1px solid rgba(136,85,255,.5)';card.style.fontSize='28px';card.style.color='#fff';card.textContent=card.dataset.val;_mem.fl.push(card);if(_mem.fl.length===2){_mem.lk=true;_mem.mv++;const el4=document.getElementById('mh-mv');if(el4)el4.textContent=_mem.mv;const[a,b]=_mem.fl;if(a.dataset.val===b.dataset.val){_mem.streak++;const sel=document.getElementById('mem-streak');if(sel)sel.textContent='×'+_mem.streak;[a,b].forEach(c=>{c.style.background='linear-gradient(135deg,#0a2818,#144028)';c.style.border='1px solid rgba(76,175,122,.6)';c.style.boxShadow='0 0 12px rgba(76,175,122,.3)';});_mem.pairs++;const pl=document.getElementById('mh-pr');if(pl)pl.textContent=_mem.pairs+'/8';const ml=document.getElementById('mem-msg');if(ml)ml.textContent=['🔥 Match!','⚡ Geweldig!','💎 Perfect!','🌟 On fire!'][Math.floor(Math.random()*4)]+' ×'+_mem.streak;_mem.fl=[];_mem.lk=false;if(_mem.pairs===8)setTimeout(endMem,500);}else{_mem.streak=0;const sel2=document.getElementById('mem-streak');if(sel2)sel2.textContent='×1';[a,b].forEach(c=>{c.style.background='linear-gradient(135deg,#1c1020,#280808)';c.style.border='1px solid rgba(224,85,85,.4)';});setTimeout(()=>{[a,b].forEach(c=>{delete c.dataset.flipped;c.style.background='linear-gradient(135deg,#0f1225,#1a1f35)';c.style.border='1px solid rgba(240,184,64,.2)';c.style.fontSize='18px';c.style.color='rgba(240,184,64,.3)';c.textContent='?';});_mem.fl=[];_mem.lk=false;},900);}}}
+function endMem(){clearInterval(_mem.timerT);const mv=_mem.mv;let rws={};if(mv<=12)rws={stone:5,wood:4,emp:6};else if(mv<=16)rws={stone:3,wood:2,emp:4};else rws={emp:2,stone:1};rws.emp+=Math.floor(_mem.streak/3);if(_mem.streak>=8)rws.crystal=1;setCd('mem');showResult('🃏 Rune Match!',`${mv} moves · max streak ×${_mem.streak}`,rws);}
 
 // GAME 4: BLOCK BUILDER
 let _blkT=null,_blk={};
 const B_W=9,B_H=16;
 const PIECES=[[[1,1,1,1]],[[1,1],[1,1]],[[1,1,1],[0,1,0]],[[1,1,1],[1,0,0]],[[1,1,1],[0,0,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]]];
-const B_COLORS=['#c9a84c','#4488cc','#cc8844','#44cc88','#cc4488','#88cc44','#8844cc'];
+const B_COLORS=['var(--gold-b)','#4488cc','#cc8844','#44cc88','#cc4488','#88cc44','#a070e0'];
 function initBlock(){_blk={board:Array(B_H).fill(null).map(()=>Array(B_W).fill(0)),score:0,lines:0,level:1,piece:null,next:null,res:{stone:0,wood:0,gold:0,emp:0},over:false};document.getElementById('g-block').style.display='flex';['bh-sc','bh-ln','bh-lv'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent={'bh-sc':'0','bh-ln':'0','bh-lv':'1'}[id];});_blk.piece=newPiece();_blk.next=newPiece();_blkT=setInterval(bTick,600);drawBlock();drawNext();}
 function newPiece(){const i=Math.floor(Math.random()*PIECES.length);return{shape:PIECES[i].map(r=>[...r]),col:B_COLORS[i],x:Math.floor(B_W/2)-1,y:0};}
 function bTick(){if(_blk.over)return;if(!bMove(0,1)){lockPiece();clearLines();_blk.piece=_blk.next;_blk.next=newPiece();if(!canPlace(_blk.piece)){_blk.over=true;clearInterval(_blkT);endBlock();}else{drawBlock();drawNext();}}}
@@ -1355,17 +1764,17 @@ function bDp(){while(bMove(0,1));lockPiece();clearLines();_blk.piece=_blk.next;_
 function bMv(dx){bMove(dx,0);}
 function lockPiece(){_blk.piece.shape.forEach((row,r)=>row.forEach((c,col)=>{if(c){const y=_blk.piece.y+r,x=_blk.piece.x+col;if(y>=0&&y<B_H)_blk.board[y][x]=_blk.piece.col;}}));}
 function clearLines(){let cleared=0;for(let y=B_H-1;y>=0;y--){if(_blk.board[y].every(c=>c!==0)){_blk.board.splice(y,1);_blk.board.unshift(Array(B_W).fill(0));cleared++;y++;}}if(cleared>0){_blk.lines+=cleared;_blk.level=Math.floor(_blk.lines/5)+1;_blk.score+=cleared*100*_blk.level;const bonuses={1:{stone:3,wood:2},2:{stone:5,wood:4,gold:1},3:{stone:8,wood:6,gold:2},4:{stone:15,wood:10,gold:4,emp:5}};const bdata=bonuses[Math.min(cleared,4)]||bonuses[1];Object.entries(bdata).forEach(([k,v])=>_blk.res[k]=(_blk.res[k]||0)+v);['bh-sc','bh-ln','bh-lv'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=_blk[{sc:'score',ln:'lines',lv:'level'}[id.split('-')[1]]];});const rh=document.getElementById('bh-res');if(rh)rh.innerHTML=Object.entries(_blk.res).filter(([,v])=>v>0).map(([k,v])=>RES_ICO[k]+v).join(' ');clearInterval(_blkT);_blkT=setInterval(bTick,Math.max(200,600-_blk.level*50));}}
-function drawBlock(){const cv=document.getElementById('bcanvas'),ctx=cv.getContext('2d'),cw=cv.width/B_W,ch=cv.height/B_H;ctx.fillStyle='#05070e';ctx.fillRect(0,0,cv.width,cv.height);ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=0.5;for(let x=0;x<=B_W;x++){ctx.beginPath();ctx.moveTo(x*cw,0);ctx.lineTo(x*cw,cv.height);ctx.stroke();}for(let y=0;y<=B_H;y++){ctx.beginPath();ctx.moveTo(0,y*ch);ctx.lineTo(cv.width,y*ch);ctx.stroke();}_blk.board.forEach((row,y)=>row.forEach((c,x)=>{if(c){ctx.fillStyle=c;ctx.fillRect(x*cw+1,y*ch+1,cw-2,ch-2);}}));if(_blk.piece)_blk.piece.shape.forEach((row,r)=>row.forEach((c,col)=>{if(c){ctx.fillStyle=_blk.piece.col;ctx.fillRect((_blk.piece.x+col)*cw+1,(_blk.piece.y+r)*ch+1,cw-2,ch-2);}}));}
-function drawNext(){const cv=document.getElementById('bnext'),ctx=cv.getContext('2d'),cw=cv.width/4,ch=cv.height/4;ctx.fillStyle='#05070e';ctx.fillRect(0,0,cv.width,cv.height);if(_blk.next)_blk.next.shape.forEach((row,r)=>row.forEach((c,col)=>{if(c){ctx.fillStyle=_blk.next.col;ctx.fillRect((col+.5)*cw+1,(r+.5)*ch+1,cw-2,ch-2);}}));}
-function endBlock(){const rws={...(_blk.res||{})};rws.emp=(rws.emp||0)+Math.floor(_blk.score/50);setCd('block');showResult('🧱 Block Builder!',`Score ${_blk.score} · ${_blk.lines} lines`,rws);}
+function drawBlock(){const cv=document.getElementById('bcanvas'),ctx=cv.getContext('2d'),cw=cv.width/B_W,ch=cv.height/B_H;ctx.fillStyle='#0c1018';ctx.fillRect(0,0,cv.width,cv.height);ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=0.5;for(let x=0;x<=B_W;x++){ctx.beginPath();ctx.moveTo(x*cw,0);ctx.lineTo(x*cw,cv.height);ctx.stroke();}for(let y=0;y<=B_H;y++){ctx.beginPath();ctx.moveTo(0,y*ch);ctx.lineTo(cv.width,y*ch);ctx.stroke();}_blk.board.forEach((row,y)=>row.forEach((c,x)=>{if(c){ctx.fillStyle=c;ctx.fillRect(x*cw+1,y*ch+1,cw-2,ch-2);}}));if(_blk.piece)_blk.piece.shape.forEach((row,r)=>row.forEach((c,col)=>{if(c){ctx.fillStyle=_blk.piece.col;ctx.fillRect((_blk.piece.x+col)*cw+1,(_blk.piece.y+r)*ch+1,cw-2,ch-2);}}));}
+function drawNext(){const cv=document.getElementById('bnext'),ctx=cv.getContext('2d'),cw=cv.width/4,ch=cv.height/4;ctx.fillStyle='#0c1018';ctx.fillRect(0,0,cv.width,cv.height);if(_blk.next)_blk.next.shape.forEach((row,r)=>row.forEach((c,col)=>{if(c){ctx.fillStyle=_blk.next.col;ctx.fillRect((col+.5)*cw+1,(r+.5)*ch+1,cw-2,ch-2);}}));}
+function endBlock(){const rws={...(_blk.res||{})};rws.emp=(rws.emp||0)+Math.floor(_blk.score/300);setCd('block');showResult('🧱 Block Builder!',`Score ${_blk.score} · ${_blk.lines} lines`,rws);}
 window.addEventListener('keydown',e=>{const gb=document.getElementById('g-block');if(!gb||gb.style.display==='none')return;if(e.key==='ArrowLeft')bMv(-1);else if(e.key==='ArrowRight')bMv(1);else if(e.key==='ArrowUp')bRt();else if(e.key==='ArrowDown')bDp();});
 
 // GAME 5: LIGHTNING FORGE
 let _react={},_reactT=null;
 function initReact(){_react={rnd:0,max:6,on:false,wait:false,st:0,emp:0,score:0};document.getElementById('g-react').style.display='flex';const res=document.getElementById('react-res');if(res)res.innerHTML='';const fb=document.getElementById('react-fb');if(fb)fb.textContent='';const rnd=document.getElementById('react-rnd');if(rnd)rnd.textContent='ROUND 1 / 6';setTimeout(nextReact,800);}
-function nextReact(){if(_react.rnd>=_react.max){endReact();return;}_react.rnd++;_react.on=false;_react.wait=true;const rnd=document.getElementById('react-rnd');if(rnd)rnd.textContent='ROUND '+_react.rnd+' / '+_react.max;const fb=document.getElementById('react-fb');if(fb)fb.textContent='';const c=document.getElementById('react-c'),ring=document.getElementById('react-ring');if(c){c.style.background='#1a1008';c.style.borderColor='#333';c.style.boxShadow='';c.textContent='⚒️';}if(ring){ring.style.transition='none';ring.style.transform='scale(1.4)';ring.style.borderColor='rgba(201,168,76,0.3)';}const delay=1000+Math.random()*2500;setTimeout(()=>{if(!_react.wait)return;if(ring){ring.style.transition='transform 0.3s ease-in, border-color 0.3s';ring.style.transform='scale(1)';ring.style.borderColor='#f5c830';}setTimeout(()=>{if(!_react.wait)return;_react.on=true;_react.st=Date.now();if(c){c.style.background='radial-gradient(circle,#3a2000,#1a1008)';c.style.borderColor='#f5c830';c.style.boxShadow='0 0 30px #f5c830';c.textContent='⚡';}if(ring){ring.style.transition='all .05s';ring.style.borderColor='#ff8800';}clearTimeout(_reactT);_reactT=setTimeout(()=>{if(_react.on){_react.on=false;_react.wait=false;if(fb){fb.textContent='❌ Too slow!';fb.style.color='#ff4444';}if(c){c.style.background='#1a0808';c.style.borderColor='#cc2200';c.style.boxShadow='';c.textContent='⚒️';}if(ring)ring.style.borderColor='transparent';setTimeout(nextReact,1200);}},1200);},300);},delay);}
-function reactTap(){if(_react.on){const ms=Date.now()-_react.st;_react.on=false;_react.wait=false;clearTimeout(_reactT);const ring=document.getElementById('react-ring');if(ring)ring.style.borderColor='transparent';let earned=0,grade='';if(ms<200){earned=8;grade='⚡ LIGHTNING! '+ms+'ms';}else if(ms<350){earned=5;grade='🔥 Fast! '+ms+'ms';}else if(ms<500){earned=3;grade='✅ Good! '+ms+'ms';}else{earned=1;grade='🐌 Slow '+ms+'ms';}_react.emp+=earned;_react.score+=earned;const fb=document.getElementById('react-fb');if(fb){fb.textContent=grade;fb.style.color=ms<200?'#f5c830':ms<350?'#ff8800':ms<500?'#44ff88':'#888';}const c=document.getElementById('react-c');if(c){c.style.background=`radial-gradient(circle,${ms<200?'#4a3800':'#1a1808'},#05070e)`;c.style.borderColor=ms<200?'#f5c830':ms<350?'#ff8800':'#44aa44';c.style.boxShadow=ms<200?'0 0 40px #f5c830':'';c.textContent=ms<200?'⚡':ms<350?'🔥':'✅';}const res=document.getElementById('react-res');if(res)res.innerHTML+=`<div style="font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:${ms<200?'#f5c830':ms<350?'#ff8800':'#aaa'}">R${_react.rnd}: +${earned}🪙</div>`;setTimeout(nextReact,1000);}else if(_react.wait){_react.wait=false;const fb2=document.getElementById('react-fb');if(fb2){fb2.textContent='⚠️ Te vroeg!';fb2.style.color='#ff8800';}const c2=document.getElementById('react-c');if(c2){c2.style.background='#1a0808';c2.textContent='⚒️';}const ring2=document.getElementById('react-ring');if(ring2)ring2.style.borderColor='transparent';setTimeout(nextReact,1200);}}
-function endReact(){const rws={emp:_react.emp};if(_react.emp>=40)rws.crystal=2;else if(_react.emp>=24)rws.gold=3;setCd('react');showResult('⚡ Lightning Forge!',`${_react.emp}🪙 verdiend · score ${_react.score}`,rws);}
+function nextReact(){if(_react.rnd>=_react.max){endReact();return;}_react.rnd++;_react.on=false;_react.wait=true;const rnd=document.getElementById('react-rnd');if(rnd)rnd.textContent='ROUND '+_react.rnd+' / '+_react.max;const fb=document.getElementById('react-fb');if(fb)fb.textContent='';const c=document.getElementById('react-c'),ring=document.getElementById('react-ring');if(c){c.style.background='#141c26';c.style.borderColor='#333';c.style.boxShadow='';c.textContent='⚒️';}if(ring){ring.style.transition='none';ring.style.transform='scale(1.4)';ring.style.borderColor='rgba(240,184,64,0.3)';}const delay=1000+Math.random()*2500;setTimeout(()=>{if(!_react.wait)return;if(ring){ring.style.transition='transform 0.3s ease-in, border-color 0.3s';ring.style.transform='scale(1)';ring.style.borderColor='#f5c830';}setTimeout(()=>{if(!_react.wait)return;_react.on=true;_react.st=Date.now();if(c){c.style.background='radial-gradient(circle,#3a2000,#141c26)';c.style.borderColor='#f5c830';c.style.boxShadow='0 0 30px #f5c830';c.textContent='⚡';}if(ring){ring.style.transition='all .05s';ring.style.borderColor='#e09030';}clearTimeout(_reactT);_reactT=setTimeout(()=>{if(_react.on){_react.on=false;_react.wait=false;if(fb){fb.textContent='❌ Too slow!';fb.style.color='#ff4444';}if(c){c.style.background='#1c1020';c.style.borderColor='#cc2200';c.style.boxShadow='';c.textContent='⚒️';}if(ring)ring.style.borderColor='transparent';setTimeout(nextReact,1200);}},1200);},300);},delay);}
+function reactTap(){if(_react.on){const ms=Date.now()-_react.st;_react.on=false;_react.wait=false;clearTimeout(_reactT);const ring=document.getElementById('react-ring');if(ring)ring.style.borderColor='transparent';let earned=0,grade='';if(ms<200){earned=8;grade='⚡ LIGHTNING! '+ms+'ms';}else if(ms<350){earned=5;grade='🔥 Fast! '+ms+'ms';}else if(ms<500){earned=3;grade='✅ Good! '+ms+'ms';}else{earned=1;grade='🐌 Slow '+ms+'ms';}_react.emp+=earned;_react.score+=earned;const fb=document.getElementById('react-fb');if(fb){fb.textContent=grade;fb.style.color=ms<200?'#f5c830':ms<350?'#e09030':ms<500?'#44ff88':'#888';}const c=document.getElementById('react-c');if(c){c.style.background=`radial-gradient(circle,${ms<200?'#4a3800':'#1a1808'},#0c1018)`;c.style.borderColor=ms<200?'#f5c830':ms<350?'#e09030':'#44aa44';c.style.boxShadow=ms<200?'0 0 40px #f5c830':'';c.textContent=ms<200?'⚡':ms<350?'🔥':'✅';}const res=document.getElementById('react-res');if(res)res.innerHTML+=`<div style="font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:${ms<200?'#f5c830':ms<350?'#e09030':'#aaa'}">R${_react.rnd}: +${earned}🪙</div>`;setTimeout(nextReact,1000);}else if(_react.wait){_react.wait=false;const fb2=document.getElementById('react-fb');if(fb2){fb2.textContent='⚠️ Te vroeg!';fb2.style.color='#e09030';}const c2=document.getElementById('react-c');if(c2){c2.style.background='#1c1020';c2.textContent='⚒️';}const ring2=document.getElementById('react-ring');if(ring2)ring2.style.borderColor='transparent';setTimeout(nextReact,1200);}}
+function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rws.crystal=1;else if(_react.emp>=24)rws.gold=1;setCd('react');showResult('⚡ Lightning Forge!',`${_react.emp}🪙 verdiend · score ${_react.score}`,rws);}
 
 // ═══ SAVE / LOAD ═══
 function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
@@ -1494,7 +1903,7 @@ function buildSaveState() {
     eHappiness:E.happiness, eStability:E.stability, eDefense:E.defense,
     eYear:E.year, eDay:E.day, eTick:E.tick, eSeason:E.season,
     eUpgradesDone:E.upgradesDone, ePriceBonus:E.priceBonus,
-    ePrestigeBonus:E.prestigeBonus, eEmpRate:E.empRate,
+    ePrestigeBonus:E.prestigeBonus, eEmpRate:E.empRate, eEmpMult:E.empMult, eTotalEarned:E.totalEmpEarned,
     savedAt: Date.now(),
   };
 }
@@ -1519,7 +1928,7 @@ function restoreSaveState(s) {
     E.happiness=s.eHappiness??70;E.stability=s.eStability??80;E.defense=s.eDefense??0;
     E.year=s.eYear??1;E.day=s.eDay??0;E.tick=s.eTick??0;E.season=s.eSeason??0;
     E.upgradesDone=s.eUpgradesDone||[];E.priceBonus=s.ePriceBonus??1;
-    E.prestigeBonus=s.ePrestigeBonus??0;E.empRate=s.eEmpRate??0;
+    E.prestigeBonus=s.ePrestigeBonus??0;E.empRate=s.eEmpRate??0;E.empMult=s.eEmpMult??1.0;E.totalEmpEarned=s.eTotalEarned??0;
     updateHUD();
   } catch(e) { console.warn('restoreSaveState error:', e); }
 }
@@ -1567,14 +1976,14 @@ async function showLeaderboard() {
   list.innerHTML = rows.map(r => {
     const isMe = r.telegram_id === myId;
     const medal = r.rank===1?'🥇':r.rank===2?'🥈':r.rank===3?'🥉':'#'+r.rank;
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.06);background:${isMe?'rgba(180,140,60,.1)':'transparent'};border-radius:6px">
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.06);background:${isMe?'rgba(200,180,100,.45)':'transparent'};border-radius:6px">
       <div style="font-size:16px;width:28px;text-align:center;flex-shrink:0">${medal}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:11px;font-weight:700;color:${isMe?'#f5dd40':'var(--txt)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.display_name}${isMe?' (you)':''}</div>
         <div style="font-size:9px;color:var(--txt-d)">ERA ${r.era} · Prestige ${r.prestige_level}</div>
       </div>
       <div style="text-align:right;flex-shrink:0">
-        <div style="font-size:12px;font-weight:900;color:#f5dd40">${(r.emp_balance||0).toLocaleString()}</div>
+        <div style="font-size:12px;font-weight:900;color:var(--emp)">${(r.emp_balance||0).toLocaleString()}</div>
         <div style="font-size:8px;color:var(--txt-d)">$EMP</div>
       </div>
     </div>`;
@@ -1588,8 +1997,8 @@ function initTelegram(){
     const tg=window.Telegram?.WebApp;
     if(!tg){tgUser={id:0,first_name:'Player',username:'player'};return;}
     tg.ready(); tg.expand();
-    tg.setHeaderColor?.('#0a0706');
-    tg.setBackgroundColor?.('#0a0706');
+    tg.setHeaderColor?.('#0c1018');
+    tg.setBackgroundColor?.('#0c1018');
     tgUser=tg.initDataUnsafe?.user||{id:0,first_name:'Player'};
     tg.BackButton?.onClick(()=>{
       if(document.getElementById('wallet-modal')?.style.display!=='none'){document.getElementById('wallet-modal').style.display='none';return;}
@@ -1723,7 +2132,7 @@ function launch(){
       eTick();
       // Auto-save every 60 ticks
       if(E.tick%60===0){ eSave(); saveGame(); }
-    }, 1000);
+    }, 8000);  // 1 game-day = 8 real seconds
   }, 800);
 
   updateHUD();
@@ -1764,31 +2173,54 @@ const MBLD={
   farm:     {n:'Farm',  ico:'🌾',tier:1,cost:{emp:5,  wood:8},   maint:{gold:1},inp:{},out:{food:3},workers:2,desc:'Feeds workers.'},
   sawmill:  {n:'Sawmill',    ico:'🪚',tier:1,cost:{emp:5,  stone:6},  maint:{gold:1},inp:{},out:{wood:3},workers:2,desc:'Produces wood.'},
   quarry:   {n:'Quarry',ico:'⛏️',tier:1,cost:{emp:5,  wood:8},   maint:{gold:1},inp:{},out:{stone:3},workers:2,desc:'Extracts stone.'},
-  smithy:   {n:'Smithy',     ico:'⚒️',tier:1,cost:{emp:8,  iron:5},   maint:{gold:2},inp:{},out:{tools:2,emp:0.2},workers:2,empSource:true,desc:'Forges iron.'},
-  emarket:  {n:'Marketplace',ico:'⚖️',tier:1,cost:{emp:12, gold:5},   maint:{gold:2},inp:{},out:{emp:1.0},workers:2,empSource:true,desc:'💰 Genereert $EMP.'},
+  smithy:   {n:'Smithy',     ico:'⚒️',tier:1,cost:{emp:8,  iron:5},   maint:{gold:2},inp:{},out:{tools:2,emp:0.02},workers:2,empSource:true,desc:'Forges iron.'},
+  emarket:  {n:'Marketplace',ico:'⚖️',tier:1,cost:{emp:12, gold:5},   maint:{gold:2},inp:{},out:{emp:0.09},workers:2,empSource:true,desc:'💰 Generates $EMP.'},
   granary:  {n:'Granary',ico:'🏚️',tier:2,cost:{emp:15, stone:12,wood:10},maint:{gold:2},inp:{},out:{food:6},workers:3,storage:300,desc:'Large food storage.'},
   ironmine: {n:'Iron Mine',  ico:'⛏️',tier:2,cost:{emp:18, stone:20}, maint:{gold:2},inp:{},out:{iron:3},workers:3,desc:'Mines iron.'},
-  workshop2:{n:'Workshop', ico:'🔧',tier:2,cost:{emp:22, iron:12},  maint:{gold:3},inp:{},out:{tools:2,emp:0.8},workers:3,empSource:true,desc:'💰 Gereedschap + $EMP.'},
-  tradepost:{n:'Trade Post',ico:'🐪',tier:2,cost:{emp:30, wood:15,stone:10},maint:{gold:4},inp:{},out:{emp:2.5},workers:3,empSource:true,logBonus:.15,desc:'💰💰 Hoog $EMP.'},
+  workshop2:{n:'Workshop', ico:'🔧',tier:2,cost:{emp:22, iron:12},  maint:{gold:3},inp:{},out:{tools:2,emp:0.07},workers:3,empSource:true,desc:'💰 Gereedschap + $EMP.'},
+  tradepost:{n:'Trade Post',ico:'🐪',tier:2,cost:{emp:30, wood:15,stone:10},maint:{gold:4},inp:{},out:{emp:0.22},workers:3,empSource:true,logBonus:.15,desc:'💰💰 Hoog $EMP.'},
   barracks: {n:'Barracks',    ico:'⚔️',tier:2,cost:{emp:35, stone:20,iron:12},maint:{gold:6},inp:{},out:{},workers:3,defense:20,desc:'Protects trade routes.'},
-  harbour:  {n:'Harbour',      ico:'⚓',tier:3,cost:{emp:60, wood:25,stone:20},maint:{gold:10},inp:{},out:{emp:4.5},workers:5,empSource:true,desc:'💰💰💰 Sea trade.'},
-  guildhall:{n:'Guild Hall',  ico:'🏛️',tier:3,cost:{emp:80, stone:30,iron:20},maint:{gold:15},inp:{},out:{emp:6.0},workers:6,empSource:true,guildBonus:true,desc:'💰💰💰💰 Beste $EMP.'},
+  harbour:  {n:'Harbour',      ico:'⚓',tier:3,cost:{emp:60, wood:25,stone:20},maint:{gold:10},inp:{},out:{emp:0.40},workers:5,empSource:true,desc:'💰💰💰 Sea trade.'},
+  guildhall:{n:'Guild Hall',  ico:'🏛️',tier:3,cost:{emp:80, stone:30,iron:20},maint:{gold:15},inp:{},out:{emp:0.55},workers:6,empSource:true,guildBonus:true,desc:'💰💰💰💰 Beste $EMP.'},
   fortress: {n:'Fortress',    ico:'🏯',tier:3,cost:{emp:100,stone:40,iron:30},maint:{gold:15},inp:{},out:{},workers:5,defense:40,desc:'Maximum defense.'},
   townhall: {n:'Town Hall',   ico:'🏠',tier:3,cost:{emp:25, stone:15,wood:12},maint:{gold:8}, inp:{},out:{},workers:4,desc:'Population growth.'},
   university:{n:'University',ico:'🎓',tier:3,cost:{emp:45,stone:20,iron:15},maint:{gold:10},inp:{},out:{},workers:4,sciBonus:true,desc:'Science +25%.'},
 };
 const MBLD_KEYS=Object.keys(MBLD);
-const MRES_ECO={food:{n:'Food',ico:'🍖',base:8},wood:{n:'Wood',ico:'🪵',base:6},stone:{n:'Stone',ico:'🪨',base:6},iron:{n:'Iron',ico:'⚙️',base:10},tools:{n:'Tools',ico:'🔨',base:15},gold:{n:'Gold',ico:'🥇',base:12}};
+const MRES_ECO={food:{n:'Food',ico:'🍖',base:1},wood:{n:'Wood',ico:'🪵',base:1},stone:{n:'Stone',ico:'🪨',base:1},iron:{n:'Iron',ico:'⚙️',base:2},tools:{n:'Tools',ico:'🔨',base:3},gold:{n:'Gold',ico:'🥇',base:2}};
 const MRES_ECO_KEYS=Object.keys(MRES_ECO);
 
 // Economy imports/expeditions/$EMP upgrades
 const EMP_UPGRADES=[
-  {id:'output1',n:'Efficient Workers',ico:'⚙️',cost:30,desc:'+15% production from all buildings',effect:()=>{E.prestigeBonus=Math.min((E.prestigeBonus||0)+.15,2);}},
-  {id:'pop1',   n:'Immigration Drive',      ico:'👥',cost:25,desc:'+8 population immediately',              effect:()=>{E.pop.workers+=8;}},
-  {id:'trade1', n:'Trade Routes',       ico:'🛣️',cost:40,desc:'Logistics +25%',                   effect:()=>{E.logBonusExtra=(E.logBonusExtra||0)+.25;}},
-  {id:'market1',n:'Market License',       ico:'📜',cost:50,desc:'Alle $EMP bronnen +20%',           effect:()=>{E.priceBonus=(E.priceBonus||1)+.20;}},
-  {id:'output2',n:'Master Craftsmen',ico:'🔨',cost:80,desc:'+20% production',                  effect:()=>{E.prestigeBonus=Math.min((E.prestigeBonus||0)+.20,2);}},
-  {id:'defense1',n:'City Guard',         ico:'🛡️',cost:60,desc:'Raids deal 50% less damage',               effect:()=>{E.raidResist=true;}},
+  // ── Presale Production Boosters ──────────────────────────────────────────
+  {id:'boost1',n:'Early Investor I',  ico:'🌱',cost:10, tier:1,
+   desc:'x1.5 all $EMP production',
+   effect:()=>{ E.empMult=+(((E.empMult||1)*1.5).toFixed(2)); }},
+  {id:'boost2',n:'Early Investor II', ico:'🌿',cost:30, tier:2,
+   desc:'x1.5 all $EMP production (stacks)',
+   effect:()=>{ E.empMult=+(((E.empMult||1)*1.5).toFixed(2)); }},
+  {id:'boost3',n:'Early Investor III',ico:'🌳',cost:80, tier:3,
+   desc:'x2.0 all $EMP production (stacks)',
+   effect:()=>{ E.empMult=+(((E.empMult||1)*2.0).toFixed(2)); }},
+  {id:'boost4',n:'Founding Merchant', ico:'⚖️',cost:200,tier:4,
+   desc:'x2.0 all $EMP production (stacks)',
+   effect:()=>{ E.empMult=+(((E.empMult||1)*2.0).toFixed(2)); }},
+  {id:'boost5',n:'Empire Architect',  ico:'🏛️',cost:500,tier:5,
+   desc:'x2.5 all $EMP production (stacks)',
+   effect:()=>{ E.empMult=+(((E.empMult||1)*2.5).toFixed(2)); }},
+  {id:'boost6',n:'Token Whale',       ico:'🐋',cost:1500,tier:6,
+   desc:'x3.0 all $EMP production (stacks)',
+   effect:()=>{ E.empMult=+(((E.empMult||1)*3.0).toFixed(2)); }},
+  // ── Utility ──────────────────────────────────────────────────────────────
+  {id:'pop1',   n:'Immigration Drive',ico:'👥',cost:20,
+   desc:'+10 population immediately',
+   effect:()=>{ E.pop.workers+=10; }},
+  {id:'trade1', n:'Trade Routes',     ico:'🛣️',cost:50,
+   desc:'Logistics efficiency +30%',
+   effect:()=>{ E.logBonusExtra=(E.logBonusExtra||0)+.30; }},
+  {id:'defense1',n:'City Guard',      ico:'🛡️',cost:40,
+   desc:'Raids deal 60% less damage',
+   effect:()=>{ E.raidResist=true; }},
 ];
 const EMP_IMPORTS=[
   {k:'food',qty:80,cost:12,label:'Food shipment (80)'},
@@ -1816,7 +2248,7 @@ const MEVENTS=[
 
 // Economy state
 const E={
-  res:{food:50,wood:80,stone:60,iron:20,tools:8,gold:150,emp:30},
+  res:{food:50,wood:80,stone:60,iron:20,tools:8,gold:150,emp:15},
   cap:{food:400,wood:500,stone:500,iron:300,tools:200,gold:9999,emp:99999},
   pop:{workers:20,merchants:0,nobles:0},
   happiness:70, stability:80, defense:0,
@@ -1827,12 +2259,13 @@ const E={
   priceBonus:1.0, events:[], log:[],
   logMult:0.5, logBonusExtra:0, sciBonus:false, guildBonus:false,
   prestigeBonus:0, eliteEmpBonus:2, raidResist:false,
-  upgradesDone:[], expeditions:[], sandbox:false, empRate:0,
+  upgradesDone:[], expeditions:[], sandbox:false, empRate:0, empMult:1.0, totalEmpEarned:0,
   goals:{happiness:0}, goalsDone:[],
 };
 
 function ePop(){return E.pop.workers+E.pop.merchants+E.pop.nobles;}
-function eEarn(amount,source){E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
+function eEarn(amount,source){
+  if(amount>0) E.totalEmpEarned=(E.totalEmpEarned||0)+amount;E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
 function eEff(b){const def=MBLD[b.type];if(!def||!b.active)return 0;const wRatio=def.workers>0?Math.min(1,(b.workers||0)/def.workers):1;let inputOk=1;if(def.inp&&Object.keys(def.inp).length>0){const met=Object.entries(def.inp).filter(([k,v])=>(E.res[k]||0)>=v).length;inputOk=.3+.7*(met/Object.keys(def.inp).length);}const sci=E.sciBonus?1.25:1,guild=E.guildBonus?1.20:1,pres=1+(E.prestigeBonus||0);return Math.max(0,Math.min(2.0,(.3+.7*wRatio)*inputOk*E.logMult*sci*guild*pres));}
 
@@ -1855,19 +2288,26 @@ function eTick(){
   E.sciBonus=E.buildings.some(b=>b.type==='university'&&b.active);
   E.guildBonus=E.buildings.some(b=>b.type==='guildhall'&&b.active);
   E.logMult=eLogMult();
-  E.buildings.forEach(b=>{
+  // ── Unified BLD_DEF empOut: world buildings generate $EMP each tick ───
+  Object.entries(G.bld).forEach(([id,built])=>{
+    if(built!==true)return;
+    const def=BLD_DEF[id];if(!def||!def.empOut)return;
+    const popRatio=Math.min(1,(E.pop.workers||0)/Math.max(1,def.workers||2));
+    const eff=Math.max(0.3,popRatio)*(E.logMult||1)*(1+(E.prestigeBonus||0));
+    eEarn(def.empOut*eff*sMult*(E.priceBonus||1)*(E.empMult||1),def.name);
+  });
+  // ── Town Hall: pop-based income ─────────────────────────────────────────
+  if(G.bld.townhall)eEarn(ePop()*.003*TR*(E.priceBonus||1)*(E.empMult||1),'Town Hall');
+  // ── Legacy MBLD buildings (still support old saves) ──────────────────
+  (E.buildings||[]).forEach(b=>{
     const def=MBLD[b.type];if(!def)return;
     const eff=eEff(b);b.eff=eff;if(!b.active||eff<.02)return;
     const tm=eff*wMult*sMult*TR;
-    Object.entries(def.inp||{}).forEach(([k,v])=>{E.res[k]=Math.max(0,(E.res[k]||0)-v*tm);});
     Object.entries(def.out||{}).forEach(([k,v])=>{
-      if(k==='emp'){eEarn(v*tm*(E.priceBonus||1),def.n);}
+      if(k==='emp'){eEarn(v*tm*(E.priceBonus||1)*(E.empMult||1),def.n);}
       else{E.res[k]=Math.min(E.cap[k]||9999,(E.res[k]||0)+v*tm);}
     });
-    if(def.maint&&E.tick%20===0)Object.entries(def.maint).forEach(([k,v])=>{E.res[k]=Math.max(0,(E.res[k]||0)-v);});
   });
-  const th=E.buildings.find(b=>b.type==='townhall'&&b.active);
-  if(th)eEarn(ePop()*.005*TR*(E.priceBonus||1),'Stadhuis');
   if(E.tick%20===0)eUpdatePop();
   if(E.tick%30===0)eUpdatePrices();
   if(E.tick%180===0&&E.events.length===0&&ePop()>=5)eMaybeEvent();
@@ -1923,11 +2363,11 @@ function showPlacementOverlay(label){
     document.body.appendChild(ov);
   }
   ov.innerHTML=`
-    <div style="background:rgba(0,0,0,.65);border:2px solid #c9a84c;border-radius:16px;padding:16px 24px;text-align:center;max-width:280px;pointer-events:none">
+    <div style="background:rgba(0,0,0,.65);border:1.5px solid rgba(240,184,64,.5);border-radius:16px;padding:16px 24px;text-align:center;max-width:280px;pointer-events:none">
       <div style="font-size:32px;margin-bottom:6px">👆</div>
-      <div style="font-family:Cinzel,serif;font-size:14px;color:#c9a84c;margin-bottom:4px">TAP THE MAP</div>
+      <div style="font-family:Cinzel,serif;font-size:14px;color:var(--gold-b);margin-bottom:4px">TAP THE MAP</div>
       <div style="font-size:11px;color:rgba(200,180,130,.8)">to place <strong>${label}</strong></div>
-      <div style="font-size:10px;color:rgba(180,150,100,.5);margin-top:6px">Move to an open spot first</div>
+      <div style="font-size:10px;color:var(--txt-d);margin-top:6px">Move to an open spot first</div>
     </div>`;
   ov.style.display='flex';
 }
@@ -1981,15 +2421,15 @@ function eLaunchExpedition(id){const ex=EMP_EXPEDITIONS.find(e=>e.id===id);if(!e
 function eResolveExpedition(ex){const fail=Math.random()<ex.risk;if(fail){eEarn(-Math.floor(ex.cost*.25),'Mislukt: '+ex.n);toast('💔 '+ex.n+' failed!');}else{const gain=ex.minRet+~~(Math.random()*(ex.maxRet-ex.minRet));eEarn(gain,ex.n);toast('🎉 '+ex.n+': +'+gain+' $EMP!');}}
 
 // Economy save/load
-function eSave(){try{localStorage.setItem('empyria_eco',JSON.stringify({res:E.res,pop:E.pop,happiness:E.happiness,stability:E.stability,defense:E.defense,year:E.year,day:E.day,tick:E.tick,season:E.season,buildings:E.buildings,nextId:E.nextId,prices:E.prices,log:E.log.slice(0,20),upgradesDone:E.upgradesDone,priceBonus:E.priceBonus,logBonusExtra:E.logBonusExtra,raidResist:E.raidResist,prestigeBonus:E.prestigeBonus,empRate:E.empRate}));}catch(ex){}}
-function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);if(s.res)Object.assign(E.res,s.res);if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;
+function eSave(){try{localStorage.setItem('empyria_eco',JSON.stringify({res:E.res,pop:E.pop,happiness:E.happiness,stability:E.stability,defense:E.defense,year:E.year,day:E.day,tick:E.tick,season:E.season,buildings:E.buildings,nextId:E.nextId,prices:E.prices,log:E.log.slice(0,20),upgradesDone:E.upgradesDone,priceBonus:E.priceBonus,logBonusExtra:E.logBonusExtra,raidResist:E.raidResist,prestigeBonus:E.prestigeBonus,empRate:E.empRate,empMult:E.empMult||1,totalEmpEarned:E.totalEmpEarned||0,empMult:E.empMult,totalEmpEarned:E.totalEmpEarned}));}catch(ex){}}
+function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);if(s.res)Object.assign(E.res,s.res);if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=s.empMult??1.0;E.totalEmpEarned=s.totalEmpEarned??0;
   // Rebuild 3D meshes for saved economy buildings
   setTimeout(()=>{E.buildings.forEach(b=>{if(b.wx!==undefined&&!econMeshes[b.id])buildEconMesh(b);});setTimeout(updateWorkerNPCs,600);},500);
 }catch(ex){console.warn('eLoad:',ex);}}
 setInterval(eSave,30000);
 
 // Economy display in Empire panel
-function openEconomy(){openCity();setTimeout(()=>cpTab('economy'),50);}
+function openEconomy(){openCity();setTimeout(()=>empTab('market'),50);}
 function updateEconomyDisplay(){
   // Update $EMP from economy
   const ep=document.getElementById('emp-val');if(ep)ep.textContent=Math.floor(E.res.emp||0);
@@ -2001,21 +2441,21 @@ function renderEconomyPanel(){
   const el=document.getElementById('cp-economy');if(!el)return;
   const ETABS=[{id:'econ-build',ico:'🏗️',l:'BUILD'},{id:'econ-stats',ico:'👑',l:'EMPIRE'},{id:'econ-market',ico:'📊',l:'MARKET'},{id:'econ-emp',ico:'💰',l:'$EMP'},{id:'econ-log',ico:'📜',l:'LOG'}];
   const activeEconTab=el.dataset.tab||'econ-build';
-  const tabBar=`<div style="display:flex;gap:2px;margin-bottom:8px;padding:3px;background:rgba(0,0,0,.3);border-radius:8px">${ETABS.map(t=>`<div onclick="setEconTab('${t.id}')" style="flex:1;text-align:center;padding:5px 2px;border-radius:6px;cursor:pointer;background:${activeEconTab===t.id?'rgba(180,140,60,.25)':'transparent'};border:1px solid ${activeEconTab===t.id?'rgba(180,140,60,.4)':'transparent'}"><div style="font-size:12px">${t.ico}</div><div style="font-size:6px;color:${activeEconTab===t.id?'#c9a84c':'rgba(180,150,100,.4)'};font-weight:${activeEconTab===t.id?700:400}">${t.l}</div></div>`).join('')}</div>`;
+  const tabBar=`<div style="display:flex;gap:2px;margin-bottom:8px;padding:3px;background:rgba(0,0,0,.3);border-radius:8px">${ETABS.map(t=>`<div onclick="setEconTab('${t.id}')" style="flex:1;text-align:center;padding:5px 2px;border-radius:6px;cursor:pointer;background:${activeEconTab===t.id?'rgba(200,180,100,.45)':'transparent'};border:1px solid ${activeEconTab===t.id?'rgba(200,180,100,.45)':'transparent'}"><div style="font-size:12px">${t.ico}</div><div style="font-size:6px;color:${activeEconTab===t.id?'var(--gold-b)':'rgba(180,150,100,.4)'};font-weight:${activeEconTab===t.id?700:400}">${t.l}</div></div>`).join('')}</div>`;
 
   // Events banner
   let events='';
-  E.events.forEach(evt=>{events+=`<div style="background:rgba(50,25,8,.9);border:1.5px solid rgba(220,120,40,.5);border-radius:9px;padding:10px;margin-bottom:8px"><div style="font-size:12px;font-weight:700;color:var(--gold-b);margin-bottom:4px">${evt.title}</div><div style="font-size:9px;color:rgba(210,185,140,.7);margin-bottom:8px">${evt.desc}</div>${evt.choices.map((ch,i)=>{const afford=!ch.cost||Object.entries(ch.cost).every(([k,v])=>(E.res[k]||0)>=v);return`<div onclick="${afford?`eHandleChoice('${evt.id}',${i})`:'void(0)'}" style="padding:7px 10px;margin-bottom:3px;border-radius:6px;border:1px solid rgba(180,140,60,.2);background:rgba(255,255,255,.04);cursor:${afford?'pointer':'default'};opacity:${afford?1:.4};font-size:9px;color:var(--txt)">${ch.l} <span style="color:rgba(200,170,80,.5)">→ ${ch.rw}</span></div>`;}).join('')}</div>`;});
+  E.events.forEach(evt=>{events+=`<div style="background:var(--bg3);border:1px solid rgba(240,140,40,.3);border-radius:9px;padding:10px;margin-bottom:8px"><div style="font-size:12px;font-weight:700;color:var(--gold-b);margin-bottom:4px">${evt.title}</div><div style="font-size:9px;color:var(--txt2);margin-bottom:8px">${evt.desc}</div>${evt.choices.map((ch,i)=>{const afford=!ch.cost||Object.entries(ch.cost).every(([k,v])=>(E.res[k]||0)>=v);return`<div onclick="${afford?`eHandleChoice('${evt.id}',${i})`:'void(0)'}" style="padding:7px 10px;margin-bottom:3px;border-radius:6px;border:1px solid rgba(200,180,100,.45);background:rgba(255,255,255,.04);cursor:${afford?'pointer':'default'};opacity:${afford?1:.4};font-size:9px;color:var(--txt)">${ch.l} <span style="color:var(--txt-d)">→ ${ch.rw}</span></div>`;}).join('')}</div>`;});
 
   const pop=ePop();
-  const header=`<div style="background:linear-gradient(135deg,#1a1200,#2a1e00);border:1.5px solid var(--gold);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="font-size:8px;color:var(--gold);letter-spacing:2px">💰 $EMP ECONOMY</div><div style="font-size:24px;font-weight:900;color:#f5dd40;font-family:Georgia,serif">${Math.floor(E.res.emp||0)}</div></div><div style="text-align:right;font-size:8px;color:rgba(180,150,100,.6)"><div>Yr ${E.year} · ${['Spring','Summer','Autumn','Winter'][E.season]}</div><div>${pop} pop · 😊 ${Math.round(E.happiness)}%</div><div>🛡️ ${E.defense} defense</div></div></div>`;
+  const header=`<div style="background:linear-gradient(135deg,#141c28,#1c2838);border:1.5px solid rgba(240,184,64,.35);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="font-size:8px;color:var(--gold);letter-spacing:2px">💰 $EMP ECONOMY</div><div style="font-size:24px;font-weight:900;color:var(--emp);font-family:Georgia,serif">${Math.floor(E.res.emp||0)}</div></div><div style="text-align:right;font-size:8px;color:rgba(180,150,100,.6)"><div>Yr ${E.year} · ${['Spring','Summer','Autumn','Winter'][E.season]}</div><div>${pop} pop · 😊 ${Math.round(E.happiness)}%</div><div>🛡️ ${E.defense} defense</div></div></div>`;
 
   let content='';
   if(activeEconTab==='econ-build')content=renderEconBuild();
   else if(activeEconTab==='econ-stats')content=renderEconStats(pop);
   else if(activeEconTab==='econ-market')content=renderEconMarket();
   else if(activeEconTab==='econ-emp')content=renderEconEMP();
-  else if(activeEconTab==='econ-log')content=`<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOG</div>${(E.log||[]).slice(0,30).map(e=>`<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}">${e.msg}</div>`).join('')}`;
+  else if(activeEconTab==='econ-log')content=`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOG</div>${(E.log||[]).slice(0,30).map(e=>`<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}">${e.msg}</div>`).join('')}`;
 
   el.innerHTML=`<div style="padding:4px 0 24px">${header}${events}${tabBar}${content}</div>`;
 }
@@ -2026,15 +2466,15 @@ function renderEconBuild(){
   const TIERS=[['⚡ TIER 1 — Foundation',['farm','sawmill','quarry','smithy','emarket']],['⚔️ TIER 2 — Growth',['granary','ironmine','workshop2','tradepost','barracks']],['👑 TIER 3 — Dominance',['harbour','guildhall','fortress','townhall','university']]];
   const active=E.buildings.filter(b=>b.active);
   let html='';
-  if(active.length>0){html+=`<div style="margin-bottom:10px"><div style="font-size:8px;color:rgba(180,150,80,.55);letter-spacing:1.5px;margin-bottom:5px">⚙️ ACTIEF (${active.length})</div><div style="display:flex;flex-wrap:wrap;gap:3px">`;active.forEach(b=>{const def=MBLD[b.type];if(!def)return;const eff=Math.round((b.eff||1)*100),ec=eff>70?'#4a8a4a':eff>40?'#886020':'#c04040';const wc=b.workers||0,wmax=MBLD[b.type]?.workers||0;html+=`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:6px;padding:3px 7px;font-size:8px;display:flex;align-items:center;gap:3px">${def.ico} ${def.n} <span style="color:${ec};font-weight:700">${eff}%</span> <span style="color:rgba(200,175,130,.5)">👷${wc}/${wmax}</span><span onclick="startMoveEconBld(${b.id})" style="color:rgba(100,180,255,.7);cursor:pointer;padding:0 3px;margin-left:2px">↔️</span></div>`;});html+='</div></div>';}
+  if(active.length>0){html+=`<div style="margin-bottom:10px"><div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:5px">⚙️ ACTIVE (${active.length})</div><div style="display:flex;flex-wrap:wrap;gap:3px">`;active.forEach(b=>{const def=MBLD[b.type];if(!def)return;const eff=Math.round((b.eff||1)*100),ec=eff>70?'#4a8a4a':eff>40?'var(--gold)':'#c04040';const wc=b.workers||0,wmax=MBLD[b.type]?.workers||0;html+=`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:6px;padding:3px 7px;font-size:8px;display:flex;align-items:center;gap:3px">${def.ico} ${def.n} <span style="color:${ec};font-weight:700">${eff}%</span> <span style="color:var(--txt-d)">👷${wc}/${wmax}</span><span onclick="startMoveEconBld(${b.id})" style="color:rgba(100,180,255,.7);cursor:pointer;padding:0 3px;margin-left:2px">↔️</span></div>`;});html+='</div></div>';}
   TIERS.forEach(([label,keys])=>{
-    html+=`<div style="font-size:8px;color:rgba(180,150,80,.45);letter-spacing:1.5px;margin:10px 0 6px;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)">${label}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">`;
+    html+=`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px;padding-top:7px;border-top:1px solid rgba(255,255,255,.06)">${label}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">`;
     keys.forEach(k=>{
       const def=MBLD[k];if(!def)return;
       const built=E.buildings.some(b=>b.type===k&&b.active);
-      const can=!built&&Object.entries(def.cost).every(([r,v])=>(r==='food'||r==='tools'?(E.res[r]||0):(G.res[r]||0))>=v);
+      const can=!built&&Object.entries(def.cost).every(([r,v])=>(G.res[r]||0)>=v);
       const costTxt=Object.entries(def.cost).map(([r,v])=>r==='emp'?v+'💰':(MRES_ECO[r]?.ico||RES_ICO[r]||r)+v).join(' ')||'Free';
-      html+=`<div onclick="${built?'void(0)':`eBuildEcon('${k}')`}" style="background:${built?'rgba(50,100,50,.25)':can?'rgba(40,30,8,.4)':'rgba(0,0,0,.15)'};border:1px solid ${built?'rgba(70,140,70,.5)':can?'rgba(180,140,60,.35)':'rgba(255,255,255,.07)'};border-radius:8px;padding:6px 4px;cursor:${built?'default':'pointer'};text-align:center;opacity:${!can&&!built?.6:1}">
+      html+=`<div onclick="${built?'void(0)':`eBuildEcon('${k}')`}" style="background:${built?'rgba(50,100,50,.25)':can?'rgba(40,30,8,.4)':'rgba(0,0,0,.15)'};border:1px solid ${built?'rgba(70,140,70,.5)':can?'rgba(200,180,100,.45)':'rgba(255,255,255,.07)'};border-radius:8px;padding:6px 4px;cursor:${built?'default':'pointer'};text-align:center;opacity:${!can&&!built?.6:1}">
         <div style="font-size:20px">${def.ico}</div>
         <div style="font-size:8px;font-weight:700;color:${built?'#4a8a4a':'var(--txt)'};margin:2px 0">${def.empSource?'💰':''}${def.n}</div>
         <div style="font-size:7px;color:${can&&!built?'rgba(200,170,100,.7)':built?'#4a8a4a':'rgba(200,80,80,.55)'};">${built?'✓ Active':costTxt}</div>
@@ -2046,15 +2486,15 @@ function renderEconBuild(){
 }
 
 function renderEconStats(pop){
-  const resHtml=MRES_ECO_KEYS.map(k=>{const v=Math.floor(E.res[k]||0),cap=E.cap[k]||500,pct=Math.min(100,v/cap*100),col=pct>80?'#c04040':pct>50?'#886020':'#4a8a4a';return`<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:8px;margin-bottom:2px"><span>${MRES_ECO[k].ico} ${MRES_ECO[k].n}</span><span style="color:rgba(180,160,120,.55)">${v}/${cap}</span></div><div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${col};border-radius:2px"></div></div></div>`;}).join('');
-  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px">${[['😊 Geluk',Math.round(E.happiness)+'%',E.happiness>60?'#4a8a4a':'#c04040'],['⚖️ Stabiliteit',Math.round(E.stability)+'%',E.stability>50?'#4a8a4a':'#886020'],['🛡️ Verdediging',E.defense,E.defense>20?'#4a8a4a':'rgba(180,160,120,.6)'],['📦 Logistiek',Math.round(E.logMult*100)+'%',E.logMult>.7?'#4a8a4a':'#886020'],['🌾 Arbeiders',E.pop.workers,'rgba(200,175,130,.8)'],['🏪 Kooplieden',E.pop.merchants,'rgba(200,175,130,.8)']].map(([l,v,col])=>`<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:7px 9px"><div style="font-size:8px;color:rgba(180,160,120,.45)">${l}</div><div style="font-size:14px;font-weight:700;color:${col};margin-top:1px">${v}</div></div>`).join('')}</div><div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">RESOURCES</div>${resHtml}`;
+  const resHtml=MRES_ECO_KEYS.map(k=>{const v=Math.floor(E.res[k]||0),cap=E.cap[k]||500,pct=Math.min(100,v/cap*100),col=pct>80?'#c04040':pct>50?'var(--gold)':'#4a8a4a';return`<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:8px;margin-bottom:2px"><span>${MRES_ECO[k].ico} ${MRES_ECO[k].n}</span><span style="color:var(--txt-d)">${v}/${cap}</span></div><div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${col};border-radius:2px"></div></div></div>`;}).join('');
+  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px">${[['😊 Geluk',Math.round(E.happiness)+'%',E.happiness>60?'#4a8a4a':'#c04040'],['⚖️ Stabiliteit',Math.round(E.stability)+'%',E.stability>50?'#4a8a4a':'var(--gold)'],['🛡️ Verdediging',E.defense,E.defense>20?'#4a8a4a':'rgba(180,160,120,.6)'],['📦 Logistiek',Math.round(E.logMult*100)+'%',E.logMult>.7?'#4a8a4a':'var(--gold)'],['🌾 Arbeiders',E.pop.workers,'rgba(200,175,130,.8)'],['🏪 Kooplieden',E.pop.merchants,'rgba(200,175,130,.8)']].map(([l,v,col])=>`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:7px 9px"><div style="font-size:8px;color:var(--txt-d)">${l}</div><div style="font-size:14px;font-weight:700;color:${col};margin-top:1px">${v}</div></div>`).join('')}</div><div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">RESOURCES</div>${resHtml}`;
 }
 
 function renderEconMarket(){
   const empBal=Math.floor(E.res.emp||0);
   let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px">TRADE RESOURCES</div>
-    <div style="font-size:10px;color:#f5dd40;font-weight:700">${empBal} 💰 available</div>
+    <div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px">TRADE RESOURCES</div>
+    <div style="font-size:10px;color:var(--emp);font-weight:700">${empBal} 💰 available</div>
   </div>`;
   MRES_ECO_KEYS.forEach(k=>{
     const v=Math.floor(E.res[k]||0);
@@ -2074,7 +2514,7 @@ function renderEconMarket(){
         <div style="font-size:8px;color:rgba(180,160,120,.5)">${v} in stock</div>
       </div>
       <span style="font-size:13px;color:${tCol};flex-shrink:0">${trend}</span>
-      <button onclick="eSell('${k}',20)" style="padding:6px 10px;background:rgba(50,100,50,.35);border:1px solid rgba(70,140,70,.4);border-radius:7px;color:#44dd88;font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap">
+      <button onclick="eSell('${k}',20)" style="padding:6px 10px;background:rgba(24,72,40,.35);border:1px solid rgba(40,160,80,.3);border-radius:7px;color:var(--grn2);font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap">
         SELL 20<br>+${sellEmp}💰
       </button>
       <button onclick="eBuyRes('${k}',10)" style="padding:6px 10px;background:${canBuy?'rgba(40,70,140,.35)':'rgba(255,255,255,.04)'};border:1px solid ${canBuy?'rgba(70,100,200,.4)':'rgba(255,255,255,.1)'};border-radius:7px;color:${canBuy?'#6aaaff':'rgba(180,160,120,.35)'};font-size:9px;font-weight:700;cursor:${canBuy?'pointer':'default'};white-space:nowrap">
@@ -2086,10 +2526,58 @@ function renderEconMarket(){
 }
 
 function renderEconEMP(){
-  const upgHtml=EMP_UPGRADES.map(u=>{const has=E.upgradesDone.includes(u.id),can=(E.res.emp||0)>=u.cost;return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:16px">${u.ico}</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:${has?'rgba(74,138,74,.8)':'var(--txt)'}">${u.n}</div><div style="font-size:8px;color:rgba(160,140,100,.55)">${u.desc}</div></div>${has?`<span style="font-size:9px;color:#4a8a4a">✓</span>`:`<button onclick="eBuyUpgrade('${u.id}')" style="padding:5px 10px;background:${can?'rgba(180,140,60,.25)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(200,160,60,.4)':'rgba(255,255,255,.1)'};border-radius:6px;color:${can?'#f5dd40':'rgba(180,160,120,.4)'};font-size:9px;cursor:pointer">${u.cost}💰</button>`}</div>`;}).join('');
-  const importHtml=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px">${EMP_IMPORTS.map(imp=>`<button onclick="eBuyImport('${imp.k}',${imp.qty},${imp.cost})" style="padding:7px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:7px;font-size:8px;color:var(--txt);cursor:pointer;text-align:left">${imp.label}<br><span style="color:#f5dd40">${imp.cost} $EMP</span></button>`).join('')}</div>`;
-  const expHtml=EMP_EXPEDITIONS.map(exp=>{const active=E.expeditions.find(e=>e.id===exp.id),can=(E.res.emp||0)>=exp.cost;return`<div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div style="font-size:9px;font-weight:700;color:var(--txt)">⛵ ${exp.n}</div><div style="font-size:8px;color:rgba(160,140,100,.55)">${exp.minRet}–${exp.maxRet} $EMP · ${Math.round(exp.risk*100)}% risk</div></div>${active?`<span style="font-size:8px;color:#f5dd40">${active.ticksLeft}t</span>`:`<button onclick="eLaunchExpedition('${exp.id}')" style="padding:5px 10px;background:${can?'rgba(40,80,140,.3)':'rgba(255,255,255,.03)'};border:1px solid ${can?'rgba(60,120,200,.35)':'rgba(255,255,255,.08)'};border-radius:6px;color:${can?'#6aaaff':'rgba(180,160,120,.4)'};font-size:8px;cursor:pointer">${exp.cost}💰</button>`}</div></div>`;}).join('');
-  return`<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin-bottom:8px">$EMP UPGRADES</div>${upgHtml}<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin:10px 0 6px">NOODIMPORTEN</div>${importHtml}<div style="font-size:8px;color:rgba(180,150,80,.5);letter-spacing:1.5px;margin:10px 0 6px">EXPEDITIES</div>${expHtml}`;
+  const mult=E.empMult||1;
+  const totalEarned=Math.floor(E.totalEmpEarned||0);
+  const currentEmp=Math.floor(E.res.emp||0);
+  const nextUpgrade=EMP_UPGRADES.filter(u=>!E.upgradesDone.includes(u.id)&&u.tier)[0];
+  const presaleHtml=`
+    <div style="background:linear-gradient(135deg,#0c1828,#0c2018);border:1.5px solid rgba(64,200,112,.35);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:8px;color:rgba(100,220,100,.6);letter-spacing:2px;margin-bottom:6px">🚀 PRESALE — PRODUCTION MULTIPLIER</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="flex:1">
+          <div style="font-size:26px;font-weight:900;color:var(--grn2)">×${mult.toFixed(2)}</div>
+          <div style="font-size:9px;color:rgba(64,200,112,.7)">current production boost</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:14px;font-weight:700;color:var(--emp)">${totalEarned} $EMP</div>
+          <div style="font-size:8px;color:rgba(200,180,80,.5)">total earned (airdrop score)</div>
+        </div>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-bottom:8px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(100,((mult-1)/8)*100)}%;background:linear-gradient(90deg,#22cc44,#44ff88);border-radius:2px;transition:width .5s"></div>
+      </div>
+      <div style="font-size:8px;color:var(--txt2)">Buy boosts below → earn $EMP faster → higher airdrop allocation at token launch</div>
+    </div>`;
+
+  const boostUpgrades=EMP_UPGRADES.filter(u=>u.tier);
+  const utilUpgrades=EMP_UPGRADES.filter(u=>!u.tier);
+  const upgHtml=[
+    '<div style="font-size:8px;color:rgba(100,220,100,.5);letter-spacing:1.5px;margin-bottom:8px">⚡ PRODUCTION BOOSTS — spend $EMP, earn faster</div>',
+    ...boostUpgrades.map(u=>{
+      const has=E.upgradesDone.includes(u.id),can=(E.res.emp||0)>=u.cost;
+      const tierColors=['#40ee80','#60c8ff','#f0c060','#f08040','#cc44ff','#ff4488'];
+      const tc=tierColors[(u.tier||1)-1]||'#f5dd40';
+      return`<div style="background:rgba(255,255,255,.04);border:1px solid ${has?'rgba(70,200,70,.4)':can?'rgba(200,180,100,.45)':'rgba(255,255,255,.07)'};border-radius:9px;padding:10px;margin-bottom:6px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${u.ico}</span>
+        <div style="flex:1">
+          <div style="font-size:10px;font-weight:700;color:${has?'rgba(70,200,70,.9)':tc}">${u.n}</div>
+          <div style="font-size:8px;color:var(--txt-d)">${u.desc}</div>
+        </div>
+        ${has
+          ?`<div style="text-align:center"><div style="font-size:9px;color:var(--grn2)">✓ Active</div></div>`
+          :`<button onclick="eBuyUpgrade('${u.id}')" style="padding:7px 12px;background:${can?'rgba(200,180,100,.45)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(200,160,60,.5)':'rgba(255,255,255,.1)'};border-radius:7px;color:${can?'#f5dd40':'rgba(180,160,120,.35)'};font-size:10px;font-weight:700;cursor:${can?'pointer':'default'};white-space:nowrap">${u.cost}💰</button>`
+        }
+      </div>`;
+    }),
+    '<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">🔧 UTILITY</div>',
+    ...utilUpgrades.map(u=>{
+      const has=E.upgradesDone.includes(u.id),can=(E.res.emp||0)>=u.cost;
+      return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:16px">${u.ico}</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:${has?'rgba(74,138,74,.8)':'var(--txt)'}">${u.n}</div><div style="font-size:8px;color:var(--txt-d)">${u.desc}</div></div>${has?`<span style="font-size:9px;color:var(--grn)">✓</span>`:`<button onclick="eBuyUpgrade('${u.id}')" style="padding:5px 10px;background:${can?'rgba(200,180,100,.45)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(200,160,60,.4)':'rgba(255,255,255,.1)'};border-radius:6px;color:${can?'#f5dd40':'rgba(180,160,120,.4)'};font-size:9px;cursor:pointer">${u.cost}💰</button>`}</div>`;
+    }),
+  ].join('');
+  const importHtml=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px">${EMP_IMPORTS.map(imp=>`<button onclick="eBuyImport('${imp.k}',${imp.qty},${imp.cost})" style="padding:7px 8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:7px;font-size:8px;color:var(--txt);cursor:pointer;text-align:left">${imp.label}<br><span style="color:var(--emp)">${imp.cost} $EMP</span></button>`).join('')}</div>`;
+  const expHtml=EMP_EXPEDITIONS.map(exp=>{const active=E.expeditions.find(e=>e.id===exp.id),can=(E.res.emp||0)>=exp.cost;return`<div style="padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1"><div style="font-size:9px;font-weight:700;color:var(--txt)">⛵ ${exp.n}</div><div style="font-size:8px;color:var(--txt-d)">${exp.minRet}–${exp.maxRet} $EMP · ${Math.round(exp.risk*100)}% risk</div></div>${active?`<span style="font-size:8px;color:var(--emp)">${active.ticksLeft}t</span>`:`<button onclick="eLaunchExpedition('${exp.id}')" style="padding:5px 10px;background:${can?'rgba(40,80,140,.3)':'rgba(255,255,255,.03)'};border:1px solid ${can?'rgba(60,120,200,.35)':'rgba(255,255,255,.08)'};border-radius:6px;color:${can?'#6aaaff':'rgba(180,160,120,.4)'};font-size:8px;cursor:pointer">${exp.cost}💰</button>`}</div></div>`;}).join('');
+  return`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">$EMP UPGRADES</div>${upgHtml}<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">NOODIMPORTEN</div>${importHtml}<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">EXPEDITIES</div>${expHtml}`;
 }
 
 // Wire economy tab into city panel
@@ -2105,7 +2593,7 @@ function initEconomyTab(){
   panel.appendChild(pg);
 }
 
-// Override cpTab to handle economy tab
+// cpTab economy override removed — economy merged into empire tab
 const _origCpTab=cpTab;
 cpTab=function(name){
   _origCpTab(name);
