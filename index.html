@@ -71,7 +71,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   background:rgba(10,14,18,.92);
   border-bottom:1px solid rgba(100,180,120,.2);
   backdrop-filter:blur(10px)}
-#topbar-row1{display:flex;align-items:center;gap:6px;padding:6px 10px 3px;pointer-events:all}
+#topbar-row1{display:flex;align-items:center;gap:4px;padding:5px 8px 3px;pointer-events:all;overflow:hidden}
 #topbar-row2{display:flex;align-items:center;gap:4px;padding:3px 10px 6px;pointer-events:all;overflow-x:auto;scrollbar-width:none}
 #topbar-row2::-webkit-scrollbar{display:none}
 
@@ -352,14 +352,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <div id="world-hud">
   <div id="topbar">
     <div id="topbar-row1">
-      <div id="logo">EMPYRIA<span class="v">&nbsp;v0.2</span><small id="era-label">ERA I — STONE AGE</small></div>
-      <div style="flex:1"></div>
-      <div id="db-badge" title="Cloud sync" style="font-size:13px;flex-shrink:0;cursor:default;pointer-events:all" onclick="showLeaderboard()">☁️</div>
-      <div id="wallet-btn" onclick="toggleWallet()" style="display:flex;align-items:center;gap:3px;background:rgba(16,24,48,.85);border:1px solid rgba(80,140,255,.3);border-radius:10px;padding:4px 10px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:var(--blue);white-space:nowrap;font-weight:600">💼 Connect</div>
-      <div id="worker-badge" onclick="openEconomy()" style="display:flex;align-items:center;gap:3px;background:rgba(20,30,20,.8);border:1px solid rgba(80,160,80,.25);border-radius:10px;padding:4px 9px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:rgba(140,220,140,.8);font-weight:600">👷 20</div>
-      <div id="emp-pill" onclick="openCity()" style="display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#201800,#362400);border:1.5px solid rgba(240,192,96,.5);border-radius:12px;padding:4px 12px;cursor:pointer;flex-shrink:0;pointer-events:all;box-shadow:0 2px 10px rgba(240,192,96,.15)">
-        <span id="emp-val" style="color:var(--emp);font-weight:900;font-size:15px;min-width:20px">0</span>
-        <span style="font-size:8px;color:var(--gold);letter-spacing:1px">$EMP</span>
+      <!-- Logo — compact, no version/era text on small screens -->
+      <div id="logo" style="flex-shrink:0">EMPYRIA<small id="era-label" style="font-size:7px;color:var(--txt-d);letter-spacing:1px;margin-left:5px">ERA I</small></div>
+      <div style="flex:1;min-width:4px"></div>
+      <!-- Cloud sync icon — tiny -->
+      <div id="db-badge" onclick="showLeaderboard()" style="font-size:12px;flex-shrink:0;cursor:pointer;padding:2px 4px;pointer-events:all">☁️</div>
+      <!-- Wallet — icon only when not connected, short address when connected -->
+      <div id="wallet-btn" onclick="toggleWallet()" style="display:flex;align-items:center;gap:2px;background:rgba(16,24,48,.85);border:1px solid rgba(80,140,255,.3);border-radius:9px;padding:4px 8px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:var(--blue);white-space:nowrap;font-weight:600">💼</div>
+      <!-- Workers — just icon + number, no label -->
+      <div id="worker-badge" onclick="openEconomy()" style="display:flex;align-items:center;gap:2px;background:rgba(20,30,20,.8);border:1px solid rgba(80,160,80,.25);border-radius:9px;padding:4px 7px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:rgba(140,220,140,.8);font-weight:600">👷<span id="worker-count">20</span></div>
+      <!-- $EMP pill — the star of the show -->
+      <div id="emp-pill" onclick="openEconomy()" style="display:flex;align-items:center;gap:3px;background:linear-gradient(135deg,#201800,#362400);border:1.5px solid rgba(240,192,96,.5);border-radius:11px;padding:4px 10px;cursor:pointer;flex-shrink:0;pointer-events:all;box-shadow:0 2px 8px rgba(240,192,96,.15)">
+        <span id="emp-val" style="color:var(--emp);font-weight:900;font-size:14px;min-width:16px">0</span>
+        <span style="font-size:7px;color:var(--gold);letter-spacing:.5px">$EMP</span>
       </div>
     </div>
     <div id="topbar-row2">
@@ -1711,7 +1716,7 @@ function updateEra(){
   const eraReqs=[[1,[]],[2,['mine','lumber','forge','market','smelter']],[3,['workshop','academy','hq','treasury']],[4,['citadel','vault','observatory']],[5,['portal','nexus']]];
   let era=1;for(const[n,req]of eraReqs)if(req.every(r=>G.bld[r]))era=n;
   if(era!==G.era){G.era=era;toast('🏰 ERA '+era+' bereikt!',3000);addLog('ERA '+era+' bereikt!','good');}
-  const labels=['ERA I — STONE AGE','ERA II — IRON AGE','ERA III — ARCANE AGE','ERA IV — STELLAR AGE','ERA V — SHADOW EMPIRE'];
+  const labels=['ERA I','ERA II','ERA III','ERA IV','ERA V'];
   const el=document.getElementById('era-label');if(el)el.textContent=labels[era-1];
 }
 
@@ -1866,8 +1871,8 @@ function updateHUD(){
     mEl.textContent='×'+((E.empMult||1).toFixed(1));
   }
   // Update worker badge in topbar
-  const wb=document.getElementById('worker-badge');
-  if(wb){const pop=E.pop.workers+(E.pop.merchants||0)+(E.pop.nobles||0);wb.textContent='👷 '+pop;}
+  const wc=document.getElementById('worker-count');
+  if(wc){const pop=E.pop.workers+(E.pop.merchants||0)+(E.pop.nobles||0);wc.textContent=pop;}
   ['s','w','g','e'].forEach((ch,i)=>{const k=['stone','wood','gold','emp'][i];const el=document.getElementById('st-'+ch);if(el)el.textContent=G.stats[k]||0;});
   const si=document.getElementById('st-iron');if(si)si.textContent=G.stats.iron||0;const sc2=document.getElementById('st-crystal');if(sc2)sc2.textContent=G.stats.crystal||0;
   const sb=document.getElementById('st-bld');if(sb)sb.textContent=Object.values(G.bld).filter(v=>v===true).length;
@@ -2249,7 +2254,7 @@ function updateWalletUI(connected){
   const addrEl=document.getElementById('wallet-address-display');
   const empEl=document.getElementById('wallet-emp-display');
   if(connected&&walletAddr){
-    if(btn){btn.textContent='💼 '+walletAddr.slice(0,6)+'…'+walletAddr.slice(-4);btn.style.color='#44ff88';btn.style.borderColor='rgba(70,200,70,.4)';}
+    if(btn){btn.innerHTML='💼<span style="font-size:9px;margin-left:2px">✓</span>';btn.style.color='var(--grn2)';btn.style.borderColor='rgba(64,200,112,.4)';}
     if(info)info.style.display='block';
     if(addrEl)addrEl.textContent=walletAddr;
     if(empEl)empEl.textContent=Math.floor(G.res.emp||0)+' $EMP';
@@ -2257,7 +2262,7 @@ function updateWalletUI(connected){
     const tnBtn=document.getElementById('ton-connect-btn');
     if(tnBtn)tnBtn.style.display='none';
   } else {
-    if(btn){btn.textContent='💼 Connect';btn.style.color='#6aaaff';btn.style.borderColor='rgba(80,120,200,.4)';}
+    if(btn){btn.innerHTML='💼';btn.style.color='var(--blue)';btn.style.borderColor='rgba(80,140,255,.3)';}
     if(info)info.style.display='none';
     const tnBtn=document.getElementById('ton-connect-btn');
     if(tnBtn)tnBtn.style.display='block';
