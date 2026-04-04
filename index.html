@@ -610,48 +610,64 @@ const SEASONS=['SPRING','SUMMER','AUTUMN','WINTER'];
 const RES_ICO={stone:'🪨',wood:'🪵',gold:'🥇',iron:'⚙️',crystal:'💎',mana:'🔮',starstone:'⭐',darkore:'🌑',emp:'🪙'};
 
 const BLD_DEF={
-  // ── ERA I — STONE AGE (resource focus, small EMP costs) ─────────────────
-  mine:      {ico:'⛏️',name:'Mine Shaft',    era:1,cost:{emp:5, stone:20},         req:[],                  passive:'+1🪨/tick', empOut:0,   workers:2, desc:'Produces stone'},
-  lumber:    {ico:'🪵',name:'Lumber Mill',   era:1,cost:{emp:5, wood:18},           req:['mine'],            passive:'+1🪵/tick', empOut:0,   workers:2, desc:'Chops wood'},
-  farm:      {ico:'🌾',name:'Farm',          era:1,cost:{emp:5, wood:10,stone:8},   req:[],                  passive:'+2🍖/tick', empOut:0,   workers:2, desc:'Feeds workers'},
-  marketplace:{ico:'⚖️',name:'Marketplace', era:1,cost:{emp:40,gold:8},            req:['mine','lumber'],   passive:'+0.09💰/tick',empOut:.09,workers:2,desc:'💰 Generates $EMP'},
+  // ═══ ERA I — STONE AGE ════════════════════════════════════════════════════
+  // Resource buildings (small EMP, heavy resources)
+  mine:       {ico:'⛏️', name:'Mine Shaft',    era:1, cost:{emp:5,  stone:20},          req:[],                    passive:'+1🪨/tick',       empOut:0,    workers:2, desc:'Extracts stone from the earth'},
+  lumber:     {ico:'🪵', name:'Lumber Mill',   era:1, cost:{emp:5,  wood:18},            req:['mine'],              passive:'+1🪵/tick',       empOut:0,    workers:2, desc:'Chops wood from the forest'},
+  farm:       {ico:'🌾', name:'Farm',          era:1, cost:{emp:5,  wood:10,stone:8},    req:[],                    passive:'+2🍖/tick',       empOut:0,    workers:2, desc:'Grows food for workers'},
+  watchtower: {ico:'🗼', name:'Watchtower',    era:1, cost:{emp:8,  stone:30},           req:['mine'],              passive:'Defense +10',     empOut:0,    workers:2, defense:10, desc:'Guards your settlement'},
+  // 💰 EMP buildings (heavy EMP, small resources)
+  empaltar:   {ico:'🏮', name:'EMP Altar',     era:1, cost:{emp:20},                     req:['farm'],              passive:'+0.05💰/tick',    empOut:.05,  workers:1, desc:'💰 First $EMP source — pure EMP cost'},
+  marketplace:{ico:'⚖️', name:'Marketplace',  era:1, cost:{emp:40, gold:8},             req:['mine','lumber'],     passive:'+0.09💰/tick',    empOut:.09,  workers:2, desc:'💰 Generates $EMP from local trade'},
 
-  // ── ERA II — IRON AGE ────────────────────────────────────────────────────
-  smelter:   {ico:'⚙️',name:'Smelter',       era:2,cost:{emp:10,stone:22,iron:5},  req:['mine'],            passive:'+1⚙️/tick', empOut:0,   workers:2, desc:'Smelts iron ore'},
-  forge:     {ico:'🔥',name:'Forge',          era:2,cost:{emp:12,stone:15,wood:15}, req:['mine','lumber'],   passive:'+1🥇/tick', empOut:0,   workers:2, desc:'Forges metals'},
-  barracks:  {ico:'⚔️',name:'Barracks',       era:2,cost:{emp:15,stone:25,iron:12}, req:['smelter'],         passive:'Defense +20',empOut:0,  workers:3, defense:20,desc:'Protects routes'},
-  tradepost: {ico:'🐪',name:'Trade Post',     era:2,cost:{emp:80,wood:20,stone:15}, req:['forge','marketplace'],passive:'+0.22💰/tick',empOut:.22,workers:3,logBonus:.15,desc:'💰💰 Trade income'},
+  // ═══ ERA II — IRON AGE ════════════════════════════════════════════════════
+  smelter:    {ico:'⚙️', name:'Smelter',       era:2, cost:{emp:10, stone:22,iron:5},    req:['mine'],              passive:'+1⚙️/tick',       empOut:0,    workers:2, desc:'Smelts iron ore into ingots'},
+  forge:      {ico:'🔥', name:'Forge',         era:2, cost:{emp:12, stone:15,wood:15},   req:['mine','lumber'],     passive:'+1🥇/tick',       empOut:0,    workers:2, desc:'Forges metals into goods'},
+  mill:       {ico:'💨', name:'Water Mill',    era:2, cost:{emp:10, wood:22,stone:12},   req:['lumber','farm'],     passive:'+2🍖+1🪵/tick',   empOut:0,    workers:2, desc:'Mills grain, boosts food production'},
+  barracks:   {ico:'⚔️', name:'Barracks',      era:2, cost:{emp:15, stone:25,iron:12},   req:['smelter'],           passive:'Defense +20',     empOut:0,    workers:3, defense:20, desc:'Trains soldiers to protect trade'},
+  // 💰 EMP buildings
+  coinmaster:  {ico:'🪙', name:'Coin Master',  era:2, cost:{emp:60, gold:12},            req:['marketplace'],       passive:'+0.18💰/tick',    empOut:.18,  workers:2, desc:'💰 Turns gold into $EMP tokens'},
+  tradepost:  {ico:'🐪', name:'Trade Post',    era:2, cost:{emp:80, wood:20,stone:15},   req:['forge','marketplace'],passive:'+0.22💰/tick',   empOut:.22,  workers:3, logBonus:.15, desc:'💰💰 Long-distance trade routes'},
 
-  // ── ERA III — ARCANE AGE ─────────────────────────────────────────────────
-  workshop:  {ico:'🔨',name:'Workshop',       era:3,cost:{emp:20,wood:18,iron:12},  req:['lumber','smelter'],passive:'+1🔨/tick', empOut:0,   workers:3, desc:'Crafts tools'},
-  academy:   {ico:'🎓',name:'Academy',        era:3,cost:{emp:25,stone:30},         req:['forge'],           passive:'+1💎/tick', empOut:0,   workers:3, desc:'Unlocks crystal'},
-  townhall:  {ico:'🏠',name:'Town Hall',      era:3,cost:{emp:30,stone:20,wood:15}, req:['farm','barracks'], passive:'+pop',      empOut:0,   workers:4, desc:'Grows population'},
-  harbour:   {ico:'⚓',name:'Harbour',         era:3,cost:{emp:150,wood:30,stone:25},req:['tradepost'],       passive:'+0.40💰/tick',empOut:.40,workers:5,desc:'💰💰💰 Sea trade'},
+  // ═══ ERA III — ARCANE AGE ═════════════════════════════════════════════════
+  workshop:   {ico:'🔨', name:'Workshop',      era:3, cost:{emp:20, wood:18,iron:12},    req:['lumber','smelter'],  passive:'+1🔨/tick',       empOut:0,    workers:3, desc:'Crafts tools and equipment'},
+  academy:    {ico:'🎓', name:'Academy',       era:3, cost:{emp:25, stone:30},           req:['forge'],             passive:'+1💎/tick',       empOut:0,    workers:3, desc:'Researches crystal extraction'},
+  townhall:   {ico:'🏠', name:'Town Hall',     era:3, cost:{emp:30, stone:20,wood:15},   req:['farm','barracks'],   passive:'+population',     empOut:0,    workers:4, desc:'Grows your city population'},
+  inn:        {ico:'🍺', name:'Inn',           era:3, cost:{emp:25, wood:25,stone:10},   req:['farm','townhall'],   passive:'+happiness',      empOut:0,    workers:3, desc:'Boosts worker happiness +15%'},
+  // 💰 EMP buildings
+  mint:       {ico:'🏧', name:'Royal Mint',    era:3, cost:{emp:90, gold:25},            req:['tradepost','forge'], passive:'+0.35💰/tick',    empOut:.35,  workers:3, desc:'💰💰 Mints $EMP from raw gold'},
+  harbour:    {ico:'⚓', name:'Harbour',        era:3, cost:{emp:150,wood:30,stone:25},   req:['tradepost'],         passive:'+0.40💰/tick',    empOut:.40,  workers:5, desc:'💰💰💰 Sea trade earns $EMP'},
 
-  // ── ERA IV — STELLAR AGE ─────────────────────────────────────────────────
-  observatory:{ico:'🔭',name:'Observatory',  era:4,cost:{emp:35,crystal:20},       req:['academy'],         passive:'+1🔮/tick', empOut:0,   workers:3, desc:'Generates mana'},
-  alchemist:  {ico:'⚗️',name:'Alchemist Lab',era:4,cost:{emp:40,iron:25,crystal:15},req:['smelter','observatory'],passive:'+2🥇/tick',empOut:0,workers:3,desc:'Converts to gold'},
-  guildhall:  {ico:'🏛️',name:'Guild Hall',   era:4,cost:{emp:250,stone:35,iron:25},req:['harbour','academy'],passive:'+0.55💰/tick',empOut:.55,workers:6,guildBonus:true,desc:'💰💰💰💰 Best $EMP'},
-  fortress:   {ico:'🏯',name:'Fortress',      era:4,cost:{emp:50,stone:45,iron:35}, req:['barracks','townhall'],passive:'Defense +40',empOut:0,workers:5,defense:40,desc:'Maximum defense'},
+  // ═══ ERA IV — STELLAR AGE ═════════════════════════════════════════════════
+  observatory:{ico:'🔭', name:'Observatory',  era:4, cost:{emp:35, crystal:20},          req:['academy'],           passive:'+1🔮/tick',       empOut:0,    workers:3, desc:'Discovers mana from the stars'},
+  alchemist:  {ico:'⚗️', name:'Alchemist Lab',era:4, cost:{emp:40, iron:25,crystal:15},  req:['smelter','observatory'],passive:'+2🥇/tick',    empOut:0,    workers:3, desc:'Transmutes iron into gold'},
+  library:    {ico:'📚', name:'Library',       era:4, cost:{emp:45, crystal:20,stone:30}, req:['academy'],           passive:'+1💎+1🔮/tick',   empOut:0,    workers:3, desc:'Doubles crystal & mana research'},
+  fortress:   {ico:'🏯', name:'Fortress',      era:4, cost:{emp:50, stone:45,iron:35},   req:['barracks','townhall'],passive:'Defense +40',     empOut:0,    workers:5, defense:40, desc:'Maximum military defense'},
+  // 💰 EMP buildings
+  emptemple:  {ico:'⛩️', name:'EMP Temple',   era:4, cost:{emp:350},                     req:['guildhall','observatory'],passive:'+0.90💰/tick',empOut:.90, workers:4, desc:'💰💰💰 Pure $EMP — no resources needed'},
+  guildhall:  {ico:'🏛️', name:'Guild Hall',   era:4, cost:{emp:250,stone:35,iron:25},   req:['harbour','academy'], passive:'+0.55💰/tick',    empOut:.55,  workers:6, guildBonus:true, desc:'💰💰💰💰 Premium trade guild'},
 
-  // ── ERA V — SHADOW EMPIRE ─────────────────────────────────────────────────
-  citadel:    {ico:'🗼',name:'Citadel',       era:5,cost:{emp:500,stone:50,iron:40},req:['guildhall','fortress'],passive:'+0.80💰/tick',empOut:.80,workers:6,desc:'💰 Military income'},
-  starforge:  {ico:'🌟',name:'Star Forge',    era:5,cost:{emp:400,crystal:30,mana:20},req:['observatory','alchemist'],passive:'+1⭐/tick',empOut:0,workers:4,desc:'Starstone forge'},
-  vault:      {ico:'🗄️',name:'EMP Vault',     era:5,cost:{emp:800,gold:50,crystal:25},req:['guildhall'],      passive:'+1.20💰/tick',empOut:1.20,workers:5,desc:'💰💰💰💰💰 Vault income'},
-  portal:     {ico:'🌀',name:'Void Portal',   era:5,cost:{emp:1200,mana:50,starstone:15},req:['starforge'],   passive:'+2.0💰/tick', empOut:2.0, workers:6,desc:'💰 Dimensional trade'},
-  empirebank: {ico:'🏦',name:'Empire Bank',   era:5,cost:{emp:3000,darkore:60,starstone:60},req:['vault','portal'],passive:'+5.0💰/tick',empOut:5.0,workers:8,desc:'💰💰💰💰💰 End-game'},
+  // ═══ ERA V — SHADOW EMPIRE ════════════════════════════════════════════════
+  starforge:  {ico:'🌟', name:'Star Forge',    era:5, cost:{emp:400, crystal:30,mana:20}, req:['observatory','alchemist'],passive:'+1⭐/tick',  empOut:0,    workers:4, desc:'Forges rare starstone materials'},
+  citadel:    {ico:'🗼', name:'Citadel',        era:5, cost:{emp:500, stone:50,iron:40},  req:['guildhall','fortress'],passive:'+0.80💰/tick',   empOut:.80,  workers:6, desc:'💰 Military empire income'},
+  shadowmkt:  {ico:'🌑', name:'Shadow Market', era:5, cost:{emp:800, darkore:20},         req:['citadel'],           passive:'+1.50💰/tick',    empOut:1.50, workers:5, desc:'💰💰 Dark trade network'},
+  // 💰 Pure EMP buildings
+  vault:      {ico:'🗄️', name:'EMP Vault',     era:5, cost:{emp:800, gold:50,crystal:25}, req:['guildhall'],         passive:'+1.20💰/tick',    empOut:1.20, workers:5, desc:'💰💰💰 Secure $EMP storage vault'},
+  empnexus:   {ico:'💠', name:'EMP Nexus',      era:5, cost:{emp:2000},                    req:['vault','emptemple'], passive:'+3.50💰/tick',    empOut:3.50, workers:6, desc:'💰💰💰💰 Pure $EMP — enormous output'},
+  portal:     {ico:'🌀', name:'Void Portal',   era:5, cost:{emp:1200,mana:50,starstone:15},req:['starforge'],        passive:'+2.00💰/tick',    empOut:2.0,  workers:6, desc:'💰 Dimensional trade routes'},
+  empirebank: {ico:'🏦', name:'Empire Bank',   era:5, cost:{emp:3000,darkore:60,starstone:60},req:['vault','portal'],passive:'+5.00💰/tick',   empOut:5.0,  workers:8, desc:'💰💰💰💰💰 The ultimate $EMP machine'},
 };
 
 const ERA_SECTIONS={
-  'ERA I — Stone Age':   ['mine','lumber','farm','marketplace'],
-  'ERA II — Iron Age':   ['smelter','forge','barracks','tradepost'],
-  'ERA III — Arcane Age':['workshop','academy','townhall','harbour'],
-  'ERA IV — Stellar Age':['observatory','alchemist','guildhall','fortress'],
-  'ERA V — Shadow Empire':['citadel','starforge','vault','portal','empirebank'],
+  'ERA I — Stone Age':    ['mine','lumber','farm','watchtower','empaltar','marketplace'],
+  'ERA II — Iron Age':    ['smelter','forge','mill','barracks','coinmaster','tradepost'],
+  'ERA III — Arcane Age': ['workshop','academy','townhall','inn','mint','harbour'],
+  'ERA IV — Stellar Age': ['observatory','alchemist','library','fortress','emptemple','guildhall'],
+  'ERA V — Shadow Empire':['starforge','citadel','shadowmkt','vault','empnexus','portal','empirebank'],
 };
 const ERA_COLORS={'ERA I':'#5090d0','ERA II':'#60b870','ERA III':'#a070e0','ERA IV':'#f0b840','ERA V':'#e05858'};
 
-const PASS_DEF={mine:{stone:1},lumber:{wood:1},farm:{food:2},smelter:{iron:1},forge:{gold:1},workshop:{tools:1},academy:{crystal:1},observatory:{mana:1},alchemist:{gold:2},starforge:{starstone:1},barracks:{},townhall:{},fortress:{},guildhall:{},harbour:{},marketplace:{},tradepost:{},citadel:{},vault:{},portal:{},empirebank:{}};
+const PASS_DEF={mine:{stone:1},lumber:{wood:1},farm:{food:2},mill:{food:2,wood:1},smelter:{iron:1},forge:{gold:1},workshop:{tools:1},academy:{crystal:1},library:{crystal:1,mana:1},observatory:{mana:1},alchemist:{gold:2},starforge:{starstone:1},watchtower:{},barracks:{},townhall:{},inn:{},fortress:{},guildhall:{},harbour:{},marketplace:{},tradepost:{},coinmaster:{},mint:{},empaltar:{},emptemple:{},citadel:{},shadowmkt:{},vault:{},empnexus:{},portal:{},empirebank:{}};
 
 const UPG_DEF={
   mine:[{cost:{stone:200,emp:30},bonus:'Stone ×1.5'},{cost:{stone:500,iron:50,emp:100},bonus:'Stone ×2.0'}],
@@ -1064,7 +1080,23 @@ function buildBldMesh(id,wx,wz){
   g.position.set(wx,gy,wz);  // FIX: group at world position
   const tier=['mine','lumber','forge','market','smelter'].includes(id)?1:['workshop','academy','temple','hq','treasury'].includes(id)?2:3;
   const w=1.4+tier*.3,h=1.0+tier*.4;
-  const COLS={mine:0x888080,lumber:0x5a7030,forge:0xcc4400,market:0xcc8820,smelter:0x9080a0,workshop:0x808860,academy:0x4080a0,temple:0x885088,hq:0x604020,treasury:0xaa8830,observatory:0x204060,alchemist:0x408060,citadel:0x503828,dragonforge:0x802010,vault:0x204840,starforge:0x605080,portal:0x202860,nexus:0x204080,shadowkeep:0x181020,empirebank:0x301808};
+  const COLS={
+    // ERA I
+    mine:0x7a7878,lumber:0x5a7030,farm:0x4a8020,watchtower:0x708090,
+    empaltar:0xb06020,marketplace:0xb08020,
+    // ERA II
+    smelter:0x8870a0,forge:0xcc4400,mill:0x7a6040,barracks:0x607080,
+    coinmaster:0xa07820,tradepost:0x806820,
+    // ERA III
+    workshop:0x808060,academy:0x3870a0,townhall:0x7a6030,inn:0x8a6040,
+    mint:0x909020,harbour:0x204870,
+    // ERA IV
+    observatory:0x204060,alchemist:0x308060,library:0x405090,fortress:0x485060,
+    emptemple:0x906030,guildhall:0x504020,
+    // ERA V
+    starforge:0x504880,citadel:0x403828,shadowmkt:0x181828,
+    vault:0x1a3840,empnexus:0x182840,portal:0x181840,empirebank:0x281008,
+  };
   const col=COLS[id]||0x886030;
   const body=mk(bx(w,h,w),col);body.position.set(0,h/2,0);body.castShadow=true;g.add(body);
   const roof=mk(new THREE.CylinderGeometry(0,w*.75,.6+tier*.15,4),0x3a1808);roof.position.set(0,h+.3+tier*.08,0);roof.rotation.y=Math.PI/4;g.add(roof);
@@ -2267,7 +2299,7 @@ function ePop(){return E.pop.workers+E.pop.merchants+E.pop.nobles;}
 function eEarn(amount,source){
   if(amount>0) E.totalEmpEarned=(E.totalEmpEarned||0)+amount;E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
-function eEff(b){const def=MBLD[b.type];if(!def||!b.active)return 0;const wRatio=def.workers>0?Math.min(1,(b.workers||0)/def.workers):1;let inputOk=1;if(def.inp&&Object.keys(def.inp).length>0){const met=Object.entries(def.inp).filter(([k,v])=>(E.res[k]||0)>=v).length;inputOk=.3+.7*(met/Object.keys(def.inp).length);}const sci=E.sciBonus?1.25:1,guild=E.guildBonus?1.20:1,pres=1+(E.prestigeBonus||0);return Math.max(0,Math.min(2.0,(.3+.7*wRatio)*inputOk*E.logMult*sci*guild*pres));}
+function eEff(b){const def=MBLD[b.type];if(!def||!b.active)return 0; const innBonus=G.bld.inn?1.15:1;const wRatio=def.workers>0?Math.min(1,(b.workers||0)/def.workers):1;let inputOk=1;if(def.inp&&Object.keys(def.inp).length>0){const met=Object.entries(def.inp).filter(([k,v])=>(E.res[k]||0)>=v).length;inputOk=.3+.7*(met/Object.keys(def.inp).length);}const sci=E.sciBonus?1.25:1,guild=E.guildBonus?1.20:1,pres=1+(E.prestigeBonus||0);return Math.max(0,Math.min(2.0,(.3+.7*wRatio)*inputOk*E.logMult*sci*guild*pres*innBonus));}
 
 
 // Bridge: mining in 3D world also fills economy resources
