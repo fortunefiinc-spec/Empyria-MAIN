@@ -1096,43 +1096,394 @@ function buildResourceNodes(){
 
 function buildPlayer(){
   playerGroup=new THREE.Group();
-  const body=mk(bx(.48,.68,.34),0x8a2810);body.position.y=.54;playerGroup.add(body);
-  const ll=mk(bx(.18,.44,.18),0x2a1805);ll.position.set(-.13,.09,0);playerGroup.add(ll);
-  const lr=mk(bx(.18,.44,.18),0x2a1805);lr.position.set(.13,.09,0);playerGroup.add(lr);
-  const head=mk(bx(.4,.4,.36),0xf0b060);head.position.y=1.08;playerGroup.add(head);
-  const helm=mk(bx(.46,.18,.42),0xc9a84c);helm.position.y=1.3;playerGroup.add(helm);
-  playerGroup.position.set(0,sampleH(0,0)+.28,0);scene.add(playerGroup);
+  // Body (slightly smaller)
+  const body=mk(bx(.36,.52,.26),0x8a2810);body.position.y=.42;playerGroup.add(body);
+  // Legs
+  const ll=mk(bx(.14,.34,.14),0x2a1805);ll.position.set(-.10,.07,0);playerGroup.add(ll);
+  const lr=mk(bx(.14,.34,.14),0x2a1805);lr.position.set(.10,.07,0);playerGroup.add(lr);
+  // Arms
+  const al=mk(bx(.11,.30,.11),0x8a2810);al.position.set(-.26,.38,0);playerGroup.add(al);
+  const ar=mk(bx(.11,.30,.11),0x8a2810);ar.position.set(.26,.38,0);playerGroup.add(ar);
+  // Head
+  const head=mk(bx(.30,.30,.28),0xf0b060);head.position.y=.84;playerGroup.add(head);
+  // Helmet/crown (player distinguisher)
+  const helm=mk(bx(.34,.14,.32),0xf0c040);helm.position.y=1.01;playerGroup.add(helm);
+  // Small crown spike
+  const spike=mk(bx(.08,.12,.08),0xf0c040);spike.position.y=1.12;playerGroup.add(spike);
+  playerGroup.position.set(0,sampleH(0,0)+.20,0);scene.add(playerGroup);
+}
+
+// ─── Building mesh helpers ────────────────────────────────────────────────────
+function addRoof(g,w,h,col,sides=4,offset=0){
+  const r=mk(new THREE.CylinderGeometry(0,w*.6,.5,sides),col);
+  r.position.set(0,h+offset,0);r.rotation.y=Math.PI/sides;r.castShadow=true;g.add(r);
+}
+function addWall(g,w,h,d,col,x=0,y=0,z=0){
+  const m=mk(bx(w,h,d),col);m.position.set(x,y+h/2,z);m.castShadow=true;g.add(m);return m;
+}
+function addCyl(g,r,h,col,x=0,y=0,z=0,s=8){
+  const m=mk(cyl(r,h,s),col);m.position.set(x,y+h/2,z);m.castShadow=true;g.add(m);return m;
+}
+function addCone(g,r,h,col,x=0,y=0,z=0,s=8){
+  const m=mk(cone(r,h,s),col);m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;
 }
 
 function buildBldMesh(id,wx,wz){
   const gy=sampleH(wx,wz);
   const g=new THREE.Group();
-  g.position.set(wx,gy,wz);  // FIX: group at world position
-  const tier=['mine','lumber','forge','market','smelter'].includes(id)?1:['workshop','academy','temple','hq','treasury'].includes(id)?2:3;
-  const w=1.4+tier*.3,h=1.0+tier*.4;
-  const COLS={
-    // ERA I
-    mine:0x7a7878,lumber:0x5a7030,farm:0x4a8020,watchtower:0x708090,
-    empaltar:0xb06020,marketplace:0xb08020,
-    // ERA II
-    smelter:0x8870a0,forge:0xcc4400,mill:0x7a6040,barracks:0x607080,
-    coinmaster:0xa07820,tradepost:0x806820,
-    // ERA III
-    workshop:0x808060,academy:0x3870a0,townhall:0x7a6030,inn:0x8a6040,
-    mint:0x909020,harbour:0x204870,
-    // ERA IV
-    observatory:0x204060,alchemist:0x308060,library:0x405090,fortress:0x485060,
-    emptemple:0x906030,guildhall:0x504020,
-    // ERA V
-    starforge:0x504880,citadel:0x403828,shadowmkt:0x181828,
-    vault:0x1a3840,empnexus:0x182840,portal:0x181840,empirebank:0x281008,
-  };
-  const col=COLS[id]||0x886030;
-  const body=mk(bx(w,h,w),col);body.position.set(0,h/2,0);body.castShadow=true;g.add(body);
-  const roof=mk(new THREE.CylinderGeometry(0,w*.75,.6+tier*.15,4),0x3a1808);roof.position.set(0,h+.3+tier*.08,0);roof.rotation.y=Math.PI/4;g.add(roof);
-  if(id==='forge'||id==='dragonforge'){const el=new THREE.PointLight(0xff4400,1.5,8);el.position.set(0,h*.5,0);g.add(el);}
-  scene.add(g);buildingMeshes[id]=g;
+  g.position.set(wx,gy,wz);
+
+  // Common material shortcuts
+  const STONE=0x8a8878, DARK_STONE=0x5a5850, WOOD=0x6a4828, DARK_WOOD=0x4a3018,
+        THATCH=0x8a6830, SLATE=0x4a5058, RED_TILE=0x8a3018, PLASTER=0xd4c8a0,
+        GOLD=0xc8920a, IRON=0x787888, SAND=0xa09060;
+
+  switch(id){
+
+    // ── ERA I ──────────────────────────────────────────────────────────────
+    case 'mine':{
+      // Low stone entrance arch + shaft opening
+      addWall(g,1.4,.7,1.0,STONE); // main wall
+      addWall(g,1.6,.25,1.2,DARK_STONE,0,.7,0); // crenellation top
+      // Arch opening (dark hole)
+      addWall(g,.5,.55,.12,0x181410,0,.1,.42); // doorway dark
+      // Two support posts
+      addCyl(g,.06,.85,DARK_WOOD,-.35,.0,.42,6);
+      addCyl(g,.06,.85,DARK_WOOD, .35,.0,.42,6);
+      // Lantern on top
+      const ml=new THREE.PointLight(0xffaa22,.8,6);ml.position.set(0,1,0);g.add(ml);
+      break;
+    }
+    case 'lumber':{
+      // Wooden cabin with slanted roof
+      addWall(g,1.3,.8,1.0,WOOD);
+      addWall(g,.3,.9,.3,DARK_WOOD,-.5,.0,-.3); // side stack
+      // Slanted plank roof
+      const rf=mk(bx(1.5,.1,1.2),DARK_WOOD);rf.position.set(0,.85,0);rf.rotation.z=.15;g.add(rf);
+      addCone(g,.75,.5,THATCH,0,.9,0,4);
+      // Log pile
+      for(let i=0;i<3;i++){const l=mk(cyl(.07,.6,6),DARK_WOOD);l.position.set(.45+i*.0,.15,.3);l.rotation.z=Math.PI/2;g.add(l);}
+      break;
+    }
+    case 'farm':{
+      // Wide low barn with big roof
+      addWall(g,1.8,.65,1.1,0x8a5028); // barn walls
+      addCone(g,1.0,.7,THATCH,0,.65,0,4); // hay roof
+      // Small fence post
+      for(let i=0;i<4;i++){const fp=mk(bx(.06,.45,.06),DARK_WOOD);fp.position.set(-.7+i*.45,0,.7);g.add(fp);}
+      const rail=mk(bx(1.4,.06,.06),DARK_WOOD);rail.position.set(0,.35,.7);g.add(rail);
+      break;
+    }
+    case 'watchtower':{
+      // Tall narrow stone tower
+      addCyl(g,.42,2.2,STONE,0,0,0,8);
+      addCyl(g,.52,.2,DARK_STONE,0,2.2,0,8); // battlement ring
+      // 4 small merlons
+      for(let i=0;i<4;i++){const a=i*Math.PI/2;addWall(g,.18,.25,.18,DARK_STONE,Math.cos(a)*.38,2.3,Math.sin(a)*.38);}
+      const tl=new THREE.PointLight(0xffcc44,.6,8);tl.position.set(0,2.2,0);g.add(tl);
+      break;
+    }
+    case 'empaltar':{
+      // Mystical shrine — low platform + glowing crystal
+      addWall(g,1.0,.2,1.0,SAND); // base platform
+      // 4 small pillars
+      [[-.35,.35],[.35,.35],[-.35,-.35],[.35,-.35]].forEach(([px,pz])=>addCyl(g,.07,.55,STONE,px,.2,pz,6));
+      // Crystal on top (glowing)
+      const crystal=mk(new THREE.OctahedronGeometry(.2,0),0xf0d840);crystal.position.set(0,.9,0);crystal.rotation.y=Math.PI/6;g.add(crystal);
+      const cl=new THREE.PointLight(0xf0d840,1.2,6);cl.position.set(0,.9,0);g.add(cl);
+      break;
+    }
+    case 'marketplace':{
+      // Open market stall with canopy
+      addWall(g,1.6,.7,1.0,PLASTER);
+      // Canopy (two-tone awning)
+      const aw=mk(bx(1.8,.08,1.3),0x8a2010);aw.position.set(0,.75,0);aw.rotation.x=-.1;g.add(aw);
+      // 4 canopy posts
+      [[-.75,.5],[.75,.5],[-.75,-.5],[.75,-.5]].forEach(([px,pz])=>addCyl(g,.05,.8,DARK_WOOD,px,0,pz,6));
+      // Counter
+      addWall(g,1.4,.25,.25,WOOD,0,.5,.45);
+      break;
+    }
+
+    // ── ERA II ─────────────────────────────────────────────────────────────
+    case 'smelter':{
+      // Squat building + tall chimney
+      addWall(g,1.2,.75,1.0,DARK_STONE);
+      addCone(g,.7,.4,SLATE,0,.75,0,4);
+      // Big chimney
+      addCyl(g,.22,1.6,DARK_STONE,.35,0,-.2,8);
+      // Smoke puff (small sphere)
+      const sm=mk(new THREE.SphereGeometry(.14,6,5),0x444444);sm.position.set(.35,1.65,-.2);sm.material.transparent=true;sm.material.opacity=.5;g.add(sm);
+      const fl=new THREE.PointLight(0xff4400,.8,5);fl.position.set(0,.4,0);g.add(fl);
+      break;
+    }
+    case 'forge':{
+      // Smithy with open front and anvil glow
+      addWall(g,1.3,.85,1.1,STONE);
+      addCone(g,.75,.45,RED_TILE,0,.85,0,4);
+      // Chimney
+      addCyl(g,.15,1.1,IRON,-.4,0,-.4,6);
+      // Glowing forge opening
+      addWall(g,.45,.5,.1,0xff4400,0,.2,.56);
+      const fl=new THREE.PointLight(0xff6600,1.5,7);fl.position.set(0,.5,0);g.add(fl);
+      break;
+    }
+    case 'mill':{
+      // Round windmill tower + cross sails
+      addCyl(g,.55,1.6,PLASTER,0,0,0,8);
+      addCone(g,.6,.5,RED_TILE,0,1.6,0,8);
+      // 4 sail arms
+      for(let i=0;i<4;i++){
+        const a=i*Math.PI/2;
+        const sail=mk(bx(.08,.7,.2),DARK_WOOD);
+        sail.position.set(Math.cos(a)*.6,1.4,Math.sin(a)*.6);
+        sail.rotation.y=a;sail.userData.isSail=true;g.add(sail);
+      }
+      break;
+    }
+    case 'barracks':{
+      // Long rectangular military building
+      addWall(g,1.8,.8,1.0,DARK_STONE);
+      // Battlements along top
+      for(let i=0;i<5;i++){addWall(g,.2,.25,.18,STONE,-.8+i*.4,.8,-.42);}
+      for(let i=0;i<5;i++){addWall(g,.2,.25,.18,STONE,-.8+i*.4,.8,.42);}
+      // Flag pole
+      addCyl(g,.04,.9,IRON,.8,.8,0,6);
+      const flag=mk(bx(.35,.2,.04),0x8a1010);flag.position.set(.98,1.6,0);g.add(flag);
+      break;
+    }
+    case 'coinmaster':{
+      // Small bank — columns and steps
+      addWall(g,1.2,.9,.9,PLASTER);
+      addCone(g,.7,.3,SLATE,0,.9,0,4);
+      // Two front columns
+      addCyl(g,.08,.95,STONE,-.35,0,.47,8);
+      addCyl(g,.08,.95,STONE, .35,0,.47,8);
+      // Steps
+      addWall(g,1.3,.12,1.1,STONE,0,-.05,0);
+      const gl=new THREE.PointLight(GOLD,.5,4);gl.position.set(0,.7,0);g.add(gl);
+      break;
+    }
+    case 'tradepost':{
+      // Desert trading post — flat roof, awning
+      addWall(g,1.4,.8,1.0,SAND);
+      addWall(g,1.5,.15,1.1,0x9a7040,0,.8,0); // flat parapet
+      // Side shelter
+      addWall(g,.6,.55,.7,0xb08050,.75,0,0);
+      addCone(g,.45,.4,THATCH,.75,.55,0,4);
+      // Camel post (thin pole)
+      addCyl(g,.05,.9,DARK_WOOD,-.55,0,.45,6);
+      break;
+    }
+
+    // ── ERA III ────────────────────────────────────────────────────────────
+    case 'workshop':{
+      // Cluttered shed — irregular shape
+      addWall(g,1.3,.7,.9,WOOD);
+      addWall(g,.6,.55,.6,DARK_WOOD,.6,0,.2); // lean-to
+      addCone(g,.75,.45,THATCH,0,.7,0,4);
+      addCone(g,.4,.3,DARK_WOOD,.6,.55,.2,4);
+      // Tool hanging outside
+      addCyl(g,.03,.5,IRON,.62,.45,-.35,6);
+      break;
+    }
+    case 'academy':{
+      // School — tall with arched windows
+      addWall(g,1.4,1.1,.9,PLASTER);
+      addCone(g,.8,.6,SLATE,0,1.1,0,4);
+      // Side wing
+      addWall(g,.5,.75,.8,.9,0,.9*.375,.1);
+      addCone(g,.35,.35,SLATE,.55,.75,.1,4);
+      // Bell tower
+      addCyl(g,.18,.9,STONE,-.5,0,-.3,8);
+      addCone(g,.22,.4,0x8a2010,-.5,.9,-.3,8);
+      break;
+    }
+    case 'townhall':{
+      // Grand civic building — wide, columns, dome
+      addWall(g,1.8,.95,1.1,PLASTER);
+      // Central dome
+      const dome=mk(new THREE.SphereGeometry(.45,8,6),SLATE);dome.position.set(0,1.4,0);dome.scale.y=.6;dome.castShadow=true;g.add(dome);
+      // Columns across front
+      for(let i=0;i<4;i++)addCyl(g,.07,1.0,STONE,-.6+i*.4,0,.58,8);
+      // Steps
+      addWall(g,2.0,.12,1.3,STONE,0,-.05,0);
+      break;
+    }
+    case 'inn':{
+      // Cozy tavern — warm wood, chimney, sign
+      addWall(g,1.5,.85,1.1,0x8a5028);
+      addCone(g,.85,.55,THATCH,0,.85,0,4);
+      // Chimney with warm light
+      addCyl(g,.14,1.0,STONE,.55,0,-.4,8);
+      const wl=new THREE.PointLight(0xff9922,.9,6);wl.position.set(0,.6,0);g.add(wl);
+      // Hanging sign
+      addCyl(g,.03,.35,DARK_WOOD,.62,.95,0,6);
+      const sign=mk(bx(.35,.2,.05),DARK_WOOD);sign.position.set(.62,.75,0);g.add(sign);
+      break;
+    }
+    case 'mint':{
+      // Treasury — stone fortress look
+      addWall(g,1.3,.9,1.0,STONE);
+      addWall(g,1.4,.2,1.1,DARK_STONE,0,.9,0);
+      // 4 corner towers
+      [[-.6,.45],[.6,.45],[-.6,-.45],[.6,-.45]].forEach(([px,pz])=>{
+        addCyl(g,.2,.9,DARK_STONE,px,0,pz,8);
+        addCone(g,.22,.35,SLATE,px,.9,pz,8);
+      });
+      const gl=new THREE.PointLight(GOLD,.6,5);gl.position.set(0,.5,0);g.add(gl);
+      break;
+    }
+    case 'harbour':{
+      // Dock building + pier posts
+      addWall(g,1.4,.7,1.0,DARK_WOOD);
+      addCone(g,.8,.5,DARK_WOOD,0,.7,0,4);
+      // Dock posts in water direction
+      for(let i=0;i<3;i++){const dp=mk(cyl(.07,.6,6),DARK_WOOD);dp.position.set(-.4+i*.4,-.15,.75);g.add(dp);}
+      // Anchor symbol (ring)
+      const anchor=mk(new THREE.TorusGeometry(.2,.05,6,12),IRON);anchor.position.set(.55,.5,.0);anchor.rotation.x=Math.PI/2;g.add(anchor);
+      const wl=new THREE.PointLight(0x4488ff,.6,6);wl.position.set(0,.5,0);g.add(wl);
+      break;
+    }
+
+    // ── ERA IV ─────────────────────────────────────────────────────────────
+    case 'observatory':{
+      // Dome on cylindrical tower
+      addCyl(g,.55,1.4,STONE,0,0,0,10);
+      const dome2=mk(new THREE.SphereGeometry(.65,10,7),0x203850);dome2.position.set(0,1.75,0);dome2.scale.set(1,.7,1);dome2.castShadow=true;g.add(dome2);
+      // Telescope stub
+      addCyl(g,.08,.5,IRON,.2,1.8,.2,6);
+      const sl=new THREE.PointLight(0x4488ff,.7,7);sl.position.set(0,1.5,0);g.add(sl);
+      break;
+    }
+    case 'alchemist':{
+      // Crooked wizard tower — irregular
+      addCyl(g,.5,1.5,0x304830,0,0,0,7);
+      addCone(g,.58,.7,0x182810,0,1.5,0,7);
+      // Side flask bump
+      const flask=mk(new THREE.SphereGeometry(.22,7,6),0x204038);flask.position.set(.52,.5,0);g.add(flask);
+      // Glowing window
+      addWall(g,.2,.2,.08,0x80ffaa,0,.8,.5);
+      const al=new THREE.PointLight(0x44ff88,.8,6);al.position.set(0,.8,0);g.add(al);
+      break;
+    }
+    case 'library':{
+      // Long low building — many windows
+      addWall(g,1.8,.95,1.0,PLASTER);
+      addCone(g,1.0,.45,SLATE,0,.95,0,4);
+      // Window row
+      for(let i=0;i<3;i++){addWall(g,.22,.32,.06,0xd4f8d4,-.55+i*.55,.35,.52);}
+      // Side extension
+      addWall(g,.55,.8,.8,PLASTER,.95,0,0);
+      addCone(g,.35,.35,SLATE,.95,.8,0,4);
+      break;
+    }
+    case 'fortress':{
+      // Heavy fortification — thick walls, 4 towers
+      addWall(g,1.8,.9,1.4,DARK_STONE);
+      // Thick walls
+      addWall(g,2.0,.3,1.5,STONE,0,.9,0);
+      // 4 corner towers
+      [[-.85,.65],[.85,.65],[-.85,-.65],[.85,-.65]].forEach(([px,pz])=>{
+        addCyl(g,.3,1.3,DARK_STONE,px,0,pz,8);
+        addWall(g,.65,.25,.65,STONE,px,1.3,pz);
+      });
+      break;
+    }
+    case 'emptemple':{
+      // Golden EMP shrine — tall ornate
+      addCyl(g,.65,1.0,SAND,0,0,0,8);
+      // Gold ring
+      const tr=mk(new THREE.TorusGeometry(.7,.08,8,16),GOLD);tr.position.y=1.05;tr.rotation.x=Math.PI/2;g.add(tr);
+      // 6 pillars
+      for(let i=0;i<6;i++){const a=i*Math.PI/3;addCyl(g,.08,.95,PLASTER,Math.cos(a)*.6,0,Math.sin(a)*.6,8);}
+      // Crown with crystal
+      const cr=mk(new THREE.OctahedronGeometry(.25,0),0xf5d840);cr.position.y=1.4;g.add(cr);
+      const el2=new THREE.PointLight(0xf5d840,1.5,8);el2.position.y=1.4;g.add(el2);
+      break;
+    }
+    case 'guildhall':{
+      // Grand hall — wide, tall, imposing
+      addWall(g,2.0,1.1,1.2,PLASTER);
+      addCone(g,1.1,.6,RED_TILE,0,1.1,0,4);
+      // Two towers flanking
+      addCyl(g,.28,1.3,STONE,-.85,0,0,8);
+      addCyl(g,.28,1.3,STONE, .85,0,0,8);
+      addCone(g,.32,.5,RED_TILE,-.85,1.3,0,8);
+      addCone(g,.32,.5,RED_TILE, .85,1.3,0,8);
+      // Banner
+      const bm=mk(bx(.5,.3,.04),0x8a1010);bm.position.set(0,1.5,0);g.add(bm);
+      break;
+    }
+
+    // ── ERA V ──────────────────────────────────────────────────────────────
+    case 'starforge':{
+      addCyl(g,.6,1.4,0x302840,0,0,0,7);
+      addCone(g,.65,.8,0x181428,0,1.4,0,7);
+      // Star-shaped glow rings
+      for(let i=0;i<3;i++){const ring=mk(new THREE.TorusGeometry(.55-i*.12,.04,6,12),0x8040e0);ring.position.y=.4+i*.35;ring.rotation.x=Math.PI/2;g.add(ring);}
+      const sl2=new THREE.PointLight(0x8040ff,1.2,9);sl2.position.y=.8;g.add(sl2);
+      break;
+    }
+    case 'citadel':{
+      // Military citadel — massive
+      addWall(g,2.0,1.1,1.5,DARK_STONE);
+      addWall(g,2.1,.25,1.6,STONE,0,1.1,0);
+      for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4;addCyl(g,.38,1.5,DARK_STONE,Math.cos(a)*.9,0,Math.sin(a)*.75,8);addCone(g,.42,.45,SLATE,Math.cos(a)*.9,1.5,Math.sin(a)*.75,8);}
+      break;
+    }
+    case 'shadowmkt':{
+      addWall(g,1.5,1.0,1.1,0x181820);
+      addCone(g,.85,.7,0x100c18,0,1.0,0,4);
+      // Eerie purple glow
+      const sml=new THREE.PointLight(0x6020a0,1.0,7);sml.position.y=.6;g.add(sml);
+      for(let i=0;i<4;i++){const a=i*Math.PI/2;const sp=mk(new THREE.SphereGeometry(.08,5,4),0x8030d0);sp.position.set(Math.cos(a)*.65,.8,Math.sin(a)*.65);g.add(sp);}
+      break;
+    }
+    case 'vault':{
+      addCyl(g,.65,1.2,DARK_STONE,0,0,0,8);
+      addWall(g,1.4,.25,1.4,STONE,0,1.2,0);
+      addCyl(g,.6,.25,STONE,0,1.2,0,8);
+      for(let i=0;i<6;i++){const a=i*Math.PI/3;addCyl(g,.06,.7,IRON,Math.cos(a)*.58,0,Math.sin(a)*.58,6);}
+      const vl=new THREE.PointLight(0xf0c040,.8,6);vl.position.y=.6;g.add(vl);
+      break;
+    }
+    case 'empnexus':{
+      // Floating crystal cluster
+      addCyl(g,.5,.9,0x101828,0,0,0,8);
+      for(let i=0;i<5;i++){const a=i*Math.PI*2/5,r=.45;const ocr=mk(new THREE.OctahedronGeometry(.2+i*.04,0),0x4080ff);ocr.position.set(Math.cos(a)*r,.8+Math.sin(i)*0.2,Math.sin(a)*r);ocr.rotation.y=a;g.add(ocr);}
+      const nl=new THREE.PointLight(0x4080ff,1.8,10);nl.position.y=.8;g.add(nl);
+      break;
+    }
+    case 'portal':{
+      addCyl(g,.55,.9,0x100818,0,0,0,8);
+      const pr=mk(new THREE.TorusGeometry(.6,.1,8,20),0x6020c0);pr.position.y=1.1;pr.rotation.x=Math.PI/2;g.add(pr);
+      const inner=mk(new THREE.CircleGeometry(.5,20),0x2010a0);inner.position.y=1.1;inner.rotation.x=Math.PI/2;inner.material.transparent=true;inner.material.opacity=.6;g.add(inner);
+      const pl=new THREE.PointLight(0x8020ff,1.5,10);pl.position.y=1.1;g.add(pl);
+      break;
+    }
+    case 'empirebank':{
+      addWall(g,2.2,1.3,1.4,PLASTER);
+      const dome3=mk(new THREE.SphereGeometry(.7,10,7),SLATE);dome3.position.y=2.0;dome3.scale.y=.5;dome3.castShadow=true;g.add(dome3);
+      for(let i=0;i<6;i++)addCyl(g,.1,1.4,STONE,-.75+i*.3,0,.72,8);
+      addWall(g,2.4,.15,1.6,STONE,0,1.3,0);
+      const bl=new THREE.PointLight(GOLD,1.0,8);bl.position.y=1.2;g.add(bl);
+      break;
+    }
+
+    default:{
+      // Fallback — simple cottage
+      addWall(g,1.2,.7,.9,STONE);
+      addCone(g,.72,.45,RED_TILE,0,.7,0,4);
+    }
+  }
+
+  g.traverse(m=>{if(m.isMesh)m.castShadow=true;});
+  scene.add(g);
+  buildingMeshes[id]=g;
 }
+// ──────────────────────────────────────────────────────────────────────────────
+
 
 const RAY=new THREE.Raycaster();const GPLANE=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 function screenToGround(ex,ey){const nx=(ex/window.innerWidth)*2-1,ny=-(ey/window.innerHeight)*2+1;RAY.setFromCamera({x:nx,y:ny},camera);const t=new THREE.Vector3();RAY.ray.intersectPlane(GPLANE,t);return t;}
@@ -1246,11 +1597,11 @@ function createWorkerNPC(bx, bz, workerIdx){
 
   // Orbit params
   const angle=((workerIdx/6)*Math.PI*2)+(Math.random()*.8);
-  const r=1.4+Math.random()*.8;
-  const speed=(.25+Math.random()*.35)*(Math.random()>.5?1:-1);
+  const r=1.8+Math.random()*.9;
+  const speed=(.22+Math.random()*.30)*(Math.random()>.5?1:-1);
   g.userData={bx,bz,angle,r,speed,phase:Math.random()*Math.PI*2,lleg,rleg,larm,rarm};
   g.position.set(bx+Math.cos(angle)*r, sampleH(bx+Math.cos(angle)*r,bz+Math.sin(angle)*r), bz+Math.sin(angle)*r);
-  g.scale.setScalar(.85+Math.random()*.25);
+  g.scale.setScalar(1.55+Math.random()*.20);
   scene.add(g);
   return g;
 }
@@ -1576,7 +1927,7 @@ function processMove(){
   const fwdX=-Math.sin(camAngle),fwdZ=-Math.cos(camAngle),rgtX=Math.cos(camAngle),rgtZ=-Math.sin(camAngle);
   let dx=0,dz=0;
   if(moving['w']){dx+=fwdX*SPD;dz+=fwdZ*SPD;}if(moving['s']){dx-=fwdX*SPD;dz-=fwdZ*SPD;}if(moving['a']){dx-=rgtX*SPD;dz-=rgtZ*SPD;}if(moving['d']){dx+=rgtX*SPD;dz+=rgtZ*SPD;}
-  if(dx||dz){pPos.x=Math.max(-35,Math.min(35,pPos.x+dx));pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));const gy=sampleH(pPos.x,pPos.z);playerGroup.position.set(pPos.x,gy+.28,pPos.z);playerGroup.rotation.y=Math.atan2(-dx,-dz);walkT+=.28;playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;camTarget.x+=(pPos.x-camTarget.x)*.08;camTarget.z+=(pPos.z-camTarget.z)*.08;if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);}
+  if(dx||dz){pPos.x=Math.max(-35,Math.min(35,pPos.x+dx));pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));const gy=sampleH(pPos.x,pPos.z);playerGroup.position.set(pPos.x,gy+.20,pPos.z);playerGroup.rotation.y=Math.atan2(-dx,-dz);walkT+=.28;playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;camTarget.x+=(pPos.x-camTarget.x)*.08;camTarget.z+=(pPos.z-camTarget.z)*.08;if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);}
 }
 function updateHints(){const n=nearestNode(),hint=document.getElementById('action-hint');if(!hint)return;if(placingBld){hint.textContent='🏗️ Tap to place · ESC cancels';hint.style.opacity='1';return;}if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
 
