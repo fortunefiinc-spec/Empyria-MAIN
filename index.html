@@ -396,7 +396,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <div id="action-bar">
   <div class="ab mine-btn" onclick="doMine()">MINE</div>
   <div class="ab" style="background:linear-gradient(135deg,#10203a,#183860);border:1.5px solid rgba(80,160,240,.35);color:var(--blue)" onclick="openCity()">CITY</div>
-  <div class="ab" style="background:linear-gradient(135deg,#16103a,#221850);border:1.5px solid rgba(160,112,224,.4);color:#c0a0ff" onclick="openEconomy()">TRADE</div>
+  <div class="ab" style="background:linear-gradient(135deg,#201800,#362400);border:1.5px solid rgba(240,184,64,.5);color:var(--emp);font-weight:800" onclick="openEconomy()">$EMP</div>
   <div class="ab" style="background:linear-gradient(135deg,#0e2818,#165a28);border:1.5px solid rgba(64,200,112,.4);color:#80f0a8" onclick="doSell()">SELL</div>
 </div>
 
@@ -1721,9 +1721,10 @@ function addLog(msg,type='neutral'){const now=new Date();const time=now.getHours
 function openCity(){
   const panel=document.getElementById('city-panel');
   const sheet=document.getElementById('cp-sheet');
-  if(sheet) sheet.style.height='62vh'; // reset to default each open
+  if(sheet) sheet.style.height='62vh';
   panel.classList.add('open');
   cpTab('empire');
+  empTab('build'); // CITY always goes straight to BUILD
 }
 function closeCity(){document.getElementById('city-panel').classList.remove('open');}
 function cityBgClick(e){if(e.target===document.getElementById('city-panel'))closeCity();}
@@ -1745,7 +1746,7 @@ function empTab(s){empireSection=s;renderEmpirePanel();const el=document.getElem
 
 function renderEmpirePanel(){
   const el=document.getElementById('cp-empire');if(!el)return;
-  const TABS=[{id:'build',ico:'🏗️',label:'BUILD'},{id:'market',ico:'⚖️',label:'MARKET'},{id:'upgrades',ico:'⬆️',label:'UPGR'},{id:'passive',ico:'⏰',label:'PASSIVE'},{id:'log',ico:'📜',label:'LOG'}];
+  const TABS=[{id:'build',ico:'🏗️',label:'BUILD'},{id:'market',ico:'⚖️',label:'MARKET'},{id:'$emp',ico:'💰',label:'$EMP'},{id:'upgrades',ico:'⬆️',label:'UPGR'},{id:'passive',ico:'⏰',label:'PASSIVE'},{id:'log',ico:'📜',label:'LOG'}];
   const tabBar=`<div style="display:flex;gap:3px;margin-bottom:10px;padding:3px;background:rgba(0,0,0,.25);border-radius:10px">${TABS.map(t=>`<div onclick="empTab('${t.id}')" style="flex:1;text-align:center;padding:7px 2px;border-radius:8px;cursor:pointer;transition:all .15s;background:${empireSection===t.id?'rgba(240,184,64,.18)':'transparent'};border:1px solid ${empireSection===t.id?'rgba(240,184,64,.35)':'transparent'}"><div style="font-size:14px">${t.ico}</div><div style="font-size:7px;color:${empireSection===t.id?'var(--gold-b)':'var(--txt-d)'};font-weight:${empireSection===t.id?'700':'400'};letter-spacing:.5px">${t.label}</div></div>`).join('')}</div>`;
   const ph=passPerHour();const bcount=Object.values(G.bld).filter(v=>v===true).length;
   // No separate header card — info shown in topbar EMP pill + compact strip
@@ -1767,6 +1768,7 @@ function renderEmpirePanel(){
   if(empireSection==='build')content=renderBuildSection();
   else if(empireSection==='upgrades')content=renderUpgradeSection();
   else if(empireSection==='market')content=renderEconMarket();
+  else if(empireSection==='$emp')content=renderEconEMP();
   else if(empireSection==='passive')content=renderPassiveSection();
   else if(empireSection==='log')content=renderLogSection();
   el.innerHTML=`<div style="padding:4px 0 24px">${header}${tabBar}${content}</div>`;
@@ -2639,7 +2641,15 @@ function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)retur
 setInterval(eSave,30000);
 
 // Economy display in Empire panel
-function openEconomy(){openCity();setTimeout(()=>empTab('market'),50);}
+function openEconomy(){
+  // TRADE opens to $EMP presale/upgrades tab — distinct from CITY→BUILD
+  const panel=document.getElementById('city-panel');
+  const sheet=document.getElementById('cp-sheet');
+  if(sheet) sheet.style.height='75vh'; // taller for presale
+  panel.classList.add('open');
+  cpTab('empire');
+  setTimeout(()=>empTab('$emp'),30);
+}
 function updateEconomyDisplay(){
   // Update $EMP from economy
   const ep=document.getElementById('emp-val');if(ep)ep.textContent=Math.floor(E.res.emp||0);
