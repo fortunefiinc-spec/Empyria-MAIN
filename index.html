@@ -3065,7 +3065,7 @@ function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rw
 
 // ═══ SAVE / LOAD ═══
 function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({version:3,savedAt:Date.now(),res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
-function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw)return;const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
+function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw){showSaveDebug?.();return;}const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
   if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save format…',2000);return;}// v2+ safe to loadif(sv.res)Object.assign(G.res,sv.res);if(sv.bld)Object.assign(G.bld,sv.bld);if(sv.cd)Object.assign(G.cd,sv.cd);if(sv.stats)Object.assign(G.stats,sv.stats);if(sv.upgrades)Object.assign(G.upgrades,sv.upgrades);G.era=sv.era||1;G.streak=sv.streak||0;G.lastLogin=sv.lastLogin||'';G.streakClaimed=sv.streakClaimed||false;G.quests=sv.quests||[];G.questsDate=sv.questsDate||'';G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings — defer to ensure scene is ready
   setTimeout(()=>{
     Object.entries(G.bld).forEach(([id,built])=>{
@@ -3077,7 +3077,7 @@ function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw)ret
     });
     updateHUD();
   },200);
-  toast('💾 Progress restored!',2000);}catch(e){if(window.location.hostname==='localhost')console.warn('Load:',e);}}
+  toast('💾 Progress restored!',2000); showSaveDebug?.(); }catch(e){ console.warn('Load error:',e); showSaveDebug?.(); }}
 setInterval(saveGame,30000);
 
 // ═══ TOAST ═══
@@ -4541,6 +4541,38 @@ async function manualSave(){
 // Helper: check if building is placed (handles both legacy true and new {x,z})
 function bldBuilt(id){ const v=G.bld[id]; return v===true||typeof v==='object'; }
 function bldPos(id){ const v=G.bld[id]; return typeof v==='object'?v:null; }
+
+function showSaveDebug(){
+  try{
+    const raw = localStorage.getItem('empyria_v2');
+    const eco = localStorage.getItem('empyria_eco');
+    
+    let msg = '';
+    if(!raw){
+      msg = '❌ NO SAVE FOUND (empyria_v2 empty)\nFirst launch or localStorage cleared.';
+    } else {
+      const sv = JSON.parse(raw);
+      const blds = Object.keys(sv.bld||{}).length;
+      const hasPosn = Object.values(sv.bld||{}).some(v=>typeof v==='object');
+      msg = '✅ SAVE FOUND\n'
+          + 'EMP: '+sv.res?.emp+' | ERA: '+sv.era+' | Buildings: '+blds
+          + (hasPosn?' (with positions)':'(no positions - legacy)')
+          + '\nSaved: '+(sv.savedAt?new Date(sv.savedAt).toLocaleTimeString():'unknown');
+      if(eco){
+        const se = JSON.parse(eco);
+        msg += '\nMultiplier: ×'+se.empMult+' | Airdrop: '+se.totalEmpEarned;
+      }
+    }
+    
+    const panel = document.createElement('div');
+    panel.style.cssText = 'position:fixed;top:60px;left:8px;right:8px;z-index:9999;background:rgba(0,0,0,.92);border:2px solid '+(raw?'#40c040':'#ff4040')+';border-radius:10px;padding:10px;font-family:monospace;font-size:10px;color:#fff;white-space:pre-wrap;pointer-events:none';
+    panel.textContent = '🔍 SAVE DEBUG\n' + msg;
+    document.body.appendChild(panel);
+    setTimeout(()=>panel.remove(), 8000);
+  }catch(e){
+    console.warn('Debug panel error:', e);
+  }
+}
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
