@@ -96,7 +96,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .rv{font-weight:700;color:var(--txt)}
 
 /* Action hint */
-#action-hint{position:fixed;top:58px;left:50%;transform:translateX(-50%);
+#action-hint{position:fixed;top:88px;left:50%;transform:translateX(-50%);
   background:rgba(10,14,20,.92);
   border:1px solid rgba(100,180,120,.3);
   border-radius:22px;padding:6px 16px;font-size:11px;color:#a8d8b0;
@@ -107,35 +107,66 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 #mode-toggle{display:none}
 
 #dpad{position:fixed;bottom:84px;right:8px;z-index:30}
-.dp-grid{display:grid;grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,38px);gap:2px}
+.dp-grid{display:grid;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(3,36px);gap:2px}
 .dp{display:flex;align-items:center;justify-content:center;
-  background:rgba(10,16,22,.85);
-  border:1px solid rgba(100,150,200,.2);
-  border-radius:9px;font-size:14px;color:var(--txt-d);
-  cursor:pointer;touch-action:none;transition:all .1s}
-.dp:active,.dp.pr{background:rgba(60,140,80,.3);border-color:rgba(80,200,100,.5);color:#80ee90}
-.dp.empty{background:transparent;border:none;pointer-events:none}
+  background:rgba(8,14,22,.82);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;font-size:15px;color:rgba(255,255,255,.4);
+  cursor:pointer;touch-action:none;transition:all .1s;
+  backdrop-filter:blur(6px);}
+.dp:active,.dp.pr{background:rgba(40,120,70,.35);border-color:rgba(64,200,112,.4);color:#70ee88;transform:scale(.92);}
+.dp.empty{background:transparent;border:none;pointer-events:none;}
 
 #cam-ctrl{position:fixed;bottom:212px;right:8px;z-index:30;display:flex;flex-direction:column;gap:2px}
+#tp-controls{display:flex;flex-direction:column;gap:2px}
+#fp-crosshair{display:none}
 .cc{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
-  background:rgba(10,16,22,.85);
-  border:1px solid rgba(100,150,200,.2);
-  border-radius:9px;font-size:16px;color:var(--txt-d);cursor:pointer}
-.cc:active{background:rgba(60,140,80,.25)}
+  background:rgba(8,14,22,.82);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;font-size:15px;color:rgba(255,255,255,.4);
+  cursor:pointer;backdrop-filter:blur(6px);transition:all .1s;}
+.cc:active{background:rgba(40,120,70,.3);color:#70ee88;transform:scale(.9);}
 
 /* Action bar */
-#action-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
-  display:flex;gap:6px;z-index:30;padding:0 8px}
-.ab{padding:11px 20px;border-radius:24px;
-  font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;
-  cursor:pointer;transition:transform .1s,box-shadow .1s;
-  border:1.5px solid transparent;letter-spacing:.5px}
-.ab:active{transform:scale(.93)}
+#presale-strip{position:fixed;left:0;right:0;z-index:22;pointer-events:all;
+  transform:translateY(-100%);transition:transform .35s cubic-bezier(.34,1.1,.64,1)}
+#presale-strip.visible{transform:translateY(0)}
+#action-bar{
+  position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+  z-index:30;
+  background:rgba(8,12,18,.88);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:22px;
+  padding:4px 6px;
+  display:flex;
+  gap:3px;
+  backdrop-filter:blur(12px);
+  box-shadow:0 4px 24px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
+}
+.ab{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;
+  width:60px;height:46px;
+  border-radius:14px;
+  font-family:Rajdhani,sans-serif;font-size:8px;font-weight:700;
+  cursor:pointer;
+  transition:transform .12s,box-shadow .12s,background .12s;
+  border:1px solid transparent;
+  letter-spacing:.6px;
+  position:relative;
+  overflow:hidden;
+}
+.ab::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:0;transition:opacity .15s;background:rgba(255,255,255,.08);}
+.ab:active::before{opacity:1;}
+.ab:active{transform:scale(.91);}
+.ab-ico{font-size:17px;line-height:1;margin-bottom:1px;}
 .mine-btn{
-  background:linear-gradient(135deg,#2a3a10,#3a5818);
-  border-color:rgba(100,200,80,.4);color:#a8ee80;
-  box-shadow:0 3px 14px rgba(80,180,60,.2)}
-.mine-btn:active{box-shadow:0 1px 6px rgba(80,180,60,.15)}
+  background:linear-gradient(160deg,#1a3a08,#2a5a10);
+  border-color:rgba(80,200,60,.35);
+  color:#90ee70;
+  box-shadow:0 2px 12px rgba(60,160,40,.25),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.mine-btn:active{box-shadow:0 1px 4px rgba(60,160,40,.15);}
 #city-panel .city-btn,
 .ab.city-btn-style{
   background:linear-gradient(135deg,#102030,#183850);
@@ -159,9 +190,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   box-shadow:0 -8px 40px rgba(0,0,0,.5)}
 #city-panel.open .cp-sheet{transform:translateY(0)}
 
-.cp-drag{width:44px;height:4px;
-  background:rgba(255,255,255,.2);
-  border-radius:2px;margin:10px auto 5px;flex-shrink:0;cursor:grab;touch-action:none}
+.cp-drag{width:40px;height:4px;
+  background:rgba(255,255,255,.18);
+  border-radius:2px;margin:10px auto 4px;flex-shrink:0;cursor:grab;touch-action:none;
+  transition:background .2s;}
+.cp-drag:hover{background:rgba(255,255,255,.35);}
 
 /* Tabs */
 .cp-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.07);
@@ -331,13 +364,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 @keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-60px);opacity:0}}
 @keyframes empPop{0%{transform:translateY(0) scale(1);opacity:1}70%{transform:translateY(-45px) scale(1.1);opacity:1}100%{transform:translateY(-80px) scale(.8);opacity:0}}
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(240,192,96,.2)}50%{box-shadow:0 0 20px rgba(240,192,96,.5)}}
+@keyframes notifPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+#emp-notif{animation:notifPulse 1.2s ease-in-out infinite;}
+@keyframes mineGlow{0%,100%{box-shadow:0 2px 12px rgba(60,160,40,.25),inset 0 1px 0 rgba(255,255,255,.08)}50%{box-shadow:0 3px 20px rgba(80,220,40,.45),inset 0 1px 0 rgba(255,255,255,.1)}}
+.mine-btn.nearResource{animation:mineGlow 1s ease-in-out infinite;}
 </style>
 </head>
 <body>
 
 <div id="splash">
   <div class="sp-logo">EMPYRIA</div>
-  <div class="sp-tag">BUILD YOUR EMPORIUM &nbsp;<span style="font-size:10px;color:var(--gold)">v0.2.1</span></div>
+  <div class="sp-tag">BUILD YOUR EMPORIUM &nbsp;<span style="font-size:10px;color:var(--gold)">v1.0.1</span></div>
   <div class="sp-story">Year <strong>1347</strong>. The great trade routes are open. Kingdoms rise and fall on commerce.<br><br>Explore the <strong>3D medieval world</strong>. Mine resources. Build your empire. Earn <strong>$EMP tokens</strong>.</div>
   <button class="sp-btn" onclick="launch()">▶ ENTER EMPYRIA</button>
   <div class="sp-chips">
@@ -358,6 +395,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div style="flex:1;min-width:4px"></div>
       <!-- Cloud sync icon — tiny -->
       <div id="db-badge" onclick="showLeaderboard()" style="font-size:12px;flex-shrink:0;cursor:pointer;padding:2px 4px;pointer-events:all">☁️</div>
+      <div onclick="openEconomy()" style="background:rgba(224,88,88,.2);border:1px solid rgba(224,88,88,.4);border-radius:6px;padding:2px 5px;font-size:7px;color:#ff9090;font-weight:700;letter-spacing:.5px;flex-shrink:0;cursor:pointer;pointer-events:all">🔥LIVE</div>
       <!-- Wallet — icon only when not connected, short address when connected -->
       <div id="wallet-btn" onclick="toggleWallet()" style="display:flex;align-items:center;gap:2px;background:rgba(16,24,48,.85);border:1px solid rgba(80,140,255,.3);border-radius:9px;padding:4px 8px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:var(--blue);white-space:nowrap;font-weight:600">💼</div>
       <!-- Workers — just icon + number, no label -->
@@ -397,17 +435,38 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 </div>
 
 <div id="cam-ctrl">
-  <div class="cc" onclick="camZ(-2)">+</div>
-  <div class="cc" onclick="camZ(2)">&minus;</div>
-  <div class="cc" onclick="camR(-0.35)">&#x21BA;</div>
-  <div class="cc" onclick="camR(0.35)">&#x21BB;</div>
+  <div class="cc" onclick="toggleFP()" id="fp-btn" title="First Person">👁️</div>
+  <div id="tp-controls">
+    <div class="cc" onclick="camZ(-2)">+</div>
+    <div class="cc" onclick="camZ(2)">&minus;</div>
+    <div class="cc" onclick="camR(-0.35)">&#x21BA;</div>
+    <div class="cc" onclick="camR(0.35)">&#x21BB;</div>
+  </div>
 </div>
 
+
+<!-- Minimap -->
+<div id="minimap" style="position:fixed;bottom:78px;left:10px;z-index:28;pointer-events:none;opacity:.9">
+  <canvas id="minimap-canvas" width="100" height="100"
+    onclick="toggleMinimap()" 
+    style="width:100px;height:100px;border-radius:12px;border:1px solid rgba(255,255,255,.15);display:block;box-shadow:0 3px 16px rgba(0,0,0,.6);cursor:pointer;pointer-events:all;image-rendering:pixelated">
+  </canvas>
+  <div id="minimap-label" style="text-align:center;font-size:7px;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.5px">MAP</div>
+</div>
 <div id="action-bar">
-  <div class="ab mine-btn" onclick="doMine()">MINE</div>
-  <div class="ab" style="background:linear-gradient(135deg,#10203a,#183860);border:1.5px solid rgba(80,160,240,.35);color:var(--blue)" onclick="openCity()">CITY</div>
-  <div class="ab" style="background:linear-gradient(135deg,#201800,#362400);border:1.5px solid rgba(240,184,64,.5);color:var(--emp);font-weight:800" onclick="openEconomy()">$EMP</div>
-  <div class="ab" style="background:linear-gradient(135deg,#0e2818,#165a28);border:1.5px solid rgba(64,200,112,.4);color:#80f0a8" onclick="doSell()">SELL</div>
+  <div class="ab mine-btn" onclick="doMine()">
+    <span class="ab-ico">⛏️</span>MINE
+  </div>
+  <div class="ab" onclick="openCity()" style="background:linear-gradient(160deg,#0a1e3a,#102848);border-color:rgba(70,140,255,.3);color:#78b8ff;box-shadow:0 2px 12px rgba(40,100,220,.2),inset 0 1px 0 rgba(255,255,255,.06)">
+    <span class="ab-ico">🏰</span>CITY
+  </div>
+  <div class="ab" onclick="openEconomy()" id="emp-action-btn" style="background:linear-gradient(160deg,#1e1400,#362200);border-color:rgba(240,184,64,.45);color:#f5d840;box-shadow:0 2px 14px rgba(200,140,0,.25),inset 0 1px 0 rgba(255,255,255,.07)">
+    <span class="ab-ico">💰</span>$EMP
+    <div id="emp-notif" style="display:none;position:absolute;top:6px;right:8px;width:7px;height:7px;background:#f5d840;border-radius:50%;box-shadow:0 0 5px #f5d840"></div>
+  </div>
+  <div class="ab" onclick="doSell()" style="background:linear-gradient(160deg,#0a2018,#10361e);border-color:rgba(50,180,90,.3);color:#60ee90;box-shadow:0 2px 12px rgba(30,140,60,.2),inset 0 1px 0 rgba(255,255,255,.06)">
+    <span class="ab-ico">💱</span>SELL
+  </div>
 </div>
 
 <div id="city-panel" onclick="cityBgClick(event)">
@@ -436,44 +495,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div class="cp-page" id="cp-upg"><div id="cp-upgrades"></div></div>
     <div class="cp-page" id="cp-prestige"></div>
     <div class="cp-page" id="cp-shop">
-      <div class="sh-sec"><div class="sh-t">⚡ COOLDOWN BOOSTS</div><div class="sh-grid">
-        <div class="sh-card" onclick="buyShop('b1')"><div class="sh-ico">&#x26A1;</div><div class="sh-name">Boost I &middot; 4u</div><div class="sh-desc">-25% all cooldowns</div><div class="sh-p"><span class="pr pr-t">0.10 TON</span><span class="pr pr-s">50 &#x2B50;</span></div></div>
-        <div class="sh-card feat" onclick="buyShop('vip')"><div class="sh-ico">&#x1F451;</div><div class="sh-name">VIP Day Pass</div><div class="sh-desc">-60% CD + 2x output</div><div class="sh-p"><span class="pr pr-t">0.75 TON</span><span class="pr pr-s">375 &#x2B50;</span></div></div>
-        <div class="sh-card" onclick="buyShop('b2')"><div class="sh-ico">&#x26A1;&#x26A1;</div><div class="sh-name">Boost II &middot; 8u</div><div class="sh-desc">-50% all cooldowns</div><div class="sh-p"><span class="pr pr-t">0.25 TON</span><span class="pr pr-s">125 &#x2B50;</span></div></div>
-        <div class="sh-card" onclick="buyShop('rst')"><div class="sh-ico">&#x1F504;</div><div class="sh-name">Quick Reset</div><div class="sh-desc">1 game instant reset</div><div class="sh-p"><span class="pr pr-t">0.05 TON</span><span class="pr pr-s">25 &#x2B50;</span></div></div>
-      </div></div>
-      <div class="sh-sec"><div class="sh-t">🎮 GAME UNLOCKS</div><div class="sh-grid">
-        <div class="sh-card" onclick="buyShop('ul-block')"><div class="sh-ico">&#x1F9F1;</div><div class="sh-name">Block Builder</div><div class="sh-desc">Direct unlock</div><div class="sh-p"><span class="pr pr-t">0.15 TON</span><span class="pr pr-s">75 &#x2B50;</span></div></div>
-        <div class="sh-card" onclick="buyShop('ul-react')"><div class="sh-ico">&#x26A1;</div><div class="sh-name">Lightning Forge</div><div class="sh-desc">Direct unlock</div><div class="sh-p"><span class="pr pr-t">0.30 TON</span><span class="pr pr-s">150 &#x2B50;</span></div></div>
-      </div></div>
-      <div class="sh-sec"><div class="sh-t">&#x1F48E; PREMIUM</div><div class="sh-grid">
-        <div class="sh-card feat" onclick="buyShop('bp')"><div class="sh-ico">&#x1F3D7;&#xFE0F;</div><div class="sh-name">Builder Pass</div><div class="sh-desc">+25% output + daily Boost</div><div class="sh-p"><span class="pr pr-t">2 TON</span><span class="pr pr-s">1000 &#x2B50;</span></div></div>
-        <div class="sh-card feat" onclick="buyShop('ep')"><div class="sh-ico">&#x1F451;</div><div class="sh-name">Empire Pass</div><div class="sh-desc">+50% output + daily Boost</div><div class="sh-p"><span class="pr pr-t">5 TON</span><span class="pr pr-s">2500 &#x2B50;</span></div></div>
-      </div></div>
-    </div>
-    <div class="cp-page" id="cp-stats">
-      <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:11px;margin-bottom:8px">
-        <div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b);margin-bottom:7px">📊 Resources Earned</div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">&#x1FAA8; Stone <span style="color:var(--gold-b)" id="st-s">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">&#x1FAB5; Wood <span style="color:var(--gold-b)" id="st-w">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">&#x1F947; Gold <span style="color:var(--gold-b)" id="st-g">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">&#x2699;&#xFE0F; Iron <span style="color:var(--gold-b)" id="st-iron">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">&#x1F48E; Crystal <span style="color:var(--gold-b)" id="st-crystal">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0">&#x1FA99; $EMP <span style="color:var(--gold-b)" id="st-e">0</span></div>
+      <!-- TON Shop coming soon -->
+      <div style="background:linear-gradient(135deg,#0a1020,#101828);border:1.5px solid rgba(96,160,240,.25);border-radius:14px;padding:16px;margin-bottom:12px;text-align:center">
+        <div style="font-size:32px;margin-bottom:8px">🚀</div>
+        <div style="font-family:Cinzel,serif;font-size:14px;color:var(--blue);margin-bottom:4px">TON Shop — Coming Soon</div>
+        <div style="font-size:11px;color:var(--txt-d);line-height:1.6">Use TON to buy permanent boosts,<br>game unlocks and VIP passes.<br><br>Connect your wallet to be notified.</div>
+        <button onclick="toggleWallet()" style="margin-top:12px;padding:9px 20px;background:linear-gradient(135deg,#0e3a5a,#164870);border:1px solid rgba(96,160,240,.4);border-radius:10px;color:#78c8ff;font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;cursor:pointer">💼 Connect Wallet</button>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:11px">
-        <div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b);margin-bottom:7px">🏛 Progress</div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">Buildings <span style="color:var(--gold-b)" id="st-bld">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">Prestige <span style="color:var(--gold-b)" id="st-pres">0</span></div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0">Mystery Boxes <span style="color:var(--gold-b)" id="st-box">0</span></div>
+      <!-- Preview cards (locked) -->
+      <div class="sh-t" style="margin-bottom:8px">⚡ PREVIEW — COMING SOON</div>
+      <div class="sh-grid">
+        <div class="sh-card" style="opacity:.55"><div class="sh-ico">⚡</div><div class="sh-name">Boost I · 4h</div><div class="sh-desc">-25% all cooldowns</div><div class="sh-p"><span class="pr pr-t">0.10 TON</span></div></div>
+        <div class="sh-card feat" style="opacity:.55"><div class="sh-ico">👑</div><div class="sh-name">VIP Day Pass</div><div class="sh-desc">-60% CD + 2× output</div><div class="sh-p"><span class="pr pr-t">0.75 TON</span></div></div>
+        <div class="sh-card feat" style="opacity:.55"><div class="sh-ico">🏗️</div><div class="sh-name">Builder Pass</div><div class="sh-desc">+25% output</div><div class="sh-p"><span class="pr pr-t">2 TON</span></div></div>
+        <div class="sh-card feat" style="opacity:.55"><div class="sh-ico">👑</div><div class="sh-name">Empire Pass</div><div class="sh-desc">+50% output</div><div class="sh-p"><span class="pr pr-t">5 TON</span></div></div>
       </div>
     </div>
+    <div class="cp-page" id="cp-stats" data-needs-render="1"></div>
   </div>
 </div>
 
 <div id="gmod">
   <div id="gmod-hdr">
-    <button id="gmod-back" onclick="closeGame()">&#x2190; TERUG</button>
+    <button id="gmod-back" onclick="closeGame()">&#x2190; BACK</button>
     <div id="gmod-title">GAME</div>
     <div id="gmod-score"></div>
   </div>
@@ -737,7 +781,7 @@ const QUEST_POOL=[
   {id:'mine_gold',label:'🥇 Mine 10 gold',type:'mine',res:'gold',need:10,reward:{emp:7,crystal:1}},
   {id:'mine_iron',label:'⚙️ Mine 15 iron',type:'mine',res:'iron',need:15,reward:{emp:8}},
   {id:'play_games',label:'🎮 Play 2 mini-games',type:'play',need:2,reward:{emp:4,stone:10}},
-  {id:'earn_emp',label:'🪙 Verdien 100 $EMP',type:'earn',need:100,reward:{emp:5,crystal:1}},
+  {id:'earn_emp',label:'🪙 Earn 100 $EMP',type:'earn',need:100,reward:{emp:5,crystal:1}},
   {id:'sell_res',label:'💰 Sell resources ×3',type:'sell',need:3,reward:{emp:4,gold:3}},
   {id:'open_box',label:'📦 Open 1 Mystery Box',type:'open_box',need:1,reward:{emp:3,stone:15}},
   {id:'build_any',label:'🏗️ Build any building',type:'build',need:1,reward:{emp:15}},
@@ -802,7 +846,8 @@ function passPerHour(){
 }
 function startPassive(){
   if(G.passiveIv)clearInterval(G.passiveIv);
-  G.passiveIv=setInterval(()=>{const ph=passPerHour(),f=1/360;for(const k of Object.keys(ph))if(ph[k]>0)addRes(k,Math.max(1,Math.round(ph[k]*f)));updateHUD();},10000);
+  G.passiveIv=setInterval(()=>{const ph=passPerHour(),f=1/360;for(const k of Object.keys(ph))if(ph[k]>0)addRes(k,Math.max(1,Math.round(ph[k]*f)));updateHUD();
+  checkAchievements();},10000);
 }
 const CD_BASE={tap:30*60,aim:45*60,mem:60*60,block:90*60,react:120*60};
 function cdRed(g){let r=0;if(g==='tap'&&G.bld.mine)r+=0.15;if(g==='tap'&&G.bld.workshop)r+=0.10;if(g==='aim'&&G.bld.forge)r+=0.15;if(g==='aim'&&G.bld.alchemist)r+=0.25;if(g==='mem'&&G.bld.lumber)r+=0.20;if(g==='mem'&&G.bld.academy)r+=0.30;if(g==='block'&&G.bld.market)r+=0.20;if(g==='react'&&G.bld.forge)r+=0.15;if(g==='react'&&G.bld.temple)r+=0.15;if(G.bld.hq)r+=0.10;if(G.bld.treasury)r+=0.15;if(G.bld.vault)r+=0.25;if(G.bld.empirebank)r+=0.40;return Math.min(r,0.85);}
@@ -821,6 +866,11 @@ let workerNPCs=[];        // animated worker figures near buildings
 let ghostPos={x:0,z:0};  // current ghost snapped position
 let ghostBlocked=false;   // is current ghost position blocked?
 let camTarget={x:0,z:0},camDist=22,camAngle=Math.PI*0.65;
+let fpMode=false;         // first-person toggle
+let fpYaw=Math.PI;        // horizontal look angle (FP)
+let fpPitch=0;            // vertical look angle (FP, clamped)
+let fpDragX=0,fpDragY=0;  // last touch position for FP look
+let fpDragging=false;
 let pPos={x:0,z:0},playerGroup,animT=0,walkT=0;
 let dayT=0;           // 0..1 day cycle (full cycle = 8 real minutes)
 let clouds=[];        // cloud meshes
@@ -1049,7 +1099,7 @@ function buildDecorations(){
       const lb=new THREE.Mesh(new THREE.SphereGeometry(.14,8,6),
         new THREE.MeshBasicMaterial({color:0xffdd88}));
       lb.position.set(.22,3.5,0);g.add(lb);
-      const ll=new THREE.PointLight(0xffaa33,0.8,6);ll.position.set(.22,3.5,0);g.add(ll);
+      const ll=new THREE.PointLight(0xffaa33,0.8,6);ll.position.set(.22,3.5,0);ll._baseI=0.8;g.add(ll);
       g.position.set(lx,gy,lz);scene.add(g);
     });
   }
@@ -1489,8 +1539,61 @@ function buildBldMesh(id,wx,wz){
 const RAY=new THREE.Raycaster();const GPLANE=new THREE.Plane(new THREE.Vector3(0,1,0),0);
 function screenToGround(ex,ey){const nx=(ex/window.innerWidth)*2-1,ny=-(ey/window.innerHeight)*2+1;RAY.setFromCamera({x:nx,y:ny},camera);const t=new THREE.Vector3();RAY.ray.intersectPlane(GPLANE,t);return t;}
 function initCamera(){camera=new THREE.PerspectiveCamera(52,window.innerWidth/window.innerHeight,.5,300);window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});}
-function updateCam(){camera.position.set(camTarget.x+camDist*Math.sin(camAngle),camDist*.78,camTarget.z+camDist*Math.cos(camAngle));camera.lookAt(camTarget.x,0,camTarget.z);}
-function camZ(d){camDist=Math.max(8,Math.min(48,camDist+d*1.5));}
+function updateCam(){
+  if(fpMode && playerGroup){
+    // First-person: camera at player eye level
+    const eyeH=.82; // eye height above terrain
+    const px=playerGroup.position.x;
+    const py=playerGroup.position.y+eyeH;
+    const pz=playerGroup.position.z;
+    camera.position.set(px,py,pz);
+    // Look direction from yaw/pitch
+    const lookX=px+Math.sin(fpYaw)*Math.cos(fpPitch);
+    const lookY=py+Math.sin(fpPitch);
+    const lookZ=pz+Math.cos(fpYaw)*Math.cos(fpPitch);
+    camera.lookAt(lookX,lookY,lookZ);
+  } else {
+    // Third-person
+    camera.position.set(
+      camTarget.x+camDist*Math.sin(camAngle),
+      camDist*.78,
+      camTarget.z+camDist*Math.cos(camAngle)
+    );
+    camera.lookAt(camTarget.x,0,camTarget.z);
+  }
+}
+function toggleFP(){
+  fpMode=!fpMode;
+  const btn=document.getElementById('fp-btn');
+  const tpc=document.getElementById('tp-controls');
+  if(fpMode){
+    // Enter first-person
+    fpYaw=playerGroup?playerGroup.rotation.y+Math.PI:Math.PI;
+    fpPitch=0;
+    if(btn){btn.style.background='rgba(240,184,64,.3)';btn.style.borderColor='rgba(240,184,64,.5)';}
+    if(tpc)tpc.style.display='none';
+    // Hide player body in FP
+    if(playerGroup)playerGroup.children.forEach(c=>c.visible=false);
+    // Show FP crosshair
+    let ch=document.getElementById('fp-crosshair');
+    if(!ch){ch=document.createElement('div');ch.id='fp-crosshair';
+      ch.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:25;pointer-events:none;color:rgba(255,255,255,.7);font-size:18px;text-shadow:0 1px 4px rgba(0,0,0,.8)';
+      ch.textContent='+';document.body.appendChild(ch);}
+    ch.style.display='block';
+    toast('👁️ First-person — drag to look around',2000);
+  } else {
+    // Exit first-person
+    if(btn){btn.style.background='';btn.style.borderColor='';}
+    if(tpc)tpc.style.display='flex';
+    if(playerGroup)playerGroup.children.forEach(c=>c.visible=true);
+    const ch=document.getElementById('fp-crosshair');
+    if(ch)ch.style.display='none';
+    // Reset cam target to player
+    camTarget.x=pPos.x;camTarget.z=pPos.z;
+    toast('🗺️ Overview mode',1500);
+  }
+}
+function camZ(d){if(!fpMode)camDist=Math.max(8,Math.min(48,camDist+d*1.5));}
 function camR(d){camAngle+=d*.35;}
 function resetCam(){camTarget={x:0,z:0};camDist=22;camAngle=Math.PI*.65;}
 
@@ -1503,7 +1606,8 @@ function initThree(){
   renderer.setClearColor(0x7ab8d8);
   renderer.toneMapping=1;// LinearToneMapping
   scene=new THREE.Scene();
-  scene.fog=new THREE.FogExp2(0x9acce0,.016);
+  scene.fog=new THREE.FogExp2(0x9acce0,.015); // slightly thinner for better visibility
+  // Edge fog: terrain boundary is at ±35 units
   initCamera();
   scene.add(new THREE.AmbientLight(0xc0d8e8,.40));
   const sun=new THREE.DirectionalLight(0xfff0d0,1.15);sun.position.set(40,60,25);sun.castShadow=true;sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;sun.shadow.camera.left=sun.shadow.camera.bottom=-55;sun.shadow.camera.right=sun.shadow.camera.top=55;sun.shadow.camera.far=200;sun.shadow.bias=-.0003;scene.add(sun);
@@ -1518,6 +1622,71 @@ function initThree(){
   ambLight=scene.children.find(c=>c.isAmbientLight);
   fillLight=scene.children.find(c=>c.isDirectionalLight&&c!==sunLight);
   canvas.addEventListener('pointerdown',onWorldTap,{passive:false});
+  // First-person look drag
+  // Touch state
+  let _t1x=0,_t1y=0,_t2x=0,_t2y=0,_tDist=0,_tDragging=false,_tPinching=false;
+
+  canvas.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){
+      const t=e.touches[0];
+      _t1x=t.clientX;_t1y=t.clientY;
+      fpDragX=t.clientX;fpDragY=t.clientY;
+      fpDragging=fpMode;_tDragging=!fpMode;_tPinching=false;
+    } else if(e.touches.length===2){
+      _tDragging=false;fpDragging=false;_tPinching=true;
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      _tDist=Math.sqrt(dx*dx+dy*dy);
+      _t1x=(e.touches[0].clientX+e.touches[1].clientX)/2;
+      _t1y=(e.touches[0].clientY+e.touches[1].clientY)/2;
+    }
+  },{passive:true});
+
+  canvas.addEventListener('touchmove',e=>{
+    if(e.touches.length===2&&_tPinching){
+      // Pinch to zoom
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(!fpMode) camDist=Math.max(6,Math.min(52,camDist-(dist-_tDist)*.06));
+      _tDist=dist;
+      // Two-finger drag to rotate camera
+      const mx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+      const rotDx=mx-_t1x;
+      if(!fpMode) camAngle+=rotDx*0.008;
+      _t1x=mx;
+      e.preventDefault();
+    } else if(e.touches.length===1){
+      const t=e.touches[0];
+      const dx=t.clientX-fpDragX, dy=t.clientY-fpDragY;
+      if(fpMode&&fpDragging){
+        fpYaw+=dx*0.004;
+        fpPitch=Math.max(-.55,Math.min(.55,fpPitch-dy*0.004));
+      } else if(_tDragging&&!fpMode){
+        // Single-finger drag → rotate camera (third person)
+        camAngle+=dx*0.006;
+        // Vertical drag → adjust pitch
+        camDist=Math.max(6,Math.min(52,camDist+dy*0.04));
+      }
+      fpDragX=t.clientX;fpDragY=t.clientY;
+      e.preventDefault();
+    }
+  },{passive:false});
+
+  canvas.addEventListener('touchend',e=>{
+    if(e.touches.length===0){fpDragging=false;_tDragging=false;_tPinching=false;}
+    else if(e.touches.length===1){_tPinching=false;}
+  },{passive:true});
+  // Mouse look in FP (desktop)
+  let mouseFP=false;
+  canvas.addEventListener('mousedown',e=>{if(fpMode&&e.button===0){mouseFP=true;fpDragX=e.clientX;fpDragY=e.clientY;}});
+  canvas.addEventListener('mousemove',e=>{
+    if(!fpMode||!mouseFP)return;
+    fpYaw+=(e.clientX-fpDragX)*0.004;
+    fpPitch=Math.max(-.55,Math.min(.55,fpPitch-(e.clientY-fpDragY)*0.004));
+    fpDragX=e.clientX;fpDragY=e.clientY;
+  });
+  canvas.addEventListener('mouseup',()=>{mouseFP=false;});
   animate();
 }
 
@@ -1825,11 +1994,21 @@ function updateDayNight(){
   if(ambLight)ambLight.intensity=ambI;
   if(hemiLight)hemiLight.intensity=hemiI;
 
-  // Night: make lanterns glow brighter
+  // Night: lanterns glow, campfires stronger
   const isNight=t<.15||t>.80;
+  const isDawn=t>=.05&&t<.20;
+  const lanternI=isNight?2.0:isDawn?.8:.4;
   scene.traverse(obj=>{
-    if(obj.isPointLight&&obj.intensity!==undefined){
-      obj.intensity=isNight?2.2:.8;
+    if(obj.isPointLight&&obj.color){
+      const col=obj.color;
+      // Warm orange lights = lanterns/campfires
+      if(col.r>col.b&&col.r>col.g*1.2){
+        obj.intensity=lanternI*(obj._baseI||1);
+      }
+      // Blue lights = EMP buildings — brighter at night too
+      if(col.b>col.r&&col.b>col.g){
+        obj.intensity=isNight?obj._baseI*1.4:obj._baseI||.8;
+      }
     }
   });
 }
@@ -1869,11 +2048,20 @@ function animate(){requestAnimationFrame(animate);animT+=.016;
     window._waterMesh.position.y=-1.75+Math.sin(animT*.4)*.04;
     if(window._waterMat){const pulse=.75+Math.sin(animT*.3)*.06;window._waterMat.opacity=pulse;}
   }
+  renderMinimap();
   renderer.render(scene,camera);}
 
 function onWorldTap(e){
   if(!e.target||typeof e.target.closest!=='function')return;
   if(e.target.closest('#world-hud')||e.target.closest('#mode-toggle')||e.target.closest('#dpad')||e.target.closest('#cam-ctrl')||e.target.closest('#action-bar'))return;
+  if(fpMode){fpDragging=true;fpDragX=e.clientX||e.touches?.[0]?.clientX||0;fpDragY=e.clientY||e.touches?.[0]?.clientY||0;return;}
+  // Check if tapped a building
+  const ex=e.clientX||(e.touches?.[0]?.clientX)||window.innerWidth/2;
+  const ey=e.clientY||(e.touches?.[0]?.clientY)||window.innerHeight/2;
+  if(!placingBld){
+    const tappedBld=getBuildingAtTap(ex,ey);
+    if(tappedBld){showBuildingPopup(tappedBld);return;}
+  }
   if(!scene)return;e.preventDefault();
   if(placingBld){
     // Tap moves the ghost preview, doesn't immediately place
@@ -1889,9 +2077,11 @@ function nearestNode(){let best=null,bd=Infinity;resourceNodes.forEach(n=>{if(!n
 function rollRareDrop(type){const drops=RARE_DROPS[type];if(!drops)return null;for(const d of drops)if(Math.random()<d.chance)return d;return null;}
 
 function doMine(){
-  // Visual pulse on MINE button
   const mb=document.querySelector('.mine-btn');
-  if(mb){mb.style.transform='scale(.9)';setTimeout(()=>mb.style.transform='',100);}
+  if(mb){
+    mb.style.transform='scale(.88)';
+    setTimeout(()=>{mb.style.transform='scale(1.04)';setTimeout(()=>mb.style.transform='',80);},90);
+  }
   const n=nearestNode();if(!n){toast('Walk closer to a resource!');return;}
   const type=n.userData.type;n.userData.hp--;
   const op=n.position.clone();let si=0;
@@ -1908,16 +2098,20 @@ function doMine(){
 }
 
 function doSell(){
-  // Sell all resources for $EMP
   const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
-  let t=0;
-  Object.entries(rates).forEach(([k,v])=>{if((G.res[k]||0)>0){t+=G.res[k]*v;G.res[k]=0;}});
-  // Also sell economy resources
-  const erates={food:.5,wood:.8,stone:.8,iron:2,tools:3,gold:1.5};
-  Object.entries(erates).forEach(([k,v])=>{if((E.res[k]||0)>0){t+=E.res[k]*v;E.res[k]=0;}});
-  if(!t){toast('Nothing to sell!');return;}
-  const e=Math.floor(t*(1+(G.bld.market?.1:0)+(G.bld.hq?.2:0)));
-  addRes('emp',e);toast('💰 +'+e+' $EMP verdiend!');
+  const erates={food:.5,tools:3};
+  const sold=[];let t=0;
+  Object.entries(rates).forEach(([k,v])=>{const qty=G.res[k]||0;if(qty>0){t+=qty*v;sold.push(RES_ICO[k]+'×'+qty);G.res[k]=0;}});
+  Object.entries(erates).forEach(([k,v])=>{const qty=E.res[k]||0;if(qty>0){t+=qty*v;sold.push(RES_ICO[k]+'×'+qty);E.res[k]=0;}});
+  if(!t){toast('Nothing to sell — mine some resources first!');return;}
+  const mult=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
+  const e=Math.floor(t*mult);
+  addRes('emp',e);
+  showEmpFloat(e);
+  window.haptic?.('medium');
+  // Show breakdown
+  const breakdown=sold.slice(0,4).join('  ');
+  toast('💰 +'+e+' $EMP  ·  '+breakdown+(sold.length>4?' +more':''),3500);
   checkQuestProgress('sell',1);updateHUD();
 }
 
@@ -1932,12 +2126,33 @@ window.addEventListener('keyup',e=>{const m={ArrowUp:'w',KeyW:'w',ArrowDown:'s',
 
 function processMove(){
   if(!playerGroup)return;
-  const fwdX=-Math.sin(camAngle),fwdZ=-Math.cos(camAngle),rgtX=Math.cos(camAngle),rgtZ=-Math.sin(camAngle);
+  // Direction based on current camera mode
+  const angle=fpMode?fpYaw:camAngle;
+  const fwdX=-Math.sin(angle),fwdZ=-Math.cos(angle);
+  const rgtX=Math.cos(angle),rgtZ=-Math.sin(angle);
   let dx=0,dz=0;
-  if(moving['w']){dx+=fwdX*SPD;dz+=fwdZ*SPD;}if(moving['s']){dx-=fwdX*SPD;dz-=fwdZ*SPD;}if(moving['a']){dx-=rgtX*SPD;dz-=rgtZ*SPD;}if(moving['d']){dx+=rgtX*SPD;dz+=rgtZ*SPD;}
-  if(dx||dz){pPos.x=Math.max(-35,Math.min(35,pPos.x+dx));pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));const gy=sampleH(pPos.x,pPos.z);playerGroup.position.set(pPos.x,gy+.20,pPos.z);playerGroup.rotation.y=Math.atan2(-dx,-dz);walkT+=.28;playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;camTarget.x+=(pPos.x-camTarget.x)*.08;camTarget.z+=(pPos.z-camTarget.z)*.08;if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);}
+  if(moving['w']){dx+=fwdX*SPD;dz+=fwdZ*SPD;}
+  if(moving['s']){dx-=fwdX*SPD;dz-=fwdZ*SPD;}
+  if(moving['a']){dx-=rgtX*SPD;dz-=rgtZ*SPD;}
+  if(moving['d']){dx+=rgtX*SPD;dz+=rgtZ*SPD;}
+  if(dx||dz){
+    pPos.x=Math.max(-35,Math.min(35,pPos.x+dx));
+    pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));
+    const gy=sampleH(pPos.x,pPos.z);
+    playerGroup.position.set(pPos.x,gy+.20,pPos.z);
+    playerGroup.rotation.y=Math.atan2(-dx,-dz);
+    walkT+=.28;
+    if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;
+    if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;
+    if(!fpMode){camTarget.x+=(pPos.x-camTarget.x)*.06;camTarget.z+=(pPos.z-camTarget.z)*.06;}
+    if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);
+  }
 }
-function updateHints(){const n=nearestNode(),hint=document.getElementById('action-hint');if(!hint)return;if(placingBld){hint.textContent='🏗️ Tap to place · ESC cancels';hint.style.opacity='1';return;}if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
+function updateHints(){const n=nearestNode(),hint=document.getElementById('action-hint');
+  // Glow MINE button when near resource
+  const mb=document.querySelector('.mine-btn');
+  if(mb) mb.classList.toggle('nearResource',!!n&&!placingBld);
+  if(!hint)return;if(placingBld){hint.textContent='🏗️ Tap to place · ESC cancels';hint.style.opacity='1';return;}if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
 
 // ═══ BUILDING ═══
 function startBuild(id){
@@ -1965,6 +2180,7 @@ function confirmPlace(wx,wz){
     const def2=BLD_DEF[id];if(def2)for(const[r,v]of Object.entries(def2.cost))G.res[r]=(G.res[r]||0)+v;updateHUD();return;
   }
   G.bld[id]=true;removeSuperseded(id);buildBldMesh(id,snap.x,snap.z);startPassive();updateEra();updateHUD();renderBuildGrid();checkQuestProgress('build',1);
+  checkAchievements();
   window.haptic?.('heavy');
   const _bdef=BLD_DEF[id];
   const _empMsg=_bdef?.empOut>0?' · +'+(_bdef.empOut*(E.empMult||1)).toFixed(2)+'💰/tick':'';
@@ -2246,6 +2462,8 @@ function cpTab(name){
   const tabMap=['empire','games','quest','upg','prestige','shop','stats'];
   const idx=tabMap.indexOf(name);if(idx>=0){const tabs=document.querySelectorAll('.cp-tab');if(tabs[idx])tabs[idx].classList.add('on');}
   if(name==='empire')renderEmpirePanel();
+  if(name==='stats')renderStatsTab();
+  updateTabBadges();
   if(name==='quest')renderQuestsTab();
   if(name==='upg')renderUpgradesTab();
   if(name==='prestige')renderPrestigeTab();
@@ -2332,6 +2550,7 @@ function renderUpgradeSection(){
 }
 
 function renderPassiveSection(){
+  // This shows all passive income including BLD_DEF empOut
   const ph=passPerHour();let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⏰ PASSIVE PER HOUR</div>';
   const activeKeys=Object.keys(ph).filter(k=>ph[k]>0);
   if(!activeKeys.length)return html+'<div style="text-align:center;padding:16px;color:var(--txt-d);font-size:11px">Bouw gebouwen voor passief inkomen</div>';
@@ -2355,6 +2574,12 @@ function renderBuildGrid(){if(document.getElementById('cp-empire')?.classList.co
 // ═══ HUD ═══
 function updateHUD(){
   const rp=document.getElementById('res-compact');
+  // Resource cap warnings
+  const capWarn=Object.entries(G.res).filter(([k,v])=>{const cap=5000;return v>cap*.9&&k!=='emp';});
+  if(capWarn.length>0&&E.tick%120===0){
+    const names=capWarn.map(([k])=>RES_ICO[k]||k).join(' ');
+    toast('⚠️ '+names+' almost full — sell resources!',3000);
+  }
   if(rp){
     const list=[
       {ico:'🪨',v:G.res.stone,      always:true},
@@ -2376,7 +2601,9 @@ function updateHUD(){
         return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':'var(--txt)'}">${v}</span></div>`;
       }).join('');
   }
-  const ep=document.getElementById('emp-val');if(ep)ep.textContent=Math.floor(E.res.emp||G.res.emp||0);
+  const _empV=Math.floor(E.res.emp||G.res.emp||0);
+  const ep=document.getElementById('emp-val');
+  if(ep&&ep.textContent!==String(_empV))ep.textContent=_empV;
   // Show passive EMP rate in topbar
   const pr=document.getElementById('passive-rate');
   const prv=document.getElementById('passive-rate-val');
@@ -2387,6 +2614,13 @@ function updateHUD(){
   }
   // Show multiplier on emp pill if above 1
   const empPill=document.getElementById('emp-pill');
+  // Show notification dot on $EMP button when upgrade affordable
+  const empNotif=document.getElementById('emp-notif');
+  if(empNotif){
+    const emp=E.res.emp||0;
+    const nextU=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
+    empNotif.style.display=(nextU&&emp>=nextU.cost)?'block':'none';
+  }
   if(empPill&&(E.empMult||1)>1){
     let mEl=document.getElementById('emp-mult-badge');
     if(!mEl){mEl=document.createElement('span');mEl.id='emp-mult-badge';mEl.style.cssText='font-size:7px;color:var(--grn2);font-weight:700;margin-left:1px';empPill.appendChild(mEl);}
@@ -2452,7 +2686,7 @@ function showMysteryBox(){const r=pickMysteryReward(),box=document.getElementByI
 
 // ═══ MINI-GAMES ═══
 const GTITLES={tap:'⛏️ MINE DASH',aim:'🎯 TOWER DEFENSE',mem:'🃏 RUNE MATCH',block:'🧱 BLOCK BUILDER',react:'⚡ LIGHTNING FORGE'};
-function playGame(id){if(cdLeft(id)>0){toast('Cooldown active!');return;}if(id==='block'&&!G.bld.lumber){toast('Build Lumber Mill!');return;}if(id==='react'&&!G.bld.forge){toast('Bouw de Smederij!');return;}G.curGame=id;closeCity();document.getElementById('gmod').classList.add('on');['tap','aim','mem','block','react'].forEach(g=>document.getElementById('g-'+g).style.display='none');document.getElementById('gmod-title').textContent=GTITLES[id];({tap:initTap,aim:initAim,mem:initMem,block:initBlock,react:initReact})[id]();}
+function playGame(id){if(cdLeft(id)>0){toast('Cooldown active!');return;}if(id==='block'&&!G.bld.lumber){toast('Build Lumber Mill!');return;}if(id==='react'&&!G.bld.forge){toast('Build the Forge first!');return;}G.curGame=id;closeCity();document.getElementById('gmod').classList.add('on');['tap','aim','mem','block','react'].forEach(g=>document.getElementById('g-'+g).style.display='none');document.getElementById('gmod-title').textContent=GTITLES[id];({tap:initTap,aim:initAim,mem:initMem,block:initBlock,react:initReact})[id]();}
 function closeGame(){checkQuestProgress('play',1);document.getElementById('gmod').classList.remove('on');clearGameTimers();}
 function clearGameTimers(){if(typeof _aimT!=='undefined'&&_aimT)clearInterval(_aimT);if(typeof _aimST!=='undefined'&&_aimST)clearInterval(_aimST);if(typeof _tapT!=='undefined'&&_tapT)clearInterval(_tapT);if(typeof _tapSpawnT!=='undefined'&&_tapSpawnT)clearInterval(_tapSpawnT);if(typeof _mem!=='undefined'&&_mem&&_mem.timerT)clearInterval(_mem.timerT);if(typeof _blkT!=='undefined'&&_blkT)clearInterval(_blkT);if(typeof _reactT!=='undefined'&&_reactT)clearTimeout(_reactT);if(typeof _aimAF!=='undefined'&&_aimAF){cancelAnimationFrame(_aimAF);_aimAF=null;}if(typeof _aimOn!=='undefined')_aimOn=false;}
 function showResult(title,sub,rws){
@@ -2460,7 +2694,7 @@ function showResult(title,sub,rws){
   const totalEmp=Object.entries(rws).filter(([k])=>k==='emp').reduce((s,[,v])=>s+v,0);
   if(G.curGame&&totalEmp>0) dbSubmitScore(G.curGame, Object.values(rws).reduce((a,b)=>a+b,0), totalEmp);
   G.pending=rws;document.getElementById('rp-t').textContent=title;document.getElementById('rp-s').textContent=sub;const w=document.getElementById('rp-rws');w.innerHTML='';for(const[k,v]of Object.entries(rws))if(v>0)w.innerHTML+=`<div class="rp-rw"><div class="rp-rw-v">+${v}</div><div class="rp-rw-l">${RES_ICO[k]||''} ${k.toUpperCase()}</div></div>`;document.getElementById('result').classList.add('on');}
-function collectResult(){for(const[k,v]of Object.entries(G.pending))addRes(k,v);G.pending={};document.getElementById('result').classList.remove('on');closeGame();updateHUD();toast('✓ Resources verzameld!');}
+function collectResult(){for(const[k,v]of Object.entries(G.pending))addRes(k,v);G.pending={};document.getElementById('result').classList.remove('on');closeGame();updateHUD();toast('✓ Resources collected!');}
 function playAgain(){document.getElementById('result').classList.remove('on');if(G.curGame&&cdLeft(G.curGame)<=0)playGame(G.curGame);else{closeGame();toast('Cooldown active!');}}
 
 // GAME 1: MINE DASH
@@ -2516,7 +2750,7 @@ let _react={},_reactT=null;
 function initReact(){_react={rnd:0,max:6,on:false,wait:false,st:0,emp:0,score:0};document.getElementById('g-react').style.display='flex';const res=document.getElementById('react-res');if(res)res.innerHTML='';const fb=document.getElementById('react-fb');if(fb)fb.textContent='';const rnd=document.getElementById('react-rnd');if(rnd)rnd.textContent='ROUND 1 / 6';setTimeout(nextReact,800);}
 function nextReact(){if(_react.rnd>=_react.max){endReact();return;}_react.rnd++;_react.on=false;_react.wait=true;const rnd=document.getElementById('react-rnd');if(rnd)rnd.textContent='ROUND '+_react.rnd+' / '+_react.max;const fb=document.getElementById('react-fb');if(fb)fb.textContent='';const c=document.getElementById('react-c'),ring=document.getElementById('react-ring');if(c){c.style.background='#141c26';c.style.borderColor='#333';c.style.boxShadow='';c.textContent='⚒️';}if(ring){ring.style.transition='none';ring.style.transform='scale(1.4)';ring.style.borderColor='rgba(240,184,64,0.3)';}const delay=1000+Math.random()*2500;setTimeout(()=>{if(!_react.wait)return;if(ring){ring.style.transition='transform 0.3s ease-in, border-color 0.3s';ring.style.transform='scale(1)';ring.style.borderColor='#f5c830';}setTimeout(()=>{if(!_react.wait)return;_react.on=true;_react.st=Date.now();if(c){c.style.background='radial-gradient(circle,#3a2000,#141c26)';c.style.borderColor='#f5c830';c.style.boxShadow='0 0 30px #f5c830';c.textContent='⚡';}if(ring){ring.style.transition='all .05s';ring.style.borderColor='#e09030';}clearTimeout(_reactT);_reactT=setTimeout(()=>{if(_react.on){_react.on=false;_react.wait=false;if(fb){fb.textContent='❌ Too slow!';fb.style.color='#ff4444';}if(c){c.style.background='#1c1020';c.style.borderColor='#cc2200';c.style.boxShadow='';c.textContent='⚒️';}if(ring)ring.style.borderColor='transparent';setTimeout(nextReact,1200);}},1200);},300);},delay);}
 function reactTap(){if(_react.on){const ms=Date.now()-_react.st;_react.on=false;_react.wait=false;clearTimeout(_reactT);const ring=document.getElementById('react-ring');if(ring)ring.style.borderColor='transparent';let earned=0,grade='';if(ms<200){earned=8;grade='⚡ LIGHTNING! '+ms+'ms';}else if(ms<350){earned=5;grade='🔥 Fast! '+ms+'ms';}else if(ms<500){earned=3;grade='✅ Good! '+ms+'ms';}else{earned=1;grade='🐌 Slow '+ms+'ms';}_react.emp+=earned;_react.score+=earned;const fb=document.getElementById('react-fb');if(fb){fb.textContent=grade;fb.style.color=ms<200?'#f5c830':ms<350?'#e09030':ms<500?'#44ff88':'#888';}const c=document.getElementById('react-c');if(c){c.style.background=`radial-gradient(circle,${ms<200?'#4a3800':'#1a1808'},#0c1018)`;c.style.borderColor=ms<200?'#f5c830':ms<350?'#e09030':'#44aa44';c.style.boxShadow=ms<200?'0 0 40px #f5c830':'';c.textContent=ms<200?'⚡':ms<350?'🔥':'✅';}const res=document.getElementById('react-res');if(res)res.innerHTML+=`<div style="font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:${ms<200?'#f5c830':ms<350?'#e09030':'#aaa'}">R${_react.rnd}: +${earned}🪙</div>`;setTimeout(nextReact,1000);}else if(_react.wait){_react.wait=false;const fb2=document.getElementById('react-fb');if(fb2){fb2.textContent='⚠️ Te vroeg!';fb2.style.color='#e09030';}const c2=document.getElementById('react-c');if(c2){c2.style.background='#1c1020';c2.textContent='⚒️';}const ring2=document.getElementById('react-ring');if(ring2)ring2.style.borderColor='transparent';setTimeout(nextReact,1200);}}
-function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rws.crystal=1;else if(_react.emp>=24)rws.gold=1;setCd('react');showResult('⚡ Lightning Forge!',`${_react.emp}🪙 verdiend · score ${_react.score}`,rws);}
+function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rws.crystal=1;else if(_react.emp>=24)rws.gold=1;setCd('react');showResult('⚡ Lightning Forge!',`${_react.emp}🪙 earned · score ${_react.score}`,rws);}
 
 // ═══ SAVE / LOAD ═══
 function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
@@ -2864,6 +3098,11 @@ function launch(){
   eLoad();
   loadWalletLink();
   startDBSync(); // Cloud save/load
+  checkDailyLogin();
+  checkRefBonus();
+  setTimeout(calcOfflineIncome,2000);
+  setTimeout(showPresaleStrip,3000);
+  localStorage.setItem('empyria_last_seen',Date.now());
 
   // Start economy tick (1 tick = 1 game-day = 8s)
   setTimeout(()=>{
@@ -2872,8 +3111,16 @@ function launch(){
     clearInterval(window._eTick);
     window._eTick = setInterval(()=>{
       eTick();
-      // Auto-save every 60 ticks
       if(E.tick%60===0){ eSave(); saveGame(); }
+      if(E.tick%300===0) dbSyncPlayer();
+  // Upgrade reminder every 200 ticks
+  if(E.tick%200===0){
+    const emp=E.res.emp||0;
+    const next=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
+    if(next&&emp>=next.cost&&Math.random()<.4){
+      toast('💡 You can afford '+next.n+' ('+next.cost+'💰)! Tap $EMP to upgrade.',4000);
+    }
+  }
     }, 8000);  // 1 game-day = 8 real seconds
   }, 800);
 
@@ -3011,6 +3258,447 @@ const E={
 
 function ePop(){return E.pop.workers+E.pop.merchants+E.pop.nobles;}
 
+
+function shareTelegram(){
+  const emp=Math.floor(E.totalEmpEarned||0);
+  const mult=(E.empMult||1).toFixed(1);
+  const blds=Object.values(G.bld).filter(v=>v===true).length;
+  const text=`🏰 I'm playing Empyria!\n\n💰 ${emp.toLocaleString()} \$EMP earned\n🏗️ ${blds} buildings\n⚡ ×${mult} production boost\n\nJoin me and earn \$EMP tokens before the presale ends! 🚀`;
+  const url='https://t.me/share/url?url=https://fortunefiinc-spec.github.io/Empyria-MAIN&text='+encodeURIComponent(text);
+  if(window.Telegram?.WebApp?.openTelegramLink){
+    window.Telegram.WebApp.openTelegramLink(url);
+  } else {
+    window.open(url,'_blank');
+  }
+  eEarn(5,'Share bonus'); toast('🎉 +5 $EMP share bonus!',2000); localStorage.setItem('empyria_shared','1'); checkAchievements();
+}
+
+const EMP_MILESTONES=[10,50,100,500,1000,5000,10000,50000];
+function checkEmpMilestones(){
+  const earned=Math.floor(E.totalEmpEarned||0);
+  const key='empyria_milestone_'+earned;
+  for(const m of EMP_MILESTONES){
+    if(earned>=m&&!localStorage.getItem('empyria_ms_'+m)){
+      localStorage.setItem('empyria_ms_'+m,'1');
+      window.haptic?.('heavy');
+      const msg=m>=10000?'🚀 WHALE STATUS! '+m.toLocaleString()+' $EMP earned!'
+        :m>=1000?'💎 Elite! '+m.toLocaleString()+' $EMP earned!'
+        :m>=100?'⚡ '+m.toLocaleString()+' $EMP milestone!'
+        :'🌱 '+m+' $EMP — great start!';
+      setTimeout(()=>toast(msg,3500),200);
+      // Encourage share at big milestones
+      if(m>=500) setTimeout(()=>toast('📣 Share your progress and earn +5 $EMP!',3000),4000);
+      break;
+    }
+  }
+}
+
+function checkDailyLogin(){
+  const today=new Date().toDateString();
+  const last=localStorage.getItem('empyria_last_login');
+  if(last===today) return;
+  localStorage.setItem('empyria_last_login',today);
+  const streak=parseInt(localStorage.getItem('empyria_login_streak')||'0')+1;
+  localStorage.setItem('empyria_login_streak',streak);
+  const bonus=Math.min(50,5*streak); // 5 EMP × day streak, max 50
+  setTimeout(()=>{
+    eEarn(bonus,'Daily login');
+    toast('📅 Day '+streak+' login bonus! +'+bonus+' $EMP',3000);
+    if(streak%7===0) setTimeout(()=>toast('🗓️ 7-day streak! Double bonus incoming!',3000),3500);
+  },2000);
+}
+
+function getRefCode(){
+  // Use Telegram user ID or wallet address as ref code
+  const tgId=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+  const wallet=localStorage.getItem('emp_wallet');
+  return tgId||(wallet?wallet.slice(2,10):null);
+}
+
+function showReferral(){
+  const code=getRefCode();
+  if(!code){toast('Connect wallet or Telegram to get your referral link!');return;}
+  const url=`https://t.me/EmpyriaBot/app?startapp=ref_${code}`;
+  const shareText=`🏰 Join me in Empyria!\n\nI've earned $EMP tokens in this medieval empire game. You get a +20 $EMP bonus when you use my link!\n\n${url}`;
+  if(window.Telegram?.WebApp?.openTelegramLink){
+    window.Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(shareText)}`);
+  } else {
+    navigator.clipboard?.writeText(url).then(()=>toast('📋 Referral link copied!',2000));
+  }
+  eEarn(10,'Referral share bonus');toast('🔗 +10 $EMP share bonus!',2000);
+}
+
+function checkRefBonus(){
+  // Check if launched via referral link
+  const params=new URLSearchParams(window.Telegram?.WebApp?.initData||'');
+  const startParam=window.Telegram?.WebApp?.initDataUnsafe?.start_param||'';
+  if(startParam.startsWith('ref_')&&!localStorage.getItem('empyria_ref_used')){
+    localStorage.setItem('empyria_ref_used','1');
+    setTimeout(()=>{
+      eEarn(20,'Referral bonus');
+      toast('🎁 +20 $EMP referral bonus from a friend!',3500);
+    },3000);
+  }
+}
+
+// ─── Presale Strip ────────────────────────────────────────────────────────────
+let _stripDismissed=false;
+let _stripTimer=null;
+
+function updatePresaleStrip(){
+  if(_stripDismissed) return;
+  const strip=document.getElementById('presale-strip');
+  const txt=document.getElementById('strip-text');
+  if(!strip||!txt) return;
+
+  const presaleEnd=new Date('2026-06-15T00:00:00Z');
+  const ms=presaleEnd-Date.now();
+  if(ms<=0){strip.classList.remove('visible');return;}
+
+  const d=Math.floor(ms/86400000);
+  const h=Math.floor((ms%86400000)/3600000);
+  const m=Math.floor((ms%3600000)/60000);
+
+  const emp=Math.floor(E?.totalEmpEarned||G?.res?.emp||0);
+  const mult=(E?.empMult||1).toFixed(1);
+  txt.textContent=`Presale ends in ${d}d ${h}h ${m}m · ${emp.toLocaleString()} $EMP earned · ×${mult} boost`;
+}
+
+function showPresaleStrip(){
+  if(_stripDismissed) return;
+  const strip=document.getElementById('presale-strip');
+  if(strip) strip.classList.add('visible');
+  updatePresaleStrip();
+  // Update every minute
+  clearInterval(_stripTimer);
+  _stripTimer=setInterval(updatePresaleStrip,30000);
+}
+
+function dismissStrip(){
+  _stripDismissed=true;
+  const strip=document.getElementById('presale-strip');
+  if(strip){strip.classList.remove('visible');}
+  // Only dismiss for this session — reappears next time
+  clearInterval(_stripTimer);
+  // Show again after 5 minutes
+  setTimeout(()=>{_stripDismissed=false;showPresaleStrip();},300000);
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
+function getBuildingAtTap(ex,ey){
+  const nx=(ex/window.innerWidth)*2-1, ny=-(ey/window.innerHeight)*2+1;
+  RAY.setFromCamera({x:nx,y:ny},camera);
+  // Check distance to each placed building
+  let closest=null, closestD=Infinity;
+  Object.entries(buildingMeshes).forEach(([id,mesh])=>{
+    if(!mesh||!G.bld[id]) return;
+    const d=RAY.ray.distanceToPoint(mesh.position);
+    if(d<2.5&&d<closestD){closest=id;closestD=d;}
+  });
+  return closest;
+}
+
+function showBuildingPopup(id){
+  const def=BLD_DEF[id]; if(!def) return;
+  const existing=document.getElementById('bld-popup');
+  if(existing) existing.remove();
+  const upgLvl=G.upgrades?.[id]||0;
+  const empRate=def.empOut?(def.empOut*(E.empMult||1)).toFixed(2):null;
+  const passRes=Object.entries(PASS_DEF[id]||{}).filter(([,v])=>v>0);
+
+  const popup=document.createElement('div');
+  popup.id='bld-popup';
+  popup.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:50;background:linear-gradient(160deg,var(--bg2),var(--bg3));border:1.5px solid rgba(240,184,64,.35);border-radius:16px;padding:14px 16px;min-width:220px;max-width:88vw;pointer-events:all;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+  popup.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:28px">${def.ico}</span>
+      <div style="flex:1">
+        <div style="font-family:Cinzel,serif;font-size:13px;color:var(--gold-b);font-weight:700">${def.name}</div>
+        <div style="font-size:9px;color:var(--txt-d)">ERA ${def.era} · ${def.workers||1} workers</div>
+      </div>
+      <div onclick="document.getElementById('bld-popup').remove()" style="color:rgba(255,255,255,.3);font-size:20px;cursor:pointer;padding:0 4px">×</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+      ${empRate?`<div style="background:rgba(64,200,112,.1);border:1px solid rgba(64,200,112,.2);border-radius:8px;padding:7px;text-align:center">
+        <div style="font-size:14px;font-weight:900;color:var(--grn2)">+${empRate}</div>
+        <div style="font-size:7px;color:var(--txt-d)">💰/tick</div>
+      </div>`:''}
+      ${passRes.map(([r,v])=>`<div style="background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:7px;text-align:center">
+        <div style="font-size:14px;font-weight:900;color:var(--txt)">+${v}</div>
+        <div style="font-size:7px;color:var(--txt-d)">${RES_ICO[r]||r}/tick</div>
+      </div>`).join('')}
+      <div style="background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:7px;text-align:center">
+        <div style="font-size:14px;font-weight:900;color:var(--txt)">${upgLvl}</div>
+        <div style="font-size:7px;color:var(--txt-d)">upgrades</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px">
+      ${G.upgrades?.[id]<(UPG_DEF[id]?.length||0)?`<button onclick="document.getElementById('bld-popup').remove();openCity();setTimeout(()=>empTab('upgrades'),50)" style="flex:1;padding:8px;background:rgba(240,184,64,.15);border:1px solid rgba(240,184,64,.3);border-radius:8px;color:var(--gold-b);font-size:11px;font-weight:700;cursor:pointer">⬆️ Upgrade</button>`:''}
+      <button onclick="startMoveWorldBld('${id}');document.getElementById('bld-popup').remove()" style="flex:1;padding:8px;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;color:var(--txt2);font-size:11px;font-weight:700;cursor:pointer">↔️ Move</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+  // Auto-close after 6s
+  setTimeout(()=>{const p=document.getElementById('bld-popup');if(p)p.remove();},6000);
+  window.haptic?.('light');
+}
+
+function calcOfflineIncome(){
+  const lastSeen=parseInt(localStorage.getItem('empyria_last_seen')||Date.now());
+  const now=Date.now();
+  const awayMs=Math.min(now-lastSeen, 8*3600000); // cap at 8 hours
+  const awaySec=awayMs/1000;
+  if(awaySec<60) return; // less than 1 min — skip
+
+  // Calculate passive EMP rate at time of leaving
+  const passRate=Object.entries(G.bld).reduce((sum,[id,built])=>{
+    if(built!==true) return sum;
+    const def=BLD_DEF[id]; return sum+(def?.empOut||0);
+  },0)*(E.empMult||1);
+
+  if(passRate<=0) return;
+
+  const ticksAway=awaySec/8; // 8s per tick
+  const earned=Math.floor(passRate*ticksAway*0.5); // 50% efficiency offline
+  if(earned<1) return;
+
+  eEarn(earned,'Offline income');
+  const hAway=Math.floor(awaySec/3600), mAway=Math.floor((awaySec%3600)/60);
+  const timeStr=hAway>0?`${hAway}h ${mAway}m`:`${mAway}m`;
+  setTimeout(()=>{
+    toast(`💤 Away for ${timeStr} — +${earned} $EMP passive income!`,4000);
+    showEmpFloat(earned);
+  },2500);
+}
+
+const ACHIEVEMENTS=[
+  {id:'first_mine',   ico:'⛏️', name:'First Strike',      desc:'Mine your first resource',           check:()=>(G.stats?.stone||0)+(G.stats?.wood||0)>0},
+  {id:'first_build',  ico:'🏗️', name:'Builder',           desc:'Place your first building',           check:()=>Object.values(G.bld).some(v=>v===true)},
+  {id:'emp_100',      ico:'💰', name:'Token Collector',   desc:'Earn 100 $EMP total',                check:()=>(E.totalEmpEarned||0)>=100},
+  {id:'emp_1000',     ico:'💎', name:'Token Hoarder',     desc:'Earn 1,000 $EMP total',              check:()=>(E.totalEmpEarned||0)>=1000},
+  {id:'emp_10000',    ico:'🌟', name:'Token Whale',       desc:'Earn 10,000 $EMP total',             check:()=>(E.totalEmpEarned||0)>=10000},
+  {id:'build_5',      ico:'🏘️', name:'Village',           desc:'Build 5 buildings',                  check:()=>Object.values(G.bld).filter(v=>v===true).length>=5},
+  {id:'build_15',     ico:'🏯', name:'City',              desc:'Build 15 buildings',                 check:()=>Object.values(G.bld).filter(v=>v===true).length>=15},
+  {id:'era2',         ico:'⚙️', name:'Iron Age',          desc:'Reach ERA II',                       check:()=>G.era>=2},
+  {id:'era5',         ico:'🌌', name:'Shadow Empire',     desc:'Reach ERA V',                        check:()=>G.era>=5},
+  {id:'multiplier',   ico:'🚀', name:'Early Investor',    desc:'Buy your first presale boost',       check:()=>(E.empMult||1)>1},
+  {id:'streak7',      ico:'🗓️', name:'Dedicated',         desc:'Log in 7 days in a row',             check:()=>parseInt(localStorage.getItem('empyria_login_streak')||0)>=7},
+  {id:'share',        ico:'📣', name:'Ambassador',        desc:'Share Empyria with a friend',        check:()=>localStorage.getItem('empyria_shared')==='1'},
+];
+
+function checkAchievements(){
+  const done=JSON.parse(localStorage.getItem('empyria_achievements')||'[]');
+  ACHIEVEMENTS.forEach(a=>{
+    if(done.includes(a.id)) return;
+    if(a.check()){
+      done.push(a.id);
+      localStorage.setItem('empyria_achievements',JSON.stringify(done));
+      window.haptic?.('heavy');
+      setTimeout(()=>showAchievementToast(a),500);
+    }
+  });
+}
+
+function showAchievementToast(a){
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:998;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1.5px solid rgba(240,184,64,.5);border-radius:14px;padding:10px 16px;display:flex;align-items:center;gap:10px;opacity:0;transition:all .35s;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none;white-space:nowrap';
+  el.innerHTML=`<span style="font-size:22px">${a.ico}</span><div><div style="font-size:9px;color:var(--gold);letter-spacing:1px">ACHIEVEMENT UNLOCKED</div><div style="font-size:12px;font-weight:700;color:var(--txt)">${a.name}</div><div style="font-size:9px;color:var(--txt-d)">${a.desc}</div></div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>{el.style.opacity='1';el.style.transform='translateX(-50%) translateY(0)';},50);
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(-50%) translateY(-20px)';setTimeout(()=>el.remove(),350);},3200);
+}
+
+function renderStatsTab(){
+  const el=document.getElementById('cp-stats');if(!el)return;
+  const bldCount=Object.values(G.bld).filter(v=>v===true).length;
+  const totalMined=Object.values(G.stats||{}).reduce((a,b)=>a+(typeof b==='number'?b:0),0);
+  const passRate=Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0);},0)*(E.empMult||1);
+  const empPerHr=Math.round(passRate*450);
+  const loginStreak=parseInt(localStorage.getItem('empyria_login_streak')||0);
+  const achievements=JSON.parse(localStorage.getItem('empyria_achievements')||'[]');
+
+  const row=(ico,label,val,col='var(--gold-b)')=>
+    `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="font-size:14px;width:22px;text-align:center">${ico}</span>
+      <span style="flex:1;font-size:11px;color:var(--txt2)">${label}</span>
+      <span style="font-size:12px;font-weight:700;color:${col}">${val}</span>
+    </div>`;
+
+  el.innerHTML=`
+    <!-- EMP Summary -->
+    <div style="background:linear-gradient(135deg,#1a1200,#241800);border:1.5px solid rgba(240,184,64,.3);border-radius:12px;padding:12px;margin-bottom:8px;text-align:center">
+      <div style="font-size:9px;color:var(--txt-d);letter-spacing:2px;margin-bottom:4px">YOUR AIRDROP SCORE</div>
+      <div style="font-size:32px;font-weight:900;color:var(--emp);font-family:Cinzel,serif">${Math.floor(E.totalEmpEarned||0).toLocaleString()}</div>
+      <div style="font-size:10px;color:var(--grn2);margin-top:2px">+${empPerHr}/hr passive · ×${(E.empMult||1).toFixed(1)} mult</div>
+      <div style="font-size:9px;color:var(--txt-d);margin-top:2px">Est. allocation: ${Math.floor((E.totalEmpEarned||0)/10).toLocaleString()} tokens</div>
+    </div>
+
+    <!-- Progress stats -->
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:10px;margin-bottom:8px">
+      <div style="font-size:8px;color:var(--txt-d);letter-spacing:2px;margin-bottom:6px">📈 PROGRESS</div>
+      ${row('🏗️','Buildings placed',bldCount+' / 31')}
+      ${row('⭐','ERA',G.era+' / 5')}
+      ${row('🌟','Prestige level',G.prestige)}
+      ${row('📅','Login streak',loginStreak+'d')}
+      ${row('🏆','Achievements',achievements.length+' / '+ACHIEVEMENTS.length)}
+      ${row('📦','Mystery boxes',G.mysteryBoxes||0)}
+    </div>
+
+    <!-- Mining stats -->
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:10px;margin-bottom:8px">
+      <div style="font-size:8px;color:var(--txt-d);letter-spacing:2px;margin-bottom:6px">⛏️ RESOURCES MINED</div>
+      ${[['🪨','Stone',G.stats?.stone],['🪵','Wood',G.stats?.wood],['🥇','Gold',G.stats?.gold],
+         ['⚙️','Iron',G.stats?.iron],['💎','Crystal',G.stats?.crystal]].map(([i,l,v])=>row(i,l,(v||0).toLocaleString())).join('')}
+    </div>
+
+    <!-- Achievements grid -->
+    <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:10px">
+      <div style="font-size:8px;color:var(--txt-d);letter-spacing:2px;margin-bottom:8px">🏆 ACHIEVEMENTS (${achievements.length}/${ACHIEVEMENTS.length})</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        ${ACHIEVEMENTS.map(a=>{
+          const done=achievements.includes(a.id);
+          return`<div title="${a.name}: ${a.desc}" style="aspect-ratio:1;background:${done?'rgba(240,184,64,.12)':'rgba(255,255,255,.03)'};border:1px solid ${done?'rgba(240,184,64,.3)':'rgba(255,255,255,.07)'};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px">
+            <span style="font-size:18px;${done?'':'filter:grayscale(1);opacity:.3'}">${a.ico}</span>
+            <span style="font-size:7px;color:${done?'var(--gold-b)':'var(--txt-d)'};text-align:center;line-height:1.1">${a.name}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function updateTabBadges(){
+  // Quest badge — incomplete quests
+  const incomplete=(G.quests||[]).filter(q=>!q.done).length;
+  const questTab=document.querySelector('.cp-tab[onclick*="quest"] i');
+  if(questTab){
+    const badge=questTab.parentElement.querySelector('.tab-badge');
+    if(incomplete>0){
+      if(!badge){
+        const b=document.createElement('div');
+        b.className='tab-badge';
+        b.style.cssText='position:absolute;top:4px;right:4px;background:var(--red);color:#fff;border-radius:5px;font-size:7px;font-weight:700;padding:0 3px;min-width:12px;text-align:center;line-height:12px';
+        b.textContent=incomplete;
+        questTab.parentElement.style.position='relative';
+        questTab.parentElement.appendChild(b);
+      } else { badge.textContent=incomplete; }
+    } else if(badge) badge.remove();
+  }
+}
+
+
+let _mmBig=false;
+function toggleMinimap(){
+  _mmBig=!_mmBig;
+  const cv=document.getElementById('minimap-canvas');
+  if(!cv)return;
+  const sz=_mmBig?180:100;
+  cv.width=sz;cv.height=sz;
+  cv.style.width=sz+'px';cv.style.height=sz+'px';
+  renderMinimap();
+}
+
+let _mmFrame=0;
+function renderMinimap(){
+  const canvas=document.getElementById('minimap-canvas');
+  if(!canvas||!scene)return;
+  // Only render every 3rd animate frame for performance
+  _mmFrame++;if(_mmFrame%3!==0&&!_mmBig)return;
+
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const WORLD=76; // world radius in units
+  const S=W/WORLD; // scale: world units → pixels
+
+  // Background — dark terrain green
+  ctx.fillStyle='#0e1e10';
+  ctx.beginPath();
+  ctx.roundRect?ctx.roundRect(0,0,W,H,10):ctx.rect(0,0,W,H);
+  ctx.fill();
+
+  // Water circle (edge of map)
+  const grad=ctx.createRadialGradient(W/2,H/2,W*.28,W/2,H/2,W*.5);
+  grad.addColorStop(0,'rgba(20,50,80,0)');
+  grad.addColorStop(.7,'rgba(16,40,70,.4)');
+  grad.addColorStop(1,'rgba(16,40,70,.85)');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+  // Terrain height hints (simple radial gradient for hills)
+  const tg=ctx.createRadialGradient(W*.35,H*.35,0,W/2,H/2,W*.45);
+  tg.addColorStop(0,'rgba(40,90,30,.3)');
+  tg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=tg;ctx.fillRect(0,0,W,H);
+
+  // Paths (approximate with sine pattern lines)
+  ctx.strokeStyle='rgba(160,130,60,.25)';ctx.lineWidth=2;
+  for(let px2=-WORLD/2;px2<WORLD/2;px2+=6){
+    const sx=W/2+px2*S;
+    const sy1=H/2+(Math.sin(px2*.18)*8+4)*S;
+    const sy2=H/2+(Math.sin(px2*.18+.3)*8-4)*S;
+    ctx.beginPath();ctx.arc(sx,sy1,1,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(sx,sy2,1,0,Math.PI*2);ctx.stroke();
+  }
+
+  // Resource nodes — amber dots
+  resourceNodes.forEach(n=>{
+    if(!n.parent)return;
+    const x=W/2+n.position.x*S, y=H/2+n.position.z*S;
+    if(x<0||x>W||y<0||y>H)return;
+    ctx.fillStyle='#e8a030';
+    ctx.beginPath();ctx.arc(x,y,_mmBig?3:2,0,Math.PI*2);ctx.fill();
+  });
+
+  // Buildings — squares, gold=EMP, green=resource
+  Object.entries(buildingMeshes).forEach(([id,mesh])=>{
+    if(!G.bld[id]||!mesh)return;
+    const x=W/2+mesh.position.x*S, y=H/2+mesh.position.z*S;
+    if(x<2||x>W-2||y<2||y>H-2)return;
+    const def=BLD_DEF[id];
+    const bsz=_mmBig?5:4;
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,.4)';
+    ctx.fillRect(x-bsz/2+1,y-bsz/2+1,bsz,bsz);
+    // Building
+    ctx.fillStyle=def?.empOut?'#f5d840':'#70d880';
+    ctx.fillRect(x-bsz/2,y-bsz/2,bsz,bsz);
+  });
+
+  // Camera FOV cone (third-person)
+  if(!fpMode){
+    const fovAngle=Math.PI*.35;
+    const coneLen=_mmBig?28:18;
+    const px3=W/2+camTarget.x*S, py3=H/2+camTarget.z*S;
+    const a1=camAngle+Math.PI-fovAngle/2;
+    const a2=camAngle+Math.PI+fovAngle/2;
+    ctx.fillStyle='rgba(255,255,255,.06)';
+    ctx.beginPath();
+    ctx.moveTo(px3,py3);
+    ctx.arc(px3,py3,coneLen,a1,a2);
+    ctx.closePath();ctx.fill();
+  }
+
+  // Player — white dot with direction arrow
+  const px4=W/2+pPos.x*S, py4=H/2+pPos.z*S;
+  // Glow
+  const pg=ctx.createRadialGradient(px4,py4,0,px4,py4,8);
+  pg.addColorStop(0,'rgba(255,255,255,.4)');
+  pg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=pg;ctx.beginPath();ctx.arc(px4,py4,8,0,Math.PI*2);ctx.fill();
+  // Dot
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath();ctx.arc(px4,py4,_mmBig?4:3,0,Math.PI*2);ctx.fill();
+  // Direction tick
+  const dir=fpMode?fpYaw:(camAngle+Math.PI);
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(px4,py4);
+  ctx.lineTo(px4+Math.sin(dir)*(_mmBig?9:6),py4+Math.cos(dir)*(_mmBig?9:6));
+  ctx.stroke();
+
+  // Border
+  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;
+  ctx.strokeRect(.5,.5,W-1,H-1);
+}
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
@@ -3020,7 +3708,7 @@ function showEmpFloat(amount){
   setTimeout(()=>el.remove(),900);
 }
 function eEarn(amount,source){
-  if(amount>0){ E.totalEmpEarned=(E.totalEmpEarned||0)+amount; if(amount>=2&&Math.random()<.15) showEmpFloat(amount); }E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
+  if(amount>0){ E.totalEmpEarned=(E.totalEmpEarned||0)+amount; if(amount>=2&&Math.random()<.15) showEmpFloat(amount); checkEmpMilestones(); }E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
 function eEff(b){const def=MBLD[b.type];if(!def||!b.active)return 0; const innBonus=G.bld.inn?1.15:1;const wRatio=def.workers>0?Math.min(1,(b.workers||0)/def.workers):1;let inputOk=1;if(def.inp&&Object.keys(def.inp).length>0){const met=Object.entries(def.inp).filter(([k,v])=>(E.res[k]||0)>=v).length;inputOk=.3+.7*(met/Object.keys(def.inp).length);}const sci=E.sciBonus?1.25:1,guild=E.guildBonus?1.20:1,pres=1+(E.prestigeBonus||0);return Math.max(0,Math.min(2.0,(.3+.7*wRatio)*inputOk*E.logMult*sci*guild*pres*innBonus));}
 
@@ -3187,7 +3875,12 @@ function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)retur
 setInterval(eSave,30000);
 // Save when app goes to background (mobile)
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){ saveGame(); eSave(); dbSyncPlayer(); }
+  if(document.hidden){
+    localStorage.setItem('empyria_last_seen',Date.now());
+    saveGame(); eSave(); dbSyncPlayer();
+  } else {
+    calcOfflineIncome();
+  }
 });
 window.addEventListener('pagehide',()=>{ saveGame(); eSave(); });
 
@@ -3306,6 +3999,21 @@ function renderEconEMP(){
     const def=BLD_DEF[id];return sum+(def&&def.empOut?def.empOut:0);
   },0)*(E.empMult||1)*(E.priceBonus||1);
   const hrRate=(passEmpRate*450).toFixed(1); // 3600s / 8s tick
+  // Countdown timer
+  const presaleEnd=new Date('2026-06-15T00:00:00Z');
+  const msLeft=presaleEnd-Date.now();
+  const dLeft=Math.max(0,Math.floor(msLeft/86400000));
+  const hLeft=Math.max(0,Math.floor((msLeft%86400000)/3600000));
+  const countdownHtml=msLeft>0?`
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(180,40,40,.12);border:1px solid rgba(224,88,88,.25);border-radius:10px;padding:7px 12px;margin-bottom:10px">
+      <span style="font-size:14px">⏳</span>
+      <div style="flex:1">
+        <span style="font-size:8px;color:rgba(255,120,120,.7);letter-spacing:1px">PRESALE ENDS · </span>
+        <span style="font-size:11px;font-weight:900;color:#ff9090">${dLeft}d ${hLeft}h</span>
+      </div>
+      <span style="font-size:8px;color:var(--txt-d)">Early = best rates</span>
+    </div>`:'';
+
   const presaleHtml=`
     <div style="background:linear-gradient(135deg,#0a1820,#0c1c10);border:1.5px solid rgba(240,184,64,.35);border-radius:16px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:.04;pointer-events:none">💰</div>
@@ -3325,11 +4033,27 @@ function renderEconEMP(){
       <div style="background:rgba(0,0,0,.3);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:10px;color:var(--txt2);line-height:1.6">
         Your <strong style="color:var(--emp)">total earned $EMP</strong> = your <strong style="color:var(--gold-b)">token allocation</strong> at launch. Buy multipliers to earn faster. 🎯
       </div>
-      <div style="height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden">
-        <div style="height:100%;width:${Math.min(100,((mult-1)/67)*100)}%;background:linear-gradient(90deg,var(--grn),var(--emp));border-radius:3px;transition:width .6s"></div>
+      <div style="background:rgba(240,184,64,.07);border:1px solid rgba(240,184,64,.2);border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:8px;color:var(--txt-d);margin-bottom:2px">EST. TOKEN ALLOCATION</div>
+          <div style="font-size:15px;font-weight:900;color:var(--gold-b)">${Math.floor(totalEarned/10).toLocaleString()} $EMP</div>
+          <div style="font-size:7px;color:var(--txt-d)">1 token per 10 earned $EMP</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:8px;color:var(--txt-d)">Pool share</div>
+          <div style="font-size:12px;font-weight:700;color:var(--gold)">${totalEarned>0?(totalEarned/10000*100).toFixed(3):'0.000'}%</div>
+          <div style="font-size:7px;color:var(--txt-d)">of 10M pool</div>
+        </div>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;position:relative">
+        <div style="height:100%;width:${Math.min(100,((mult-1)/66.5)*100)}%;background:linear-gradient(90deg,#40c870,#f5d840,#f08040);border-radius:3px;transition:width .6s"></div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:7px;color:var(--txt-d);margin-top:3px">
-        <span>×1 start</span><span>×67.5 max</span>
+        <span style="color:${mult<2?'var(--grn)':'var(--txt-d)'}">×1</span>
+        <span style="color:${mult>=2&&mult<4?'var(--grn)':'var(--txt-d)'}">×3</span>
+        <span style="color:${mult>=4&&mult<9?'var(--grn)':'var(--txt-d)'}">×9</span>
+        <span style="color:${mult>=9&&mult<22?'var(--grn)':'var(--txt-d)'}">×18</span>
+        <span style="color:${mult>=67?'var(--emp)':'var(--txt-d)'}">×67 🔥</span>
       </div>
     </div>`;
 
@@ -3360,7 +4084,18 @@ function renderEconEMP(){
     }),
   ].join('');
 
-  return presaleHtml + upgHtml;
+  const shareHtml=`
+    <div style="margin-top:10px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="shareTelegram()" style="width:100%;padding:11px;background:linear-gradient(135deg,#0a3a5a,#0e4870);border:1.5px solid rgba(96,160,240,.4);border-radius:12px;color:#88c8ff;font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <span style="font-size:16px">✈️</span> Share your score · +5 $EMP
+        </button>
+        <button onclick="showReferral()" style="width:100%;padding:11px;background:linear-gradient(135deg,#0a2010,#102808);border:1.5px solid rgba(64,200,112,.35);border-radius:12px;color:var(--grn2);font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          <span style="font-size:16px">🔗</span> Invite friends · they get +20 $EMP
+        </button>
+      </div>
+    </div>`;
+  return countdownHtml + presaleHtml + shareHtml + upgHtml;
 }
 
 
