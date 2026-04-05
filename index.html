@@ -374,7 +374,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
 
 <!-- Loading screen -->
-<div id="loading-screen" style="position:fixed;inset:0;z-index:600;background:radial-gradient(ellipse at 50% 35%,#0e1e28 0%,#060c14 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+<div id="loading-screen" style="position:fixed;inset:0;z-index:600;background:radial-gradient(ellipse at 50% 35%,#0e1e28 0%,#060c14 100%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div style="font-family:Cinzel,serif;font-size:36px;font-weight:900;background:linear-gradient(135deg,#f0c060,#ffd870);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px">EMPYRIA</div>
   <div style="width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden">
     <div id="load-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--grn),var(--emp));border-radius:2px;transition:width .3s"></div>
@@ -382,11 +382,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div id="load-msg" style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:1px">Initializing world…</div>
 </div>
 
-<div id="splash" style="display:none">
+<div id="splash">
   <div class="sp-logo">EMPYRIA</div>
   <div class="sp-tag">BUILD YOUR EMPORIUM &nbsp;<span style="font-size:10px;color:var(--gold)">v1.0.1</span></div>
   <div class="sp-story">Year <strong>1347</strong>. The great trade routes are open. Kingdoms rise and fall on commerce.<br><br>Explore the <strong>3D medieval world</strong>. Mine resources. Build your empire. Earn <strong>$EMP tokens</strong>.</div>
-  <button class="sp-btn" onclick="launch()">▶ ENTER EMPYRIA</button>
+  <button class="sp-btn" onclick="startLaunch()">▶ ENTER EMPYRIA</button>
   <div class="sp-chips">
     <div class="sp-chip">⛏ Mine Resources</div>
     <div class="sp-chip">🏰 Build Empire</div>
@@ -3349,67 +3349,76 @@ function loadWalletLink(){
 }
 // ──────────────────────────────────────────────────────────────────────────────
 
-function launch(){
+function startLaunch(){
+  // Hide splash, show loading screen, then launch
   const sp=document.getElementById('splash');
-  sp.style.transition='opacity .5s';sp.style.opacity='0';
-  setTimeout(()=>sp.style.display='none',500);
+  const ls=document.getElementById('loading-screen');
+  if(sp){sp.style.transition='opacity .3s';sp.style.opacity='0';setTimeout(()=>sp.style.display='none',300);}
+  if(ls){ls.style.display='flex';}
+  setTimeout(launch, 350);
+}
 
-  // Init DB + Telegram + TON Connect
+function launch(){
+  // Splash already hidden by startLaunch()
+
+  // Step 1 — quick inits
+  setLoadProgress(10,'Starting up…');
   initDB();
   initTelegram();
   initTONConnect();
 
-  // Show loading progress
-  document.getElementById('splash').style.display='flex';
-  setLoadProgress(15,'Building terrain…');
-  // Init 3D world
-  initThree();
-  setLoadProgress(50,'Placing buildings…');
+  // Step 2 — build 3D world (heavy — give browser a frame first)
+  setTimeout(()=>{
+    setLoadProgress(25,'Building terrain…');
+    setTimeout(()=>{
+      try{
+        initThree();
+      }catch(err){
+        console.warn('initThree error:',err);
+      }
+      setLoadProgress(60,'Loading buildings…');
 
-  // Init systems
-  startPassive();
-  initDailyQuests();
+      // Step 3 — game systems
+      setTimeout(()=>{
+        startPassive();
+        initDailyQuests();
+        loadGame();
+        eLoad();
+        loadWalletLink();
+        setLoadProgress(80,'Restoring progress…');
 
-  // Load saved game state
-  loadGame();
-  eLoad();
-  // Try Telegram CloudStorage as backup if local save is empty
-  try{
-    const tgCloud=window.Telegram?.WebApp?.CloudStorage;
-    if(tgCloud&&!(localStorage.getItem('empyria_v2'))){
-      tgCloud.getItem('empyria_airdrop',(err,val)=>{
-        if(!err&&val&&parseInt(val)>0){
-          E.totalEmpEarned=parseInt(val);
-          toast('☁️ Airdrop score restored: '+parseInt(val)+' $EMP',3000);
-        }
-      });
-    }
-  }catch(e){}
-  loadWalletLink();
-  startDBSync();
-  checkDailyLogin();
-  // Backup airdrop score to Telegram CloudStorage
-  try{
-    window.Telegram?.WebApp?.CloudStorage?.setItem(
-      'empyria_airdrop',
-      String(Math.floor(E.totalEmpEarned||0)),
-      ()=>{}
-    );
-  }catch(e){}
-  // Offline/online banners
-  window.addEventListener('offline',()=>toast('📵 No internet — game runs offline',4000));
-  window.addEventListener('online',()=>{toast('✅ Back online — syncing…',2000);setTimeout(dbSyncPlayer,1000);});
-  checkRefBonus();
-  setTimeout(calcOfflineIncome,2000);
-  setLoadProgress(90,'Almost ready…');
-  setTimeout(()=>{setLoadProgress(100,'Welcome!');setTimeout(hideLoadingScreen,300);},400);
-  setTimeout(showPresaleStrip,3500);
-  localStorage.setItem('empyria_last_seen',Date.now());
+        // Step 4 — cloud + final
+        setTimeout(()=>{
+          startDBSync();
+          checkDailyLogin();
+          checkRefBonus();
+          setTimeout(calcOfflineIncome,2000);
+          // Telegram CloudStorage backup restore
+          try{
+            const tgCloud=window.Telegram?.WebApp?.CloudStorage;
+            if(tgCloud&&!(localStorage.getItem('empyria_v2'))){
+              tgCloud.getItem('empyria_airdrop',(err,val)=>{
+                if(!err&&val&&parseInt(val)>0){E.totalEmpEarned=parseInt(val);toast('☁️ Airdrop score restored: '+parseInt(val)+' $EMP',3000);}
+              });
+            }
+          }catch(e){}
+          try{
+            window.Telegram?.WebApp?.CloudStorage?.setItem('empyria_airdrop',String(Math.floor(E.totalEmpEarned||0)),()=>{});
+          }catch(e){}
+          window.addEventListener('offline',()=>toast('📵 No internet — game runs offline',4000));
+          window.addEventListener('online',()=>{toast('✅ Back online — syncing…',2000);setTimeout(dbSyncPlayer,1000);});
+          localStorage.setItem('empyria_last_seen',Date.now());
+
+          setLoadProgress(100,'Welcome to Empyria!');
+          setTimeout(hideLoadingScreen,500);
+          setTimeout(showPresaleStrip,4000);
+        },300);
+      },200);
+    },50); // give browser 1 frame before heavy 3D init
+  },100);
 
   // Start economy tick (1 tick = 1 game-day = 8s)
   setTimeout(()=>{
-    // Start economy tick
-    // Start economy tick (1 tick = 1 game-day ~1s)
     clearInterval(window._eTick);
     window._eTick = setInterval(()=>{
       eTick();
@@ -4254,6 +4263,15 @@ function showTapIndicator(wx,wz){
   },40);
 }
 
+// Safety net — always hide loading after 10s no matter what
+setTimeout(()=>{
+  const ls=document.getElementById('loading-screen');
+  if(ls&&ls.style.opacity!=='0'){
+    console.warn('Loading timeout — forcing hide');
+    hideLoadingScreen();
+  }
+},10000);
+
 function setLoadProgress(pct, msg){
   const bar=document.getElementById('load-bar');
   const txt=document.getElementById('load-msg');
@@ -4262,7 +4280,10 @@ function setLoadProgress(pct, msg){
 }
 function hideLoadingScreen(){
   const ls=document.getElementById('loading-screen');
-  if(ls){ls.style.transition='opacity .4s';ls.style.opacity='0';setTimeout(()=>ls.remove(),400);}
+  if(!ls)return;
+  ls.style.transition='opacity .5s';
+  ls.style.opacity='0';
+  setTimeout(()=>{ls.style.display='none';},500);
 }
 
 function showWalletGate(){
