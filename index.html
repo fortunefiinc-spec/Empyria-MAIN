@@ -395,6 +395,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div style="flex:1;min-width:4px"></div>
       <!-- Cloud sync icon — tiny -->
       <div id="db-badge" onclick="showLeaderboard()" style="font-size:12px;flex-shrink:0;cursor:pointer;padding:2px 4px;pointer-events:all">☁️</div>
+      <div id="weather-icon" style="font-size:12px;flex-shrink:0;padding:2px 2px;pointer-events:none">☀️</div>
       <div onclick="openEconomy()" style="background:rgba(224,88,88,.2);border:1px solid rgba(224,88,88,.4);border-radius:6px;padding:2px 5px;font-size:7px;color:#ff9090;font-weight:700;letter-spacing:.5px;flex-shrink:0;cursor:pointer;pointer-events:all">🔥LIVE</div>
       <!-- Wallet — icon only when not connected, short address when connected -->
       <div id="wallet-btn" onclick="toggleWallet()" style="display:flex;align-items:center;gap:2px;background:rgba(16,24,48,.85);border:1px solid rgba(80,140,255,.3);border-radius:9px;padding:4px 8px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:var(--blue);white-space:nowrap;font-weight:600">💼</div>
@@ -447,9 +448,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
 <!-- Minimap -->
 <div id="minimap" style="position:fixed;bottom:78px;left:10px;z-index:28;pointer-events:none;opacity:.9">
-  <canvas id="minimap-canvas" width="100" height="100"
-    onclick="toggleMinimap()" 
-    style="width:100px;height:100px;border-radius:12px;border:1px solid rgba(255,255,255,.15);display:block;box-shadow:0 3px 16px rgba(0,0,0,.6);cursor:pointer;pointer-events:all;image-rendering:pixelated">
+  <canvas id="minimap-canvas" width="100" height="100" style="width:100px;height:100px;border-radius:12px;border:1px solid rgba(255,255,255,.15);display:block;box-shadow:0 3px 16px rgba(0,0,0,.6);cursor:pointer;pointer-events:all;image-rendering:pixelated">
   </canvas>
   <div id="minimap-label" style="text-align:center;font-size:7px;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.5px">MAP</div>
 </div>
@@ -685,7 +684,7 @@ const BLD_DEF={
   mine:       {ico:'⛏️', name:'Mine Shaft',    era:1, cost:{emp:5,  stone:20},          req:[],                    passive:'+1🪨/tick',       empOut:0,    workers:2, desc:'Extracts stone from the earth'},
   lumber:     {ico:'🪵', name:'Lumber Mill',   era:1, cost:{emp:5,  wood:18},            req:['mine'],              passive:'+1🪵/tick',       empOut:0,    workers:2, desc:'Chops wood from the forest'},
   farm:       {ico:'🌾', name:'Farm',          era:1, cost:{emp:5,  wood:10,stone:8},    req:[],                    passive:'+2🍖/tick',       empOut:0,    workers:2, desc:'Grows food for workers'},
-  watchtower: {ico:'🗼', name:'Watchtower',    era:1, cost:{emp:8,  stone:30},           req:['mine'],              passive:'Defense +10',     empOut:0,    workers:2, defense:10, desc:'Guards your settlement'},
+  watchtower: {ico:'🗼', name:'Watchtower',    era:1, cost:{emp:8,  stone:30},           req:['mine'],              passive:'🛡️ Defense +10',     empOut:0,    workers:2, defense:10, desc:'Guards your settlement'},
   // 💰 EMP buildings (heavy EMP, small resources)
   empaltar:   {ico:'🏮', name:'EMP Altar',     era:1, cost:{emp:20},                     req:['farm'],              passive:'+0.05💰/tick',    empOut:.05,  workers:1, desc:'💰 First $EMP source — pure EMP cost'},
   marketplace:{ico:'⚖️', name:'Marketplace',  era:1, cost:{emp:40, gold:8},             req:['mine','lumber'],     passive:'+0.09💰/tick',    empOut:.09,  workers:2, desc:'💰 Generates $EMP from local trade'},
@@ -694,7 +693,7 @@ const BLD_DEF={
   smelter:    {ico:'⚙️', name:'Smelter',       era:2, cost:{emp:10, stone:22,iron:5},    req:['mine'],              passive:'+1⚙️/tick',       empOut:0,    workers:2, desc:'Smelts iron ore into ingots'},
   forge:      {ico:'🔥', name:'Forge',         era:2, cost:{emp:12, stone:15,wood:15},   req:['mine','lumber'],     passive:'+1🥇/tick',       empOut:0,    workers:2, desc:'Forges metals into goods'},
   mill:       {ico:'💨', name:'Water Mill',    era:2, cost:{emp:10, wood:22,stone:12},   req:['lumber','farm'],     passive:'+2🍖+1🪵/tick',   empOut:0,    workers:2, desc:'Mills grain, boosts food production'},
-  barracks:   {ico:'⚔️', name:'Barracks',      era:2, cost:{emp:15, stone:25,iron:12},   req:['smelter'],           passive:'Defense +20',     empOut:0,    workers:3, defense:20, desc:'Trains soldiers to protect trade'},
+  barracks:   {ico:'⚔️', name:'Barracks',      era:2, cost:{emp:15, stone:25,iron:12},   req:['smelter'],           passive:'🛡️ Defense +20',     empOut:0,    workers:3, defense:20, desc:'Trains soldiers to protect trade'},
   // 💰 EMP buildings
   coinmaster:  {ico:'🪙', name:'Coin Master',  era:2, cost:{emp:60, gold:12},            req:['marketplace'],       passive:'+0.18💰/tick',    empOut:.18,  workers:2, desc:'💰 Turns gold into $EMP tokens'},
   tradepost:  {ico:'🐪', name:'Trade Post',    era:2, cost:{emp:80, wood:20,stone:15},   req:['forge','marketplace'],passive:'+0.22💰/tick',   empOut:.22,  workers:3, logBonus:.15, desc:'💰💰 Long-distance trade routes'},
@@ -702,8 +701,8 @@ const BLD_DEF={
   // ═══ ERA III — ARCANE AGE ═════════════════════════════════════════════════
   workshop:   {ico:'🔨', name:'Workshop',      era:3, cost:{emp:20, wood:18,iron:12},    req:['lumber','smelter'],  passive:'+1🔨/tick',       empOut:0,    workers:3, desc:'Crafts tools and equipment'},
   academy:    {ico:'🎓', name:'Academy',       era:3, cost:{emp:25, stone:30},           req:['forge'],             passive:'+1💎/tick',       empOut:0,    workers:3, desc:'Researches crystal extraction'},
-  townhall:   {ico:'🏠', name:'Town Hall',     era:3, cost:{emp:30, stone:20,wood:15},   req:['farm','barracks'],   passive:'+population',     empOut:0,    workers:4, desc:'Grows your city population'},
-  inn:        {ico:'🍺', name:'Inn',           era:3, cost:{emp:25, wood:25,stone:10},   req:['farm','townhall'],   passive:'+happiness',      empOut:0,    workers:3, desc:'Boosts worker happiness +15%'},
+  townhall:   {ico:'🏠', name:'Town Hall',     era:3, cost:{emp:30, stone:20,wood:15},   req:['farm','barracks'],   passive:'👥 Grows population',     empOut:0,    workers:4, desc:'Grows your city population'},
+  inn:        {ico:'🍺', name:'Inn',           era:3, cost:{emp:25, wood:25,stone:10},   req:['farm','townhall'],   passive:'😊 +15% happiness',      empOut:0,    workers:3, desc:'Boosts worker happiness +15%'},
   // 💰 EMP buildings
   mint:       {ico:'🏧', name:'Royal Mint',    era:3, cost:{emp:90, gold:25},            req:['tradepost','forge'], passive:'+0.35💰/tick',    empOut:.35,  workers:3, desc:'💰💰 Mints $EMP from raw gold'},
   harbour:    {ico:'⚓', name:'Harbour',        era:3, cost:{emp:150,wood:30,stone:25},   req:['tradepost'],         passive:'+0.40💰/tick',    empOut:.40,  workers:5, desc:'💰💰💰 Sea trade earns $EMP'},
@@ -712,7 +711,7 @@ const BLD_DEF={
   observatory:{ico:'🔭', name:'Observatory',  era:4, cost:{emp:35, crystal:20},          req:['academy'],           passive:'+1🔮/tick',       empOut:0,    workers:3, desc:'Discovers mana from the stars'},
   alchemist:  {ico:'⚗️', name:'Alchemist Lab',era:4, cost:{emp:40, iron:25,crystal:15},  req:['smelter','observatory'],passive:'+2🥇/tick',    empOut:0,    workers:3, desc:'Transmutes iron into gold'},
   library:    {ico:'📚', name:'Library',       era:4, cost:{emp:45, crystal:20,stone:30}, req:['academy'],           passive:'+1💎+1🔮/tick',   empOut:0,    workers:3, desc:'Doubles crystal & mana research'},
-  fortress:   {ico:'🏯', name:'Fortress',      era:4, cost:{emp:50, stone:45,iron:35},   req:['barracks','townhall'],passive:'Defense +40',     empOut:0,    workers:5, defense:40, desc:'Maximum military defense'},
+  fortress:   {ico:'🏯', name:'Fortress',      era:4, cost:{emp:50, stone:45,iron:35},   req:['barracks','townhall'],passive:'🛡️ Defense +40',     empOut:0,    workers:5, defense:40, desc:'Maximum military defense'},
   // 💰 EMP buildings
   emptemple:  {ico:'⛩️', name:'EMP Temple',   era:4, cost:{emp:350},                     req:['guildhall','observatory'],passive:'+0.90💰/tick',empOut:.90, workers:4, desc:'💰💰💰 Pure $EMP — no resources needed'},
   guildhall:  {ico:'🏛️', name:'Guild Hall',   era:4, cost:{emp:250,stone:35,iron:25},   req:['harbour','academy'], passive:'+0.55💰/tick',    empOut:.55,  workers:6, guildBonus:true, desc:'💰💰💰💰 Premium trade guild'},
@@ -796,7 +795,7 @@ const G={
   res:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:15},
   bld:{},cd:{tap:0,aim:0,mem:0,block:0,react:0},upgrades:{},
   stats:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:0},
-  era:1,quests:[],questsDate:'',streak:0,lastLogin:'',streakClaimed:false,
+  era:1,quests:generateDailyQuests(),questsDate:'',streak:0,lastLogin:'',streakClaimed:false,
   prestige:0,prestigeBonus:0,mysteryBoxes:0,totalTaps:0,nextBoxAt:0,
   paused:false,curGame:null,pending:{},passiveIv:null,worldMode:'mine',log:[],
 };
@@ -866,7 +865,11 @@ let workerNPCs=[];        // animated worker figures near buildings
 let ghostPos={x:0,z:0};  // current ghost snapped position
 let ghostBlocked=false;   // is current ghost position blocked?
 let camTarget={x:0,z:0},camDist=22,camAngle=Math.PI*0.65;
-let fpMode=false;         // first-person toggle
+let fpMode=false;
+let walkTarget=null;
+const WORLD_RADIUS=38;
+let _mmBig=false;
+let _mmTapTime=0;
 let fpYaw=Math.PI;        // horizontal look angle (FP)
 let fpPitch=0;            // vertical look angle (FP, clamped)
 let fpDragX=0,fpDragY=0;  // last touch position for FP look
@@ -1037,8 +1040,9 @@ function buildDecorations(){
     [18,8],[20,14],[14,18],[8,20],[10,-20],[16,4],[-16,4],
     [-22,-14],[22,-8],[-10,24],[12,-16],[-18,-18],[24,4]
   ];
-  const barkCols=[0x3a2008,0x4a2810,0x5a3015,0x2e1808];
+  const barkCols=[0x3a2008,0x4a2810,0x5a3015,0x2e1808,0x4a3820];
   const leafCols=[0x1a4008,0x164010,0x1e4a08,0x124208,0x206010,0x184808];
+  const roundLeafCols=[0x1e5810,0x185218,0x286018,0x204c10]; // deciduous
 
   treeClusters.forEach(([tx,tz])=>{
     if(Math.abs(tx)<6&&Math.abs(tz)<6)return;
@@ -1066,7 +1070,7 @@ function buildDecorations(){
     g.position.set(tx,gy,tz);g.rotation.y=Math.random()*Math.PI*2;
     g.scale.setScalar(.85+Math.random()*.35);
     scene.add(g);
-    // Companion small trees (50% chance)
+    // Companion trees — mix of conifer and round deciduous
     for(let t=0;t<(big?2:1);t++){
       if(Math.random()>.6)continue;
       const ox=tx+(Math.random()-.5)*4.5,oz=tz+(Math.random()-.5)*4.5;
@@ -1074,9 +1078,16 @@ function buildDecorations(){
       const gy2=sampleH(ox,oz);if(gy2<0)continue;
       const g2=new THREE.Group();
       const h2=1.8+Math.random()*1.8;
-      const tr2=mk(cyl(.12,h2,6),barkCols[0]);tr2.position.y=h2/2;g2.add(tr2);
-      const f2=mk(cone(.9+Math.random()*.4,1.4,7),leafCols[Math.floor(Math.random()*leafCols.length)]);
-      f2.position.y=h2+.1;g2.add(f2);
+      const tr2=mk(cyl(.12,h2,6),barkCols[Math.floor(Math.random()*barkCols.length)]);
+      tr2.position.y=h2/2;g2.add(tr2);
+      if(Math.random()>.5){
+        // Round deciduous canopy
+        const cr=mk(new THREE.SphereGeometry(.8+Math.random()*.3,6,5),roundLeafCols[~~(Math.random()*roundLeafCols.length)]);
+        cr.position.y=h2+.3;cr.scale.set(1,.75,1);g2.add(cr);
+      } else {
+        const f2=mk(cone(.9+Math.random()*.4,1.4,7),leafCols[Math.floor(Math.random()*leafCols.length)]);
+        f2.position.y=h2+.1;g2.add(f2);
+      }
       g2.position.set(ox,gy2,oz);g2.rotation.y=Math.random()*Math.PI*2;
       g2.scale.setScalar(.7+Math.random()*.3);
       scene.add(g2);
@@ -1622,6 +1633,15 @@ function initThree(){
   ambLight=scene.children.find(c=>c.isAmbientLight);
   fillLight=scene.children.find(c=>c.isDirectionalLight&&c!==sunLight);
   canvas.addEventListener('pointerdown',onWorldTap,{passive:false});
+  // Wire minimap tap handlers after DOM ready
+  // Wire minimap — deferred so minimapTap is defined
+  setTimeout(()=>{
+    const mmcv=document.getElementById('minimap-canvas');
+    if(mmcv&&typeof minimapTap==='function'){
+      mmcv.addEventListener('click',e=>{minimapTap(e);},{passive:false});
+      mmcv.addEventListener('touchend',e=>{minimapTap(e);},{passive:false});
+    }
+  },100);
   // First-person look drag
   // Touch state
   let _t1x=0,_t1y=0,_t2x=0,_t2y=0,_tDist=0,_tDragging=false,_tPinching=false;
@@ -2042,7 +2062,18 @@ function animate(){requestAnimationFrame(animate);animT+=.016;
   const panelOpen=document.getElementById('city-panel')?.classList.contains('open');
   processMove();updateCam();updateHints();
   if(!panelOpen||animT%3<1) animateWorkers(); // reduce worker updates when panel open
-  resourceNodes.forEach(n=>{n.traverse(cv=>{if(cv.userData&&cv.userData.isGoldCrystal)cv.rotation.y+=.025;});});
+  resourceNodes.forEach(n=>{
+    n.traverse(cv=>{
+      if(cv.userData&&cv.userData.isGoldCrystal) cv.rotation.y+=.025;
+    });
+    // Pulse nearest node
+    const dx=n.position.x-pPos.x, dz=n.position.z-pPos.z;
+    const dist=Math.sqrt(dx*dx+dz*dz);
+    if(dist<8){
+      const pulse=.85+Math.sin(animT*4)*.15;
+      n.traverse(cv=>{if(cv.isMesh&&cv.material)cv.material.emissiveIntensity=pulse*.4;});
+    }
+  });
   // Animate water
   if(window._waterMesh){
     window._waterMesh.position.y=-1.75+Math.sin(animT*.4)*.04;
@@ -2055,12 +2086,18 @@ function onWorldTap(e){
   if(!e.target||typeof e.target.closest!=='function')return;
   if(e.target.closest('#world-hud')||e.target.closest('#mode-toggle')||e.target.closest('#dpad')||e.target.closest('#cam-ctrl')||e.target.closest('#action-bar'))return;
   if(fpMode){fpDragging=true;fpDragX=e.clientX||e.touches?.[0]?.clientX||0;fpDragY=e.clientY||e.touches?.[0]?.clientY||0;return;}
-  // Check if tapped a building
+  // Check if tapped a building or ground
   const ex=e.clientX||(e.touches?.[0]?.clientX)||window.innerWidth/2;
   const ey=e.clientY||(e.touches?.[0]?.clientY)||window.innerHeight/2;
   if(!placingBld){
     const tappedBld=getBuildingAtTap(ex,ey);
     if(tappedBld){showBuildingPopup(tappedBld);return;}
+    // Tap empty ground → walk there
+    const gp=screenToGround(ex,ey);
+    if(gp&&isFinite(gp.x)&&isFinite(gp.z)&&Math.abs(gp.x)<38&&Math.abs(gp.z)<38){
+      walkTarget={x:Math.round(gp.x*10)/10,z:Math.round(gp.z*10)/10};
+      return;
+    }
   }
   if(!scene)return;e.preventDefault();
   if(placingBld){
@@ -2107,7 +2144,7 @@ function doSell(){
   const mult=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
   const e=Math.floor(t*mult);
   addRes('emp',e);
-  showEmpFloat(e);
+  showEmpFloat(e);sfxCoin();
   window.haptic?.('medium');
   // Show breakdown
   const breakdown=sold.slice(0,4).join('  ');
@@ -2117,7 +2154,7 @@ function doSell(){
 
 function setWorldMode(m){G.worldMode=m;}
 
-function mvStart(e,dir){e.preventDefault();try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}moving[dir]=true;const el=document.getElementById('dp'+dir.toUpperCase());if(el)el.classList.add('pr');}
+function mvStart(e,dir){walkTarget=null;e.preventDefault();try{e.currentTarget.setPointerCapture(e.pointerId);}catch(_){}moving[dir]=true;const el=document.getElementById('dp'+dir.toUpperCase());if(el)el.classList.add('pr');}
 function mvStop(e,dir){moving[dir]=false;try{e.currentTarget.releasePointerCapture(e.pointerId);}catch(_){}const el=document.getElementById('dp'+dir.toUpperCase());if(el)el.classList.remove('pr');}
 function mvStopAll(){['w','a','s','d'].forEach(k=>{moving[k]=false;const el=document.getElementById('dp'+k.toUpperCase());if(el)el.classList.remove('pr');});}
 window.addEventListener('pointerup',mvStopAll);window.addEventListener('pointercancel',mvStopAll);window.addEventListener('blur',mvStopAll);
@@ -2126,6 +2163,23 @@ window.addEventListener('keyup',e=>{const m={ArrowUp:'w',KeyW:'w',ArrowDown:'s',
 
 function processMove(){
   if(!playerGroup)return;
+  // Walk-to target (from world tap on empty ground)
+  if(walkTarget&&!placingBld){
+    const dx=walkTarget.x-pPos.x, dz=walkTarget.z-pPos.z;
+    const dist=Math.sqrt(dx*dx+dz*dz);
+    if(dist>0.4){
+      const spd=SPD*1.5;
+      pPos.x+=dx/dist*spd; pPos.z+=dz/dist*spd;
+      const gy=sampleH(pPos.x,pPos.z);
+      playerGroup.position.set(pPos.x,gy+.20,pPos.z);
+      playerGroup.rotation.y=Math.atan2(-dx,-dz);
+      walkT+=.28;
+      if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;
+      if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;
+      if(!fpMode){camTarget.x+=(pPos.x-camTarget.x)*.08;camTarget.z+=(pPos.z-camTarget.z)*.08;}
+    } else { walkTarget=null; window.haptic?.('light'); }
+    return; // skip d-pad movement while walking to target
+  }
   // Direction based on current camera mode
   const angle=fpMode?fpYaw:camAngle;
   const fwdX=-Math.sin(angle),fwdZ=-Math.cos(angle);
@@ -2142,16 +2196,25 @@ function processMove(){
     playerGroup.position.set(pPos.x,gy+.20,pPos.z);
     playerGroup.rotation.y=Math.atan2(-dx,-dz);
     walkT+=.28;
-    if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;
-    if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;
+    // Leg swing
+    if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.55;
+    if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.55;
+    // Arm swing (children 3,4)
+    if(playerGroup.children[3])playerGroup.children[3].rotation.x=-Math.sin(walkT)*.35;
+    if(playerGroup.children[4])playerGroup.children[4].rotation.x=Math.sin(walkT)*.35;
+    // Subtle body bob
+    if(playerGroup.children[0])playerGroup.children[0].position.y=.42+Math.abs(Math.sin(walkT))*.04;
     if(!fpMode){camTarget.x+=(pPos.x-camTarget.x)*.06;camTarget.z+=(pPos.z-camTarget.z)*.06;}
     if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);
   }
 }
 function updateHints(){const n=nearestNode(),hint=document.getElementById('action-hint');
-  // Glow MINE button when near resource
   const mb=document.querySelector('.mine-btn');
+  // Glow MINE when near resource
+  const wasNear=mb?.classList.contains('nearResource');
   if(mb) mb.classList.toggle('nearResource',!!n&&!placingBld);
+  // Subtle haptic when first entering range
+  if(n&&!wasNear&&!placingBld) window.haptic?.('light');
   if(!hint)return;if(placingBld){hint.textContent='🏗️ Tap to place · ESC cancels';hint.style.opacity='1';return;}if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
 
 // ═══ BUILDING ═══
@@ -2181,12 +2244,16 @@ function confirmPlace(wx,wz){
   }
   G.bld[id]=true;removeSuperseded(id);buildBldMesh(id,snap.x,snap.z);startPassive();updateEra();updateHUD();renderBuildGrid();checkQuestProgress('build',1);
   checkAchievements();
-  window.haptic?.('heavy');
+  window.haptic?.('heavy');sfxBuild();
   const _bdef=BLD_DEF[id];
   const _empMsg=_bdef?.empOut>0?' · +'+(_bdef.empOut*(E.empMult||1)).toFixed(2)+'💰/tick':'';
   toast('✅ '+_bdef?.name+' built!'+_empMsg,3000);
   addLog(_bdef?.ico+' '+_bdef?.name+' built','good');
-  setTimeout(updateWorkerNPCs,200);
+  setTimeout(()=>{
+    updateWorkerNPCs();
+    // Burst particles at build site
+    if(typeof spawnBuildParticles==='function') spawnBuildParticles(snap.x,snap.z);
+  },200);
 }
 
 
@@ -2535,7 +2602,7 @@ function renderBuildSection(){
 
 function renderUpgradeSection(){
   const builtAny=Object.values(G.bld).some(v=>v===true);
-  if(!builtAny)return'<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Bouw first to unlock upgrades</div>';
+  if(!builtAny)return'<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Build some buildings first to unlock upgrades</div>';
   let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⬆️ BUILDING UPGRADES</div>';
   Object.entries(UPG_DEF).forEach(([id,defs])=>{
     if(!G.bld[id])return;const lvl=G.upgrades[id]||0,maxed=lvl>=defs.length,def=BLD_DEF[id];if(!def)return;
@@ -2550,10 +2617,11 @@ function renderUpgradeSection(){
 }
 
 function renderPassiveSection(){
+  // Inject total EMP summary at top
   // This shows all passive income including BLD_DEF empOut
   const ph=passPerHour();let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⏰ PASSIVE PER HOUR</div>';
   const activeKeys=Object.keys(ph).filter(k=>ph[k]>0);
-  if(!activeKeys.length)return html+'<div style="text-align:center;padding:16px;color:var(--txt-d);font-size:11px">Bouw gebouwen voor passief inkomen</div>';
+  if(!activeKeys.length)return html+'<div style="text-align:center;padding:16px;color:var(--txt-d);font-size:11px">Build buildings for passive income</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">';
   activeKeys.forEach(k=>{html+=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:7px;text-align:center"><div style="font-size:16px">${RES_ICO[k]||k}</div><div style="font-size:13px;font-weight:700;color:var(--gold-b)">+${ph[k]}</div><div style="font-size:7px;color:var(--txt-d)">${k}</div></div>`;});
   html+='</div>';
@@ -2610,7 +2678,7 @@ function updateHUD(){
   if(pr&&prv){
     const ph2=passPerHour();
     const empPerHr=Math.round((ph2.emp||0)+(Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0);},0)*450*(E.empMult||1)));
-    if(empPerHr>0){pr.style.display='flex';prv.textContent='+'+empPerHr;}else{pr.style.display='none';}
+    if(empPerHr>0){pr.style.display='flex';prv.textContent='+'+empPerHr;pr.title='+'+empPerHr+' $EMP/hr passive';}else{pr.style.display='none';}
   }
   // Show multiplier on emp pill if above 1
   const empPill=document.getElementById('emp-pill');
@@ -2659,6 +2727,24 @@ function renderQuestProgress(q){
     <div style="height:100%;width:${pct}%;background:${done?'var(--grn)':'var(--gold)'};border-radius:2px;transition:width .4s"></div>
   </div>`;
 }
+
+function generateDailyQuests(){
+  const pool=[
+    {id:'mine50',    label:'⛏️ Mine 50 stone',   type:'mine',  res:'stone',  need:50,  reward:{emp:8}},
+    {id:'mine30w',   label:'🪵 Chop 30 wood',    type:'mine',  res:'wood',   need:30,  reward:{emp:6}},
+    {id:'mine20g',   label:'🥇 Mine 20 gold',    type:'mine',  res:'gold',   need:20,  reward:{emp:10}},
+    {id:'sell3',     label:'💱 Sell resources ×3',type:'sell',  need:3,       reward:{emp:15}},
+    {id:'build1',    label:'🏗️ Place a building', type:'build', need:1,       reward:{emp:20,stone:30}},
+    {id:'earn50emp', label:'💰 Earn 50 $EMP',     type:'emp',   need:50,      reward:{emp:10}},
+    {id:'play1',     label:'🎮 Play a mini-game', type:'play',  need:1,       reward:{emp:12}},
+    {id:'open_box',  label:'📦 Open mystery box', type:'open_box',need:1,     reward:{emp:8,gold:10}},
+    {id:'mine10c',   label:'💎 Find 10 crystal',  type:'mine',  res:'crystal',need:10, reward:{emp:25}},
+    {id:'earn100emp',label:'💰 Earn 100 $EMP',    type:'emp',   need:100,     reward:{emp:20}},
+  ];
+  // Pick 3 random quests
+  const shuffled=[...pool].sort(()=>Math.random()-.5);
+  return shuffled.slice(0,3).map(q=>({...q,progress:0,done:false}));
+}
 function renderQuestsTab(){
   const el=document.getElementById('cp-quests');if(!el)return;
   const bonus=Math.min(G.streak*5,150),sc=G.streak>=7?'#f0b040':G.streak>=3?'#f0c96e':'#a8c0d0';
@@ -2675,7 +2761,7 @@ function renderPrestigeTab(){
   const title=G.prestige>0?PRESTIGE_TITLES[G.prestige-1]:'Beginner',badge=G.prestige>0?PRESTIGE_BADGES[G.prestige-1]:'🌱',can=canPrestige();
   let pips='';for(let i=0;i<10;i++)pips+=`<div style="width:20px;height:20px;border-radius:4px;background:${i<G.prestige?'var(--gold)':'rgba(255,255,255,.06)'};border:1px solid ${i<G.prestige?'var(--gold-b)':'rgba(255,255,255,.1)'};font-size:10px;display:flex;align-items:center;justify-content:center">${i<G.prestige?PRESTIGE_BADGES[i]:''}</div>`;
   let hist='';for(let i=0;i<G.prestige;i++)hist+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px"><span>${PRESTIGE_BADGES[i]}</span><span style="color:var(--txt)">${PRESTIGE_TITLES[i]}</span><span style="margin-left:auto;color:var(--gold-b);font-size:9px">+${(i+1)*10}%</span></div>`;
-  el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:8px;text-align:center"><div style="font-size:36px;margin-bottom:4px">${badge}</div><div style="font-family:Cinzel,serif;font-size:14px;color:var(--gold-b)">${title}</div><div style="font-size:10px;color:var(--txt-d);margin:2px 0">Prestige Level ${G.prestige}/10</div>${G.prestigeBonus>0?`<div style="font-size:12px;font-weight:700;color:var(--grn2);margin-top:4px">+${Math.round(G.prestigeBonus*100)}% permanent bonus</div>`:''}<div style="display:flex;gap:4px;margin:10px 0;justify-content:center;flex-wrap:wrap">${pips}</div></div>${G.prestige<10?`<div style="background:var(--bg3);border:1px solid ${can?'rgba(240,184,64,.5)':'var(--bdr)'};border-radius:9px;padding:12px;margin-bottom:8px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b);margin-bottom:6px">Next: ${PRESTIGE_BADGES[G.prestige]||'?'} ${PRESTIGE_TITLES[G.prestige]||''}</div><div style="font-size:10px;color:var(--txt-d);margin-bottom:8px">Vereist: 18+ gebouwen + Rijksbank<br>Behoudt: 10% $EMP · +10% permanente bonus</div><button onclick="doPrestige()" style="width:100%;padding:10px;border-radius:8px;border:none;font-family:Cinzel,serif;font-size:12px;font-weight:700;${can?'background:linear-gradient(135deg,#6a00aa,#aa00ff);color:#fff;cursor:pointer':'opacity:.4;cursor:default;background:rgba(255,255,255,.05);color:var(--txt-d)'}">${can?'🌟 PRESTIGE NOW':'🔒 Build more buildings first'}</button></div>`:''}${G.prestige>0?`<div style="font-size:9px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">BEHAALDE TITELS</div>${hist}`:''}`;
+  el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:12px;margin-bottom:8px;text-align:center"><div style="font-size:36px;margin-bottom:4px">${badge}</div><div style="font-family:Cinzel,serif;font-size:14px;color:var(--gold-b)">${title}</div><div style="font-size:10px;color:var(--txt-d);margin:2px 0">Prestige Level ${G.prestige}/10</div>${G.prestigeBonus>0?`<div style="font-size:12px;font-weight:700;color:var(--grn2);margin-top:4px">+${Math.round(G.prestigeBonus*100)}% permanent bonus</div>`:''}<div style="display:flex;gap:4px;margin:10px 0;justify-content:center;flex-wrap:wrap">${pips}</div></div>${G.prestige<10?`<div style="background:var(--bg3);border:1px solid ${can?'rgba(240,184,64,.5)':'var(--bdr)'};border-radius:9px;padding:12px;margin-bottom:8px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b);margin-bottom:6px">Next: ${PRESTIGE_BADGES[G.prestige]||'?'} ${PRESTIGE_TITLES[G.prestige]||''}</div><div style="font-size:10px;color:var(--txt-d);margin-bottom:8px">Requires: 18+ buildings + Empire Bank<br>Keeps: 10% $EMP · +10% permanent bonus</div><button onclick="doPrestige()" style="width:100%;padding:10px;border-radius:8px;border:none;font-family:Cinzel,serif;font-size:12px;font-weight:700;${can?'background:linear-gradient(135deg,#6a00aa,#aa00ff);color:#fff;cursor:pointer':'opacity:.4;cursor:default;background:rgba(255,255,255,.05);color:var(--txt-d)'}">${can?'🌟 PRESTIGE — Reset & Grow':'🔒 Need more buildings'}</button></div>`:''}${G.prestige>0?`<div style="font-size:9px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">BEHAALDE TITELS</div>${hist}`:''}`;
 }
 function buyShop(id){if(!walletAddr){toast('Connect your wallet first!');toggleWallet();return;}toast('📱 TON payment coming soon — wallet: '+walletAddr.slice(0,8)+'…');}
 
@@ -2755,7 +2841,7 @@ function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rw
 // ═══ SAVE / LOAD ═══
 function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
 function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw)return;const sv=JSON.parse(raw);if(sv.res)Object.assign(G.res,sv.res);if(sv.bld)Object.assign(G.bld,sv.bld);if(sv.cd)Object.assign(G.cd,sv.cd);if(sv.stats)Object.assign(G.stats,sv.stats);if(sv.upgrades)Object.assign(G.upgrades,sv.upgrades);G.era=sv.era||1;G.streak=sv.streak||0;G.lastLogin=sv.lastLogin||'';G.streakClaimed=sv.streakClaimed||false;G.quests=sv.quests||[];G.questsDate=sv.questsDate||'';G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings on world
-Object.entries(G.bld).forEach(([id,built])=>{if(built===true&&BLD_DEF[id]){const spacing=Object.keys(buildingMeshes).length;const bx=((spacing*4.5)%36)-18,bz=Math.floor(spacing/8)*5-10;buildBldMesh(id,bx,bz);}});toast('💾 Game loaded!',2000);}catch(e){console.warn('Load:',e);}}
+Object.entries(G.bld).forEach(([id,built])=>{if(built===true&&BLD_DEF[id]){const spacing=Object.keys(buildingMeshes).length;const bx=((spacing*4.5)%36)-18,bz=Math.floor(spacing/8)*5-10;buildBldMesh(id,bx,bz);}});toast('💾 Game loaded!',2000);}catch(e){if(window.location.hostname==='localhost')console.warn('Load:',e);}}
 setInterval(saveGame,30000);
 
 // ═══ TOAST ═══
@@ -3113,12 +3199,22 @@ function launch(){
       eTick();
       if(E.tick%60===0){ eSave(); saveGame(); }
       if(E.tick%300===0) dbSyncPlayer();
+  updateWeather();
   // Upgrade reminder every 200 ticks
   if(E.tick%200===0){
     const emp=E.res.emp||0;
     const next=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
     if(next&&emp>=next.cost&&Math.random()<.4){
       toast('💡 You can afford '+next.n+' ('+next.cost+'💰)! Tap $EMP to upgrade.',4000);
+    }
+    // Auto-refresh quests if all complete
+    if(G.quests&&G.quests.every(q=>q.done)){
+      setTimeout(()=>{
+        G.quests=generateDailyQuests();
+        toast('📋 New daily quests available!',2500);
+        renderQuestsTab?.();
+        updateTabBadges?.();
+      },2000);
     }
   }
     }, 8000);  // 1 game-day = 8 real seconds
@@ -3361,7 +3457,8 @@ function updatePresaleStrip(){
 
   const emp=Math.floor(E?.totalEmpEarned||G?.res?.emp||0);
   const mult=(E?.empMult||1).toFixed(1);
-  txt.textContent=`Presale ends in ${d}d ${h}h ${m}m · ${emp.toLocaleString()} $EMP earned · ×${mult} boost`;
+  const wx=weatherState==='rain'?'🌧️ ':weatherState==='cloudy'?'⛅ ':'☀️ ';
+  txt.textContent=`${wx}Presale ends ${d}d ${h}h ${m}m · ${emp.toLocaleString()} $EMP · ×${mult} boost`;
 }
 
 function showPresaleStrip(){
@@ -3421,7 +3518,7 @@ function showBuildingPopup(id){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
       ${empRate?`<div style="background:rgba(64,200,112,.1);border:1px solid rgba(64,200,112,.2);border-radius:8px;padding:7px;text-align:center">
         <div style="font-size:14px;font-weight:900;color:var(--grn2)">+${empRate}</div>
-        <div style="font-size:7px;color:var(--txt-d)">💰/tick</div>
+        <div style="font-size:7px;color:var(--txt-d)">💰/tick · ${empHr}/hr</div>
       </div>`:''}
       ${passRes.map(([r,v])=>`<div style="background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:7px;text-align:center">
         <div style="font-size:14px;font-weight:900;color:var(--txt)">+${v}</div>
@@ -3587,7 +3684,30 @@ function updateTabBadges(){
 }
 
 
-let _mmBig=false;
+
+function minimapTap(e){
+  if(e) { e.stopPropagation(); e.preventDefault(); }
+  const cv=document.getElementById('minimap-canvas');if(!cv)return;
+  const rect=cv.getBoundingClientRect();
+  const clientX=e.changedTouches?e.changedTouches[0].clientX:(e.clientX||0);
+  const clientY=e.changedTouches?e.changedTouches[0].clientY:(e.clientY||0);
+  const nx=(clientX-rect.left)/rect.width - .5; // -0.5..0.5
+  const ny=(clientY-rect.top)/rect.height - .5;
+  const now=Date.now();
+  if(now-(_mmTapTime||0)<400){toggleMinimap();_mmTapTime=0;return;}
+  _mmTapTime=now;
+  // Un-rotate tap to match rotated map
+  const facing=playerGroup?playerGroup.rotation.y:0;
+  const cosA=Math.cos(facing), sinA=Math.sin(facing);
+  const rnx=nx*cosA - ny*sinA;
+  const rny=nx*sinA + ny*cosA;
+  const tx=Math.max(-WORLD_RADIUS,Math.min(WORLD_RADIUS, rnx*WORLD_RADIUS*2));
+  const tz=Math.max(-WORLD_RADIUS,Math.min(WORLD_RADIUS, rny*WORLD_RADIUS*2));
+  pPos.x=tx;pPos.z=tz;
+  if(playerGroup){const gy=sampleH(tx,tz);playerGroup.position.set(tx,gy+.20,tz);}
+  camTarget.x=tx;camTarget.z=tz;walkTarget=null;
+  toast('📍',600);
+}
 function toggleMinimap(){
   _mmBig=!_mmBig;
   const cv=document.getElementById('minimap-canvas');
@@ -3607,20 +3727,25 @@ function renderMinimap(){
 
   const ctx=canvas.getContext('2d');
   const W=canvas.width, H=canvas.height;
-  const WORLD=76; // world radius in units
-  const S=W/WORLD; // scale: world units → pixels
+  const R=WORLD_RADIUS||38;
+  const S=W/(R*2); // pixels per world unit
 
-  // Background — dark terrain green
+  // Rotate map to match player direction (player always faces UP)
+  const plrFacing=playerGroup?playerGroup.rotation.y:0;
+  ctx.save();
+  ctx.translate(W/2, H/2);
+  ctx.rotate(-plrFacing); // counter-rotate so player's forward = up
+  ctx.translate(-W/2, -H/2);
+
+  // Background — dark terrain green (draw BEFORE rotate clip)
   ctx.fillStyle='#0e1e10';
-  ctx.beginPath();
-  ctx.roundRect?ctx.roundRect(0,0,W,H,10):ctx.rect(0,0,W,H);
-  ctx.fill();
+  ctx.fillRect(0,0,W,H);
 
   // Water circle (edge of map)
-  const grad=ctx.createRadialGradient(W/2,H/2,W*.28,W/2,H/2,W*.5);
+  const grad=ctx.createRadialGradient(W/2,H/2,W*.25,W/2,H/2,W*.52);
   grad.addColorStop(0,'rgba(20,50,80,0)');
-  grad.addColorStop(.7,'rgba(16,40,70,.4)');
-  grad.addColorStop(1,'rgba(16,40,70,.85)');
+  grad.addColorStop(.65,'rgba(16,40,70,.35)');
+  grad.addColorStop(1,'rgba(16,40,70,.9)');
   ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
 
   // Terrain height hints (simple radial gradient for hills)
@@ -3631,7 +3756,7 @@ function renderMinimap(){
 
   // Paths (approximate with sine pattern lines)
   ctx.strokeStyle='rgba(160,130,60,.25)';ctx.lineWidth=2;
-  for(let px2=-WORLD/2;px2<WORLD/2;px2+=6){
+  for(let px2=-R;px2<R;px2+=6){
     const sx=W/2+px2*S;
     const sy1=H/2+(Math.sin(px2*.18)*8+4)*S;
     const sy2=H/2+(Math.sin(px2*.18+.3)*8-4)*S;
@@ -3640,64 +3765,178 @@ function renderMinimap(){
   }
 
   // Resource nodes — amber dots
-  resourceNodes.forEach(n=>{
-    if(!n.parent)return;
-    const x=W/2+n.position.x*S, y=H/2+n.position.z*S;
-    if(x<0||x>W||y<0||y>H)return;
-    ctx.fillStyle='#e8a030';
-    ctx.beginPath();ctx.arc(x,y,_mmBig?3:2,0,Math.PI*2);ctx.fill();
+  (resourceNodes||[]).forEach(n=>{
+    if(!n||!n.parent||!scene.children.includes(n))return;
+    const wx=n.position.x, wz=n.position.z;
+    const x=W/2+wx*S, y=H/2+wz*S;
+    if(x<1||x>W-1||y<1||y>H-1)return;
+    ctx.fillStyle='#e8b030';
+    ctx.beginPath();ctx.arc(x,y,_mmBig?3.5:2.5,0,Math.PI*2);ctx.fill();
   });
 
-  // Buildings — squares, gold=EMP, green=resource
-  Object.entries(buildingMeshes).forEach(([id,mesh])=>{
-    if(!G.bld[id]||!mesh)return;
-    const x=W/2+mesh.position.x*S, y=H/2+mesh.position.z*S;
-    if(x<2||x>W-2||y<2||y>H-2)return;
+  // Buildings — squares, gold=EMP buildings, green=resource
+  Object.entries(buildingMeshes||{}).forEach(([id,mesh])=>{
+    if(!mesh||G.bld[id]!==true)return;
+    const wx=mesh.position.x, wz=mesh.position.z;
+    const x=W/2+wx*S, y=H/2+wz*S;
+    if(x<1||x>W-1||y<1||y>H-1)return;
     const def=BLD_DEF[id];
-    const bsz=_mmBig?5:4;
-    // Shadow
-    ctx.fillStyle='rgba(0,0,0,.4)';
+    const bsz=_mmBig?6:5;
+    ctx.fillStyle='rgba(0,0,0,.5)';
     ctx.fillRect(x-bsz/2+1,y-bsz/2+1,bsz,bsz);
-    // Building
-    ctx.fillStyle=def?.empOut?'#f5d840':'#70d880';
+    ctx.fillStyle=def?.empOut?'#f5d840':'#6ee878';
     ctx.fillRect(x-bsz/2,y-bsz/2,bsz,bsz);
   });
 
-  // Camera FOV cone (third-person)
+  // Player walk direction — use playerGroup.rotation.y (actual facing)
+  const plrDir=playerGroup?playerGroup.rotation.y:0;
+  const R2=R||38;
+
+  // Camera FOV cone
   if(!fpMode){
-    const fovAngle=Math.PI*.35;
-    const coneLen=_mmBig?28:18;
-    const px3=W/2+camTarget.x*S, py3=H/2+camTarget.z*S;
-    const a1=camAngle+Math.PI-fovAngle/2;
-    const a2=camAngle+Math.PI+fovAngle/2;
-    ctx.fillStyle='rgba(255,255,255,.06)';
+    const fovAngle=Math.PI*.4;
+    const coneLen=_mmBig?30:20;
+    const px3=W/2+(pPos.x||0)*S, py3=H/2+(pPos.z||0)*S;
+    // In rotated map, camera always looks from bottom (player is center)
+    const viewDir=Math.PI; // always points toward top of rotated map
+    ctx.fillStyle='rgba(255,255,255,.07)';
     ctx.beginPath();
     ctx.moveTo(px3,py3);
-    ctx.arc(px3,py3,coneLen,a1,a2);
+    ctx.arc(px3,py3,coneLen,viewDir-fovAngle/2,viewDir+fovAngle/2);
     ctx.closePath();ctx.fill();
   }
 
-  // Player — white dot with direction arrow
-  const px4=W/2+pPos.x*S, py4=H/2+pPos.z*S;
-  // Glow
-  const pg=ctx.createRadialGradient(px4,py4,0,px4,py4,8);
-  pg.addColorStop(0,'rgba(255,255,255,.4)');
-  pg.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle=pg;ctx.beginPath();ctx.arc(px4,py4,8,0,Math.PI*2);ctx.fill();
-  // Dot
-  ctx.fillStyle='#ffffff';
-  ctx.beginPath();ctx.arc(px4,py4,_mmBig?4:3,0,Math.PI*2);ctx.fill();
-  // Direction tick
-  const dir=fpMode?fpYaw:(camAngle+Math.PI);
-  ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;
-  ctx.beginPath();
-  ctx.moveTo(px4,py4);
-  ctx.lineTo(px4+Math.sin(dir)*(_mmBig?9:6),py4+Math.cos(dir)*(_mmBig?9:6));
-  ctx.stroke();
+  // Restore rotation — player dot always at center pointing up
+  ctx.restore();
 
+  // Player dot — always center of minimap, arrow always points UP
+  const px4=W/2, py4=H/2;
+  // Glow ring
+  const pg=ctx.createRadialGradient(px4,py4,0,px4,py4,9);
+  pg.addColorStop(0,'rgba(255,255,255,.35)');
+  pg.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=pg;ctx.beginPath();ctx.arc(px4,py4,9,0,Math.PI*2);ctx.fill();
+  // Direction triangle — always points the way player is facing
+  const arrowLen=_mmBig?10:7;
+  const arrowW=_mmBig?5:3.5;
+  // Arrow always points UP (player faces up on rotating map)
+  ctx.save();
+  ctx.translate(px4,py4);
+  ctx.fillStyle='#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(0,-arrowLen);
+  ctx.lineTo(arrowW,arrowLen*.4);
+  ctx.lineTo(-arrowW,arrowLen*.4);
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+
+  // Compass: show N indicator at top edge
+  ctx.fillStyle='rgba(255,80,80,.8)';
+  ctx.font=`bold ${_mmBig?10:8}px sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText('N',W/2,_mmBig?14:10);
   // Border
   ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=1;
   ctx.strokeRect(.5,.5,W-1,H-1);
+}
+
+// ─── Sound FX (Web Audio API — no files needed) ───────────────────────────────
+let _ac=null;
+function getAC(){if(!_ac)try{_ac=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return _ac;}
+function playTone(freq,dur,type='square',vol=.12){
+  const ac=getAC();if(!ac)return;
+  try{
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);
+    o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime);
+    g.gain.setValueAtTime(vol,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+dur);
+    o.start();o.stop(ac.currentTime+dur);
+  }catch(e){}
+}
+function sfxMine()   { playTone(180,.08,'sawtooth',.08); }
+function sfxBuild()  { playTone(440,.05,'square',.1);setTimeout(()=>playTone(660,.12,'square',.1),60); }
+function sfxEMP()    { playTone(520,.04,'sine',.08);setTimeout(()=>playTone(780,.15,'sine',.07),50); }
+function sfxQuest()  { [440,550,660,880].forEach((f,i)=>setTimeout(()=>playTone(f,.1,'sine',.1),i*80)); }
+function sfxError()  { playTone(120,.15,'sawtooth',.12); }
+function sfxCoin()   { playTone(900,.04,'sine',.06);setTimeout(()=>playTone(1100,.08,'sine',.06),40); }
+// ──────────────────────────────────────────────────────────────────────────────
+
+// ─── Weather System ───────────────────────────────────────────────────────────
+let weatherState='clear'; // 'clear'|'cloudy'|'rain'
+let weatherTimer=0;
+let rainParticles=[];
+
+function updateWeather(){
+  weatherTimer++;
+  if(weatherTimer<800) return;
+  weatherTimer=0;
+  const roll=Math.random();
+  if(weatherState==='clear'&&roll<.25){ setWeather('cloudy'); }
+  else if(weatherState==='cloudy'&&roll<.4){ setWeather(roll<.2?'rain':'clear'); }
+  else if(weatherState==='rain'){ setWeather('clear'); }
+}
+
+function setWeather(w){
+  weatherState=w;
+  const wi=document.getElementById('weather-icon');
+  if(wi)wi.textContent=w==='rain'?'🌧️':w==='cloudy'?'⛅':'☀️';
+  if(w==='rain'){
+    toast('🌧️ Rain started — workers slowing down',2500);
+    spawnRain();
+  } else if(w==='clear'&&rainParticles.length){
+    rainParticles.forEach(p=>scene.remove(p));rainParticles=[];
+    toast('☀️ Clear skies — production restored',2000);
+  }
+  // Adjust fog for weather
+  if(scene.fog){
+    scene.fog.density=w==='rain'?.032:w==='cloudy'?.020:.015;
+  }
+}
+
+function spawnRain(){
+  if(!scene)return;
+  const mat=new THREE.MeshBasicMaterial({color:0x88aacc,transparent:true,opacity:.4});
+  for(let i=0;i<120;i++){
+    const drop=new THREE.Mesh(new THREE.BoxGeometry(.04,.4,.04),mat);
+    drop.position.set((Math.random()-.5)*70,(Math.random()*15)+2,(Math.random()-.5)*70);
+    drop.userData.vy=-(1.5+Math.random()*1.5);
+    scene.add(drop);rainParticles.push(drop);
+  }
+}
+
+function animateWeather(){
+  if(weatherState!=='rain')return;
+  rainParticles.forEach(p=>{
+    p.position.y+=p.userData.vy*.016*60;
+    if(p.position.y<-2){p.position.y=14+Math.random()*4;}
+    p.position.x+=(Math.random()-.5)*.02;
+  });
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
+function spawnBuildParticles(wx,wz){
+  if(!scene)return;
+  const cols=[0xf5d840,0x80ee90,0xffffff,0xf0b840];
+  for(let i=0;i<12;i++){
+    const m=new THREE.Mesh(
+      new THREE.SphereGeometry(.12,4,4),
+      new THREE.MeshBasicMaterial({color:cols[i%cols.length]})
+    );
+    const gy=sampleH(wx,wz);
+    m.position.set(wx+(Math.random()-.5)*.5,gy+.3,wz+(Math.random()-.5)*.5);
+    m.userData.vy=1.5+Math.random()*2;
+    m.userData.life=1;
+    scene.add(m);
+    // Animate and remove
+    const tick=setInterval(()=>{
+      m.position.y+=m.userData.vy*.016;
+      m.userData.vy-=4*.016;
+      m.userData.life-=.04;
+      m.scale.setScalar(m.userData.life);
+      if(m.userData.life<=0){clearInterval(tick);scene.remove(m);}
+    },16);
+  }
 }
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
@@ -3708,7 +3947,16 @@ function showEmpFloat(amount){
   setTimeout(()=>el.remove(),900);
 }
 function eEarn(amount,source){
-  if(amount>0){ E.totalEmpEarned=(E.totalEmpEarned||0)+amount; if(amount>=2&&Math.random()<.15) showEmpFloat(amount); checkEmpMilestones(); }E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
+  if(amount>0){
+    E.totalEmpEarned=(E.totalEmpEarned||0)+amount;
+    if(amount>=2&&Math.random()<.15) showEmpFloat(amount);
+    checkEmpMilestones();
+    // Flash EMP pill
+    if(amount>=.5){
+      const pill=document.getElementById('emp-pill');
+      if(pill){pill.style.boxShadow='0 0 14px rgba(245,216,64,.7)';setTimeout(()=>pill.style.boxShadow='',300);}
+    }
+  }E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
 function eEff(b){const def=MBLD[b.type];if(!def||!b.active)return 0; const innBonus=G.bld.inn?1.15:1;const wRatio=def.workers>0?Math.min(1,(b.workers||0)/def.workers):1;let inputOk=1;if(def.inp&&Object.keys(def.inp).length>0){const met=Object.entries(def.inp).filter(([k,v])=>(E.res[k]||0)>=v).length;inputOk=.3+.7*(met/Object.keys(def.inp).length);}const sci=E.sciBonus?1.25:1,guild=E.guildBonus?1.20:1,pres=1+(E.prestigeBonus||0);return Math.max(0,Math.min(2.0,(.3+.7*wRatio)*inputOk*E.logMult*sci*guild*pres*innBonus));}
 
@@ -3736,7 +3984,7 @@ function eTick(){
     if(built!==true)return;
     const def=BLD_DEF[id];if(!def||!def.empOut)return;
     const popRatio=Math.min(1,(E.pop.workers||0)/Math.max(1,def.workers||2));
-    const eff=Math.max(0.3,popRatio)*(E.logMult||1)*(1+(E.prestigeBonus||0));
+    const eff=Math.max(0.3,popRatio)*weatherPenalty*(E.logMult||1)*(1+(E.prestigeBonus||0));
     eEarn(def.empOut*eff*sMult*(E.priceBonus||1)*(E.empMult||1),def.name);
   });
   // ── Town Hall: pop-based income ─────────────────────────────────────────
@@ -3764,7 +4012,7 @@ function eTick(){
 
 function eUpdatePop(){
   // Refresh worker NPCs every 5th pop update (~100 ticks)
-  if(E.tick%60===0) setTimeout(updateWorkerNPCs,0);
+  if(E.tick%90===0) setTimeout(updateWorkerNPCs,0);
   const pop=ePop(),foodSupply=E.res.food/Math.max(1,pop*.25);
   const hd=(Math.min(1,foodSupply)*20-10)+(E.defense>20?3:-2);
   E.happiness=Math.max(0,Math.min(100,E.happiness+hd*.1));
