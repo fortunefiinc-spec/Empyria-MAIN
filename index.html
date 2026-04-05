@@ -880,7 +880,7 @@ function passPerHour(){
   for(const[b,r]of Object.entries(PASS_DEF)){if(!G.bld[b])continue;for(const[k,v]of Object.entries(r))out[k]=(out[k]||0)+v;}
   // BLD_DEF empOut buildings (world buildings → passive EMP)
   for(const[id,built]of Object.entries(G.bld)){
-    if(built!==true)continue;
+    if(built!==true&&typeof built!=='object')continue;
     const def=BLD_DEF[id];
     if(def?.empOut) out.emp=(out.emp||0)+def.empOut*(E.empMult||1)*450;
   }
@@ -2380,7 +2380,7 @@ function confirmPlace(wx,wz){
   checkAchievements();
   window.haptic?.('heavy');sfxBuild();
   // Max buildings per era tier
-  const _builtCount=Object.values(G.bld).filter(v=>v===true).length;
+  const _builtCount=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
   const _bdef=BLD_DEF[id];
   const _empMsg=_bdef?.empOut>0?' · +'+(_bdef.empOut*(E.empMult||1)).toFixed(2)+'💰/tick':'';
   toast('✅ '+_bdef?.name+' built!'+_empMsg,3000);
@@ -2624,7 +2624,7 @@ function buyUpgrade(id){
   for(const[res,amt]of Object.entries(cost))G.res[res]-=amt;G.upgrades[id]=lvl+1;toast('⬆️ '+BLD_DEF[id].name+' Lv '+(lvl+2)+'! '+defs[lvl].bonus,3500);updateHUD();
 }
 
-function canPrestige(){return G.bld.empirebank&&Object.values(G.bld).filter(v=>v===true).length>=18;}
+function canPrestige(){return G.bld.empirebank&&Object.values(G.bld).filter(v=>v===true||typeof v==='object').length>=18;}
 function doPrestige(){
   if(!canPrestige()){toast('Build 18+ buildings + Empire Bank first!');return;}if(G.prestige>=10){toast('Max Prestige! 👑');return;}
   G.prestige++;G.prestigeBonus=G.prestige*0.10;const keptEMP=Math.floor(G.res.emp/10);
@@ -2685,7 +2685,7 @@ function renderEmpirePanel(){
   const el=document.getElementById('cp-empire');if(!el)return;
   const TABS=[{id:'build',ico:'🏗️',label:'BUILD'},{id:'market',ico:'⚖️',label:'MARKET'},{id:'$emp',ico:'💰',label:'$EMP'},{id:'upgrades',ico:'⬆️',label:'UPGR'},{id:'passive',ico:'⏰',label:'PASSIVE'},{id:'log',ico:'📜',label:'LOG'}];
   const tabBar=`<div style="display:flex;gap:3px;margin-bottom:10px;padding:3px;background:rgba(0,0,0,.25);border-radius:10px">${TABS.map(t=>`<div onclick="empTab('${t.id}')" style="flex:1;text-align:center;padding:7px 2px;border-radius:8px;cursor:pointer;transition:all .15s;background:${empireSection===t.id?'rgba(240,184,64,.18)':'transparent'};border:1px solid ${empireSection===t.id?'rgba(240,184,64,.35)':'transparent'}"><div style="font-size:14px">${t.ico}</div><div style="font-size:7px;color:${empireSection===t.id?'var(--gold-b)':'var(--txt-d)'};font-weight:${empireSection===t.id?'700':'400'};letter-spacing:.5px">${t.label}</div></div>`).join('')}</div>`;
-  const ph=passPerHour();const bcount=Object.values(G.bld).filter(v=>v===true).length;
+  const ph=passPerHour();const bcount=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
   // No separate header card — info shown in topbar EMP pill + compact strip
   const passEmp=ph.emp||0;
   const empRate=passEmp>0?`+${passEmp<1?passEmp.toFixed(2):Math.round(passEmp)}/hr`:'no passive yet';
@@ -2713,7 +2713,7 @@ function renderEmpirePanel(){
 
 function renderBuildSection(){
   let html='';
-  const active=Object.entries(G.bld).filter(([,v])=>v===true);
+  const active=Object.entries(G.bld).filter(([,v])=>v===true||typeof v==='object');
   if(active.length>0){
     html+=`<div style="margin-bottom:10px"><div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:5px">⚙️ ACTIVE (${active.length})</div><div style="display:flex;flex-wrap:wrap;gap:4px">`;
     active.forEach(([id])=>{const def=BLD_DEF[id];if(!def)return;html+=`<div style="background:rgba(50,100,50,.25);border:1px solid rgba(40,160,80,.3);border-radius:7px;padding:4px 8px;font-size:9px;display:inline-flex;align-items:center;gap:4px">${def.ico} <span style="color:var(--txt)">${def.name}</span></div>`;});
@@ -2743,7 +2743,7 @@ function renderBuildSection(){
 }
 
 function renderUpgradeSection(){
-  const builtAny=Object.values(G.bld).some(v=>v===true);
+  const builtAny=Object.values(G.bld).some(v=>v===true||typeof v==='object');
   if(!builtAny)return'<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Build some buildings first to unlock upgrades</div>';
   let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⬆️ BUILDING UPGRADES</div>';
   Object.entries(UPG_DEF).forEach(([id,defs])=>{
@@ -2869,7 +2869,7 @@ function _doUpdateHUD(){
         return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':vhigh?'rgba(64,200,112,.35)':high?'rgba(240,184,64,.25)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':vhigh?'var(--grn2)':high?'var(--gold-b)':'var(--txt)'}">${v}</span></div>`;
       }).join('');
   }
-  const _empV=Math.floor(E.res.emp||G.res.emp||0);
+  const _empV=Math.floor(G.res.emp||E.res.emp||0); // G.res.emp is canonical
   const ep=document.getElementById('emp-val');
   if(ep&&ep.textContent!==String(_empV)){
     ep.textContent=_empV;
@@ -2911,7 +2911,7 @@ function _doUpdateHUD(){
   }
   ['s','w','g','e'].forEach((ch,i)=>{const k=['stone','wood','gold','emp'][i];const el=document.getElementById('st-'+ch);if(el)el.textContent=G.stats[k]||0;});
   const si=document.getElementById('st-iron');if(si)si.textContent=G.stats.iron||0;const sc2=document.getElementById('st-crystal');if(sc2)sc2.textContent=G.stats.crystal||0;
-  const sb=document.getElementById('st-bld');if(sb)sb.textContent=Object.values(G.bld).filter(v=>v===true).length;
+  const sb=document.getElementById('st-bld');if(sb)sb.textContent=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
   const sp=document.getElementById('st-pres');if(sp)sp.textContent=G.prestige;const sbox=document.getElementById('st-box');if(sbox)sbox.textContent=G.mysteryBoxes;
   updateEra();updateGameCards();
 }
@@ -3572,7 +3572,7 @@ function launch(){
   updateHUD();
 
   // Restore 3D buildings from save
-  const loaded=Object.entries(G.bld).filter(([,v])=>v===true);
+  const loaded=Object.entries(G.bld).filter(([,v])=>v===true||typeof v==='object');
   if(loaded.length>0){
     loaded.forEach(([id],i)=>{
       if(!buildingMeshes[id]){
@@ -3584,14 +3584,15 @@ function launch(){
   }
 
   setTimeout(()=>{
-    const isNew=!Object.values(G.bld).some(v=>v===true);
+    const isNew=!Object.values(G.bld).some(v=>v===true||typeof v==='object');
     if(isNew){
       addRes('stone',30); addRes('wood',30); addRes('gold',10); addRes('emp',15);
       E.res.gold+=150; E.res.wood+=80; E.res.stone+=60;
       updateHUD();
       toast('🏰 Welcome to Empyria! Mine · Build · Earn $EMP!', 4000);
     } else {
-      toast('⚔️ Welcome back! '+Math.floor(G.res.emp||0)+' $EMP ready.', 2500);
+      const dispEmp=Math.max(G.res.emp||0,E.res.emp||0);
+      toast('⚔️ Welcome back! '+dispEmp.toLocaleString()+' $EMP ready.', 2500);
     }
     updateHUD();
   }, 900);
@@ -3707,7 +3708,7 @@ function ePop(){return E.pop.workers+E.pop.merchants+E.pop.nobles;}
 function shareTelegram(){
   const emp=Math.floor(E.totalEmpEarned||0);
   const mult=(E.empMult||1).toFixed(1);
-  const blds=Object.values(G.bld).filter(v=>v===true).length;
+  const blds=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
   const text=`🏰 I'm playing Empyria!\n\n💰 ${emp.toLocaleString()} \$EMP earned\n🏗️ ${blds} buildings\n⚡ ×${mult} production boost\n\n👉 Play now: t.me/EMPYRIAbot/EMPYRIAworld\n\nJoin before the presale ends and earn real \$EMP tokens! 🚀`;
   const url='https://t.me/share/url?url=https://t.me/EMPYRIAbot/EMPYRIAworld&text='+encodeURIComponent(text);
   if(window.Telegram?.WebApp?.openTelegramLink){
@@ -3918,12 +3919,12 @@ function calcOfflineIncome(){
 
 const ACHIEVEMENTS=[
   {id:'first_mine',   ico:'⛏️', name:'First Strike',      desc:'Mine your first resource',           check:()=>(G.stats?.stone||0)+(G.stats?.wood||0)>0},
-  {id:'first_build',  ico:'🏗️', name:'Builder',           desc:'Place your first building',           check:()=>Object.values(G.bld).some(v=>v===true)},
+  {id:'first_build',  ico:'🏗️', name:'Builder',           desc:'Place your first building',           check:()=>Object.values(G.bld).some(v=>v===true||typeof v==='object')},
   {id:'emp_100',      ico:'💰', name:'Token Collector',   desc:'Earn 100 $EMP total',                check:()=>(E.totalEmpEarned||0)>=100},
   {id:'emp_1000',     ico:'💎', name:'Token Hoarder',     desc:'Earn 1,000 $EMP total',              check:()=>(E.totalEmpEarned||0)>=1000},
   {id:'emp_10000',    ico:'🌟', name:'Token Whale',       desc:'Earn 10,000 $EMP total',             check:()=>(E.totalEmpEarned||0)>=10000},
-  {id:'build_5',      ico:'🏘️', name:'Village',           desc:'Build 5 buildings',                  check:()=>Object.values(G.bld).filter(v=>v===true).length>=5},
-  {id:'build_15',     ico:'🏯', name:'City',              desc:'Build 15 buildings',                 check:()=>Object.values(G.bld).filter(v=>v===true).length>=15},
+  {id:'build_5',      ico:'🏘️', name:'Village',           desc:'Build 5 buildings',                  check:()=>Object.values(G.bld).filter(v=>v===true||typeof v==='object').length>=5},
+  {id:'build_15',     ico:'🏯', name:'City',              desc:'Build 15 buildings',                 check:()=>Object.values(G.bld).filter(v=>v===true||typeof v==='object').length>=15},
   {id:'era2',         ico:'⚙️', name:'Iron Age',          desc:'Reach ERA II',                       check:()=>G.era>=2},
   {id:'era5',         ico:'🌌', name:'Shadow Empire',     desc:'Reach ERA V',                        check:()=>G.era>=5},
   {id:'multiplier',   ico:'🚀', name:'Early Investor',    desc:'Buy your first presale boost',       check:()=>(E.empMult||1)>1},
@@ -3957,7 +3958,7 @@ function showAchievementToast(a){
 
 function renderStatsTab(){
   const el=document.getElementById('cp-stats');if(!el)return;
-  const bldCount=Object.values(G.bld).filter(v=>v===true).length;
+  const bldCount=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
   const totalMined=Object.values(G.stats||{}).reduce((a,b)=>a+(typeof b==='number'?b:0),0);
   const passRate=Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0);},0)*(E.empMult||1);
   const empPerHr=Math.round(passRate*450);
@@ -4145,7 +4146,7 @@ function renderMinimap(){
 
   // Buildings — squares, gold=EMP buildings, green=resource
   Object.entries(buildingMeshes||{}).forEach(([id,mesh])=>{
-    if(!mesh||G.bld[id]!==true)return;
+    if(!mesh||G.bld[id]!==true&&typeof G.bld[id]!=='object')return;
     const wx=mesh.position.x, wz=mesh.position.z;
     const x=W/2+wx*S, y=H/2+wz*S;
     if(x<1||x>W-1||y<1||y>H-1)return;
@@ -4520,6 +4521,10 @@ async function manualSave(){
   }, 2500);
 }
 
+
+// Helper: check if building is placed (handles both legacy true and new {x,z})
+function bldBuilt(id){ const v=G.bld[id]; return v===true||typeof v==='object'; }
+function bldPos(id){ const v=G.bld[id]; return typeof v==='object'?v:null; }
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
@@ -4539,9 +4544,9 @@ function eEarn(amount,source){
       if(pill){pill.style.boxShadow='0 0 14px rgba(245,216,64,.7)';setTimeout(()=>pill.style.boxShadow='',300);}
     }
     }
-  E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));
-  // Sync to G.res.emp for topbar display
-  G.res.emp=(E.res.emp||0);
+  const newEmp=Math.max(0,Math.min(E.cap.emp||999999,(E.res.emp||0)+amount));
+  E.res.emp=newEmp;
+  G.res.emp=newEmp; // always identical — G is canonical for save
   if(Math.abs(amount)>=0.5) addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');
 }
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
@@ -4568,7 +4573,7 @@ function eTick(){
   E.logMult=eLogMult();
   // ── Unified BLD_DEF empOut: world buildings generate $EMP each tick ───
   Object.entries(G.bld).forEach(([id,built])=>{
-    if(built!==true)return;
+    if(built!==true&&typeof built!=='object')return;
     const def=BLD_DEF[id];if(!def||!def.empOut)return;
     const popRatio=Math.min(1,(E.pop.workers||0)/Math.max(1,def.workers||2));
     const eff=Math.max(0.3,popRatio)*weatherPenalty*(E.logMult||1)*(1+(E.prestigeBonus||0));
@@ -4727,7 +4732,8 @@ function eResolveExpedition(ex){const fail=Math.random()<ex.risk;if(fail){eEarn(
 function eSave(){
   try{
     const payload={
-      res:E.res, pop:E.pop, happiness:E.happiness, stability:E.stability,
+      res:{...E.res, emp:G.res.emp||E.res.emp||0}, // emp from G.res (canonical)
+      pop:E.pop, happiness:E.happiness, stability:E.stability,
       defense:E.defense, year:E.year, day:E.day, tick:E.tick, season:E.season,
       buildings:E.buildings, nextId:E.nextId, prices:E.prices,
       log:E.log.slice(0,20), upgradesDone:E.upgradesDone||[],
@@ -4876,7 +4882,7 @@ function renderEconEMP(){
   const currentEmp=Math.floor(E.res.emp||0);
   const nextUpgrade=EMP_UPGRADES.filter(u=>!E.upgradesDone.includes(u.id)&&u.tier)[0];
   const passEmpRate=Object.entries(G.bld).reduce((sum,[id,built])=>{
-    if(built!==true)return sum;
+    if(built!==true&&typeof built!=='object')return sum;
     const def=BLD_DEF[id];return sum+(def&&def.empOut?def.empOut:0);
   },0)*(E.empMult||1)*(E.priceBonus||1);
   const hrRate=(passEmpRate*450).toFixed(1); // 3600s / 8s tick
