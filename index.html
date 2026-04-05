@@ -2354,8 +2354,8 @@ function updateHints(){const n=nearestNode(),hint=document.getElementById('actio
 function startBuild(id){
   cancelWalkTarget?.();
   closeCity();const def=BLD_DEF[id];if(!def)return;
-  if(G.bld[id]===true){toast('Already built!');return;}
-  if(!def.req.every(r=>G.bld[r])){toast('Build first: '+def.req.filter(r=>!G.bld[r]).map(r=>BLD_DEF[r].name).join(', '));return;}
+  if(G.bld[id]===true||typeof G.bld[id]==='object'){toast('Already built! Use ↔️ to move it.');return;}
+  if(!def.req.every(r=>G.bld[r]===true||typeof G.bld[r]==='object')){toast('Build first: '+def.req.filter(r=>!G.bld[r]&&typeof G.bld[r]!=='object').map(r=>BLD_DEF[r]?.name||r).join(', '));return;}
   for(const[res,amt]of Object.entries(def.cost)){const have=G.res[res]||0;if(have<amt){toast('Not enough '+(res==='emp'?'$EMP':res)+': need '+amt);return;}}
   for(const[res,amt]of Object.entries(def.cost))G.res[res]-=amt;
   updateHUD();pendingBldId=id;placingBld=id;
@@ -2567,7 +2567,7 @@ function startMoveEconBld(id){
 
 function cancelPlacing(){
   // Refund world building cost
-  if(pendingBldId&&!G.bld[pendingBldId]&&!pendingBldId.startsWith('move_econ_')&&placingEconType===null){
+  if(pendingBldId&&!(G.bld[pendingBldId]===true||typeof G.bld[pendingBldId]==='object')&&!pendingBldId.startsWith('move_econ_')&&placingEconType===null){
     const def3=BLD_DEF[pendingBldId];if(def3)for(const[r,v]of Object.entries(def3.cost)){G.res[r]=(G.res[r]||0)+v;if(E.res[r]!==undefined)E.res[r]=Math.min(E.cap[r]||CAP,(E.res[r]||0)+v);}updateHUD();
   }
   // Refund economy building cost on cancel
@@ -2640,7 +2640,7 @@ function doPrestige(){
 function updateEra(){
   const eraReqs=[[1,[]],[2,['mine','lumber','forge','market','smelter']],[3,['workshop','academy','hq','treasury']],[4,['citadel','vault','observatory']],[5,['portal','nexus']]];
   let era=1;for(const[n,req]of eraReqs)if(req.every(r=>G.bld[r]))era=n;
-  if(era!==G.era){G.era=era;toast('🏰 ERA '+era+' bereikt!',3000);addLog('ERA '+era+' bereikt!','good');}
+  if(era!==G.era){G.era=era;toast('🏰 ERA '+era+' unlocked!',3000);addLog('ERA '+era+' bereikt!','good');}
   const labels=['ERA I','ERA II','ERA III','ERA IV','ERA V'];
   const el=document.getElementById('era-label');if(el)el.textContent=labels[era-1];
 }
@@ -3600,15 +3600,19 @@ function launch(){
   }
 
   setTimeout(()=>{
-    const isNew=!Object.values(G.bld).some(v=>v===true||typeof v==='object');
+    // Only give new player bonus if NO save has ever been made
+    const hasSave = !!localStorage.getItem('empyria_v2') || !!localStorage.getItem('empyria_eco');
+    const hasBuildings = Object.values(G.bld).some(v=>v===true||typeof v==='object');
+    const hasProgress = (E.totalEmpEarned||0)>0 || (G.res.emp||0)>15;
+    const isNew = !hasSave && !hasBuildings && !hasProgress;
     if(isNew){
       addRes('stone',30); addRes('wood',30); addRes('gold',10); addRes('emp',15);
       E.res.gold+=150; E.res.wood+=80; E.res.stone+=60;
       updateHUD();
       toast('🏰 Welcome to Empyria! Mine · Build · Earn $EMP!', 4000);
     } else {
-      const dispEmp=Math.max(G.res.emp||0,E.res.emp||0);
-      toast('⚔️ Welcome back! '+dispEmp.toLocaleString()+' $EMP ready.', 2500);
+      const dispEmp=G.res.emp||E.res.emp||0;
+      if(dispEmp>15) toast('⚔️ Welcome back! '+Math.floor(dispEmp).toLocaleString()+' $EMP ready.', 2500);
     }
     updateHUD();
   }, 900);
