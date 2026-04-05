@@ -463,7 +463,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <span class="ab-ico">💰</span>$EMP
     <div id="emp-notif" style="display:none;position:absolute;top:6px;right:8px;width:7px;height:7px;background:#f5d840;border-radius:50%;box-shadow:0 0 5px #f5d840"></div>
   </div>
-  <div class="ab" onclick="doSell()" style="background:linear-gradient(160deg,#0a2018,#10361e);border-color:rgba(50,180,90,.3);color:#60ee90;box-shadow:0 2px 12px rgba(30,140,60,.2),inset 0 1px 0 rgba(255,255,255,.06)">
+  <div class="ab" onclick="showSellScreen()" style="background:linear-gradient(160deg,#0a2018,#10361e);border-color:rgba(50,180,90,.3);color:#60ee90;box-shadow:0 2px 12px rgba(30,140,60,.2),inset 0 1px 0 rgba(255,255,255,.06)">
     <span class="ab-ico">💱</span>SELL
   </div>
 </div>
@@ -803,6 +803,7 @@ const CAP=10000;
 
 // ═══ UTILS ═══
 function addRes(k,v){
+  if(k==='emp'){ G.res.emp=Math.max(0,(G.res.emp||0)+v); E.res.emp=G.res.emp; updateHUD(); return; }
   if(!v||v<=0)return;
   G.res[k]=Math.min(CAP,(G.res[k]||0)+v);
   G.stats[k]=(G.stats[k]||0)+v;
@@ -840,13 +841,28 @@ function mult(t){
 function applyMult(v,t){return Math.max(0,Math.round(v*mult(t)));}
 function passPerHour(){
   const out={stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:0};
+  // PASS_DEF resource outputs
   for(const[b,r]of Object.entries(PASS_DEF)){if(!G.bld[b])continue;for(const[k,v]of Object.entries(r))out[k]=(out[k]||0)+v;}
+  // BLD_DEF empOut buildings (world buildings → passive EMP)
+  for(const[id,built]of Object.entries(G.bld)){
+    if(built!==true)continue;
+    const def=BLD_DEF[id];
+    if(def?.empOut) out.emp=(out.emp||0)+def.empOut*(E.empMult||1)*450;
+  }
   return out;
 }
 function startPassive(){
   if(G.passiveIv)clearInterval(G.passiveIv);
-  G.passiveIv=setInterval(()=>{const ph=passPerHour(),f=1/360;for(const k of Object.keys(ph))if(ph[k]>0)addRes(k,Math.max(1,Math.round(ph[k]*f)));updateHUD();
-  checkAchievements();},10000);
+  G.passiveIv=setInterval(()=>{
+    const ph=passPerHour(),f=1/360;
+    for(const k of Object.keys(ph)){
+      if(ph[k]<=0)continue;
+      const amt=Math.max(1,Math.round(ph[k]*f));
+      if(k==='emp') eEarn(amt,'Passive income'); // track for airdrop!
+      else addRes(k,amt);
+    }
+    updateHUD();checkAchievements();
+  },10000);
 }
 const CD_BASE={tap:30*60,aim:45*60,mem:60*60,block:90*60,react:120*60};
 function cdRed(g){let r=0;if(g==='tap'&&G.bld.mine)r+=0.15;if(g==='tap'&&G.bld.workshop)r+=0.10;if(g==='aim'&&G.bld.forge)r+=0.15;if(g==='aim'&&G.bld.alchemist)r+=0.25;if(g==='mem'&&G.bld.lumber)r+=0.20;if(g==='mem'&&G.bld.academy)r+=0.30;if(g==='block'&&G.bld.market)r+=0.20;if(g==='react'&&G.bld.forge)r+=0.15;if(g==='react'&&G.bld.temple)r+=0.15;if(G.bld.hq)r+=0.10;if(G.bld.treasury)r+=0.15;if(G.bld.vault)r+=0.25;if(G.bld.empirebank)r+=0.40;return Math.min(r,0.85);}
@@ -1041,7 +1057,10 @@ function buildDecorations(){
     [-22,-14],[22,-8],[-10,24],[12,-16],[-18,-18],[24,4]
   ];
   const barkCols=[0x3a2008,0x4a2810,0x5a3015,0x2e1808,0x4a3820];
-  const leafCols=[0x1a4008,0x164010,0x1e4a08,0x124208,0x206010,0x184808];
+  // 80% green, 20% autumn/dark for variety
+  const leafCols=Math.random()>.8?
+    [0x8a4010,0xa05820,0x7a3808,0x904a18]: // autumn
+    [0x1a4008,0x164010,0x1e4a08,0x124208,0x206010,0x184808]; // summer
   const roundLeafCols=[0x1e5810,0x185218,0x286018,0x204c10]; // deciduous
 
   treeClusters.forEach(([tx,tz])=>{
@@ -1902,6 +1921,7 @@ function buildAmbientDetails(){
 }
 
 function buildCampfire(cx,cy,cz){
+  // Enhanced with flame geometry
   const g=new THREE.Group();
   // Stone ring
   for(let i=0;i<6;i++){
@@ -1922,10 +1942,13 @@ function buildCampfire(cx,cy,cz){
   // Fire glow (warm point light)
   const fire=new THREE.PointLight(0xff6620,1.2,5);
   fire.position.y=.3; g.add(fire);
-  // Ember sphere
-  const ember=new THREE.Mesh(new THREE.SphereGeometry(.06,6,4),
-    new THREE.MeshBasicMaterial({color:0xff8820}));
-  ember.position.y=.15; g.add(ember);
+  // Flame cone (animated in updateDayNight)
+  const flameMat=new THREE.MeshBasicMaterial({color:0xff6820,transparent:true,opacity:.9});
+  const flame=new THREE.Mesh(new THREE.ConeGeometry(.1,.28,6),flameMat);
+  flame.position.y=.22; g.add(flame);
+  const flame2=new THREE.Mesh(new THREE.ConeGeometry(.06,.18,5),new THREE.MeshBasicMaterial({color:0xffdd44,transparent:true,opacity:.8}));
+  flame2.position.y=.32; g.add(flame2);
+  const ember=flame; // alias for existing code
   window._campfires=window._campfires||[];
   window._campfires.push({light:fire,ember,base:cy});
   g.position.set(cx,cy,cz);
@@ -2096,6 +2119,7 @@ function onWorldTap(e){
     const gp=screenToGround(ex,ey);
     if(gp&&isFinite(gp.x)&&isFinite(gp.z)&&Math.abs(gp.x)<38&&Math.abs(gp.z)<38){
       walkTarget={x:Math.round(gp.x*10)/10,z:Math.round(gp.z*10)/10};
+      showTapIndicator(gp.x,gp.z);
       return;
     }
   }
@@ -2126,15 +2150,24 @@ function doMine(){
   if(n.userData.hp<=0){let sc=1;const sv2=setInterval(()=>{sc-=.16;n.scale.setScalar(Math.max(0,sc));if(sc<=0){clearInterval(sv2);scene.remove(n);resourceNodes=resourceNodes.filter(x=>x!==n);}},55);}
   const bonus=(G.bld.mine&&type==='stone')?.8:(G.bld.lumber&&type==='wood')?.8:(G.bld.smelter&&type==='iron')?1:(G.bld.academy&&type==='crystal')?.8:(G.bld.observatory&&type==='mana')?1.2:(G.bld.starforge&&type==='starstone')?1.5:(G.bld.shadowkeep&&type==='darkore')?2:0;
   const amt=Math.ceil(Math.random()*2+bonus);const earned=applyMult(amt,type);
-  addRes(type,earned);if(Math.random()<.3)addRes('emp',1); // rare 1 EMP per mine
-  eMineBridge(type, earned);
+  addRes(type,earned);
+  eMineBridge(type,earned);
+  // EMP chance by resource type
+  const empRoll=Math.random();
+  let empEarned=0;
+  if(type==='gold'||type==='crystal'){ if(empRoll<.5){empEarned=2;} }
+  else if(type==='iron'||type==='mana'){ if(empRoll<.35){empEarned=1;} }
+  else if(type==='starstone'||type==='darkore'){ if(empRoll<.6){empEarned=3;} }
+  else { if(empRoll<.20){empEarned=1;} }
+  if(empEarned>0){ addRes('emp',empEarned); showEmpFloat(empEarned); }
   const rare=rollRareDrop(type);
-  if(rare){addRes(rare.res,rare.amt);toast(rare.msg+' +'+rare.amt,3000);}
-  else toast('+'+earned+' '+RES_ICO[type]+'  🪙 +'+Math.floor(earned*.5)+' $EMP');
+  if(rare){addRes(rare.res,rare.amt);window.haptic?.('medium');toast(rare.msg+' +'+rare.amt,3000);}
+  else toast('+'+earned+' '+RES_ICO[type]+(empEarned?' · +'+empEarned+'💰':''));
   checkQuestProgress('mine',earned,type);checkMysteryBox();updateHUD();
 }
 
 function doSell(){
+  document.getElementById('sell-screen')?.remove();
   const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
   const erates={food:.5,tools:3};
   const sold=[];let t=0;
@@ -2143,10 +2176,9 @@ function doSell(){
   if(!t){toast('Nothing to sell — mine some resources first!');return;}
   const mult=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
   const e=Math.floor(t*mult);
-  addRes('emp',e);
-  showEmpFloat(e);sfxCoin();
+  eEarn(e,'Sell resources'); // use eEarn so airdrop score is tracked!
+  showEmpFloat(e);sfxCoin?.();
   window.haptic?.('medium');
-  // Show breakdown
   const breakdown=sold.slice(0,4).join('  ');
   toast('💰 +'+e+' $EMP  ·  '+breakdown+(sold.length>4?' +more':''),3500);
   checkQuestProgress('sell',1);updateHUD();
@@ -2529,7 +2561,8 @@ function cpTab(name){
   const tabMap=['empire','games','quest','upg','prestige','shop','stats'];
   const idx=tabMap.indexOf(name);if(idx>=0){const tabs=document.querySelectorAll('.cp-tab');if(tabs[idx])tabs[idx].classList.add('on');}
   if(name==='empire')renderEmpirePanel();
-  if(name==='stats')renderStatsTab();
+  if(name==='stats')setTimeout(renderStatsTab,0);
+  if(name==='prestige')setTimeout(renderPrestigeTab,0);
   updateTabBadges();
   if(name==='quest')renderQuestsTab();
   if(name==='upg')renderUpgradesTab();
@@ -2617,23 +2650,73 @@ function renderUpgradeSection(){
 }
 
 function renderPassiveSection(){
-  // Inject total EMP summary at top
-  // This shows all passive income including BLD_DEF empOut
-  const ph=passPerHour();let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⏰ PASSIVE PER HOUR</div>';
-  const activeKeys=Object.keys(ph).filter(k=>ph[k]>0);
-  if(!activeKeys.length)return html+'<div style="text-align:center;padding:16px;color:var(--txt-d);font-size:11px">Build buildings for passive income</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">';
-  activeKeys.forEach(k=>{html+=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:7px;text-align:center"><div style="font-size:16px">${RES_ICO[k]||k}</div><div style="font-size:13px;font-weight:700;color:var(--gold-b)">+${ph[k]}</div><div style="font-size:7px;color:var(--txt-d)">${k}</div></div>`;});
-  html+='</div>';
-  html+=`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:12px 0 8px">✖️ MULTIPLIERS</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px">`;
-  ['stone','wood','gold','iron','crystal','emp'].forEach(k=>{const m=mult(k);if(m<=1.0)return;html+=`<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:5px 8px;display:flex;justify-content:space-between;font-size:10px"><span style="color:var(--txt2)">${RES_ICO[k]} ${k}</span><span style="color:var(--gold-b);font-weight:700">×${m.toFixed(2)}</span></div>`;});
-  html+='</div>';return html;
+  const ph=passPerHour();
+  const empMult=E.empMult||1;
+  // Total EMP/hr from world buildings
+  const empSources=Object.entries(G.bld)
+    .filter(([id,v])=>v===true&&BLD_DEF[id]?.empOut)
+    .map(([id])=>({id,def:BLD_DEF[id],rate:BLD_DEF[id].empOut*empMult*450}))
+    .sort((a,b)=>b.rate-a.rate);
+  const totalEmpHr=empSources.reduce((s,x)=>s+x.rate,0);
+
+  let html=`
+    <!-- EMP income summary -->
+    <div style="background:linear-gradient(135deg,#121800,#1e2400);border:1.5px solid rgba(240,184,64,.3);border-radius:12px;padding:12px;margin-bottom:10px">
+      <div style="font-size:8px;color:var(--gold);letter-spacing:2px;margin-bottom:6px">💰 $EMP PASSIVE INCOME</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px">
+        <span style="font-size:28px;font-weight:900;color:var(--emp);font-family:Cinzel,serif">${Math.round(totalEmpHr)}</span>
+        <span style="font-size:11px;color:var(--txt-d)">$EMP/hr</span>
+        <span style="font-size:10px;color:var(--grn2);margin-left:auto">×${empMult.toFixed(1)} boost</span>
+      </div>
+      <div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(100,(totalEmpHr/500)*100)}%;background:linear-gradient(90deg,var(--grn),var(--emp));border-radius:2px"></div>
+      </div>
+      <div style="font-size:8px;color:var(--txt-d);margin-top:3px">Max potential: ~7,500/hr (all buildings + ×67 boost)</div>
+    </div>`;
+
+  // Per-building EMP breakdown
+  if(empSources.length){
+    html+=`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:6px">🏗️ INCOME BY BUILDING</div>`;
+    empSources.forEach(({id,def,rate})=>{
+      const pct=totalEmpHr>0?(rate/totalEmpHr*100).toFixed(0):0;
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:16px;width:22px">${def.ico}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:10px;color:var(--txt)">${def.name}</div>
+          <div style="height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:3px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:var(--emp);border-radius:2px"></div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:11px;font-weight:700;color:var(--emp)">+${Math.round(rate)}</div>
+          <div style="font-size:7px;color:var(--txt-d)">/hr</div>
+        </div>
+      </div>`;
+    });
+    html+='<div style="margin-top:8px"></div>';
+  } else {
+    html+=`<div style="text-align:center;padding:14px;color:var(--txt-d);font-size:11px">💡 Build 💰 EMP buildings<br><span style="font-size:9px">Look for 💰 in the BUILD tab</span></div>`;
+  }
+
+  // Resource income
+  const activeKeys=Object.keys(ph).filter(k=>ph[k]>0&&k!=='emp');
+  if(activeKeys.length){
+    html+=`<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:6px">📦 RESOURCE INCOME</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">`;
+    activeKeys.forEach(k=>{html+=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:7px;text-align:center">
+      <div style="font-size:15px">${RES_ICO[k]||k}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--gold-b)">+${ph[k]}</div>
+      <div style="font-size:7px;color:var(--txt-d)">/hr</div>
+    </div>`;});
+    html+='</div>';
+  }
+  return html;
 }
 
 function renderLogSection(){
-  let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOGLOG</div>';
-  if(!G.log.length)return html+'<div style="font-size:9px;color:rgba(180,160,120,.3);text-align:center;padding:12px">Nog geen activiteit</div>';
-  G.log.slice(0,40).forEach(e=>{html+=`<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:8px;color:${e.type==='good'?'#4a8a4a':e.type==='bad'?'#c04040':'rgba(180,160,120,.45)'}"><span style="color:var(--txt-d)">[${e.time||''}]</span> ${e.msg}</div>`;});
+  let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOG</div>';
+  if(!G.log.length)return html+'<div style="font-size:9px;color:var(--txt-d);text-align:center;padding:12px">No activity yet</div>';
+  G.log.slice(0,40).forEach(e=>{html+=`<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:9px;display:flex;gap:6px;align-items:baseline"><span style="color:var(--txt-d);font-size:7px;flex-shrink:0">${e.time||''}</span><span style="color:${e.type==='good'?'var(--grn2)':e.type==='bad'?'var(--red)':'var(--txt2)'}">${e.msg}</span></div>`;});
   return html;
 }
 
@@ -2666,7 +2749,8 @@ function updateHUD(){
       .map(r=>{
         const v=Math.floor(r.v);
         const low=r.always&&v<5;
-        return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':'var(--txt)'}">${v}</span></div>`;
+        const high=r.always&&v>200;
+        return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':high?'rgba(240,184,64,.3)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':high?'var(--gold-b)':'var(--txt)'}">${v}</span></div>`;
       }).join('');
   }
   const _empV=Math.floor(E.res.emp||G.res.emp||0);
@@ -2696,7 +2780,13 @@ function updateHUD(){
   }
   // Update worker badge in topbar
   const wc=document.getElementById('worker-count');
-  if(wc){const pop=E.pop.workers+(E.pop.merchants||0)+(E.pop.nobles||0);wc.textContent=pop;}
+  if(wc){
+    const pop=E.pop.workers+(E.pop.merchants||0)+(E.pop.nobles||0);
+    wc.textContent=pop;
+    // Show rain icon on badge when raining
+    const wb=document.getElementById('worker-badge');
+    if(wb) wb.title=weatherState==='rain'?'🌧️ Rain: -25% efficiency':'Workers active';
+  }
   ['s','w','g','e'].forEach((ch,i)=>{const k=['stone','wood','gold','emp'][i];const el=document.getElementById('st-'+ch);if(el)el.textContent=G.stats[k]||0;});
   const si=document.getElementById('st-iron');if(si)si.textContent=G.stats.iron||0;const sc2=document.getElementById('st-crystal');if(sc2)sc2.textContent=G.stats.crystal||0;
   const sb=document.getElementById('st-bld');if(sb)sb.textContent=Object.values(G.bld).filter(v=>v===true).length;
@@ -3197,27 +3287,25 @@ function launch(){
     clearInterval(window._eTick);
     window._eTick = setInterval(()=>{
       eTick();
+      updateWeather();
       if(E.tick%60===0){ eSave(); saveGame(); }
       if(E.tick%300===0) dbSyncPlayer();
-  updateWeather();
-  // Upgrade reminder every 200 ticks
-  if(E.tick%200===0){
-    const emp=E.res.emp||0;
-    const next=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
-    if(next&&emp>=next.cost&&Math.random()<.4){
-      toast('💡 You can afford '+next.n+' ('+next.cost+'💰)! Tap $EMP to upgrade.',4000);
-    }
-    // Auto-refresh quests if all complete
-    if(G.quests&&G.quests.every(q=>q.done)){
-      setTimeout(()=>{
-        G.quests=generateDailyQuests();
-        toast('📋 New daily quests available!',2500);
-        renderQuestsTab?.();
-        updateTabBadges?.();
-      },2000);
-    }
-  }
-    }, 8000);  // 1 game-day = 8 real seconds
+      // Upgrade reminder
+      if(E.tick%200===0){
+        const emp=E.res.emp||0;
+        const next=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
+        if(next&&emp>=next.cost&&Math.random()<.4)
+          toast('💡 You can afford '+next.n+' ('+next.cost+'💰)! Tap $EMP to upgrade.',4000);
+        // Auto-refresh quests
+        if(G.quests&&G.quests.every(q=>q.done)){
+          setTimeout(()=>{
+            G.quests=generateDailyQuests();
+            toast('📋 New daily quests available!',2500);
+            renderQuestsTab?.();updateTabBadges?.();
+          },2000);
+        }
+      }
+    }, 8000); // 8s per tick
   }, 800);
 
   updateHUD();
@@ -3584,6 +3672,7 @@ const ACHIEVEMENTS=[
 ];
 
 function checkAchievements(){
+  if(!G||!E)return;
   const done=JSON.parse(localStorage.getItem('empyria_achievements')||'[]');
   ACHIEVEMENTS.forEach(a=>{
     if(done.includes(a.id)) return;
@@ -3703,9 +3792,9 @@ function minimapTap(e){
   const rny=nx*sinA + ny*cosA;
   const tx=Math.max(-WORLD_RADIUS,Math.min(WORLD_RADIUS, rnx*WORLD_RADIUS*2));
   const tz=Math.max(-WORLD_RADIUS,Math.min(WORLD_RADIUS, rny*WORLD_RADIUS*2));
-  pPos.x=tx;pPos.z=tz;
-  if(playerGroup){const gy=sampleH(tx,tz);playerGroup.position.set(tx,gy+.20,tz);}
-  camTarget.x=tx;camTarget.z=tz;walkTarget=null;
+  // Walk-to instead of teleport
+  walkTarget={x:tx,z:tz};
+  showTapIndicator(tx,tz);
   toast('📍',600);
 }
 function toggleMinimap(){
@@ -3938,6 +4027,85 @@ function spawnBuildParticles(wx,wz){
     },16);
   }
 }
+
+function showSellScreen(){
+  const existing=document.getElementById('sell-screen');
+  if(existing){existing.remove();return;}
+  const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const sellable=Object.entries(rates).filter(([k])=>(G.res[k]||0)>=1);
+  if(!sellable.length){toast('Nothing to sell!');return;}
+
+  const panel=document.createElement('div');
+  panel.id='sell-screen';
+  panel.style.cssText='position:fixed;bottom:78px;left:50%;transform:translateX(-50%);z-index:60;background:var(--bg2);border:1.5px solid rgba(64,200,112,.3);border-radius:16px;padding:12px;width:88vw;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+
+  const mult=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
+  let rows='';
+  sellable.forEach(([k,rate])=>{
+    const qty=Math.floor(G.res[k]||0);
+    const emp=Math.floor(qty*rate*mult);
+    rows+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+      <span style="font-size:18px">${RES_ICO[k]}</span>
+      <div style="flex:1">
+        <div style="font-size:10px;font-weight:700;color:var(--txt)">${qty}</div>
+        <div style="font-size:8px;color:var(--txt-d)">→ +${emp} 💰</div>
+      </div>
+      <button onclick="sellOne('${k}');renderSellScreen()" style="padding:5px 10px;background:rgba(64,200,112,.15);border:1px solid rgba(64,200,112,.3);border-radius:7px;color:var(--grn2);font-size:9px;font-weight:700;cursor:pointer">SELL</button>
+    </div>`;
+  });
+
+  panel.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:11px;font-weight:700;color:var(--txt)">💱 Sell Resources</div>
+      <div onclick="document.getElementById('sell-screen')?.remove()" style="color:rgba(255,255,255,.3);font-size:18px;cursor:pointer">×</div>
+    </div>
+    <div id="sell-rows">${rows}</div>
+    <button onclick="doSell();document.getElementById('sell-screen')?.remove()" style="width:100%;margin-top:8px;padding:9px;background:linear-gradient(135deg,#0e2818,#186030);border:1.5px solid rgba(64,200,112,.4);border-radius:10px;color:var(--grn2);font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;cursor:pointer">SELL ALL</button>`;
+  document.body.appendChild(panel);
+  setTimeout(()=>document.addEventListener('click',e=>{if(!e.target.closest('#sell-screen')&&!e.target.closest('.ab'))document.getElementById('sell-screen')?.remove();},{once:true}),100);
+}
+
+function sellOne(k){
+  const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const rate=rates[k]||.1;
+  const qty=G.res[k]||0;if(!qty)return;
+  const mult2=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
+  const emp=Math.floor(qty*rate*mult2);
+  G.res[k]=0;eEarn(emp,'Sell '+k);sfxCoin?.();
+  showEmpFloat(emp);updateHUD();checkQuestProgress('sell',1);
+  // Refresh sell screen rows
+  setTimeout(()=>{
+    const rows=document.getElementById('sell-rows');
+    if(rows){
+      const sellable=Object.entries(rates).filter(([rk])=>(G.res[rk]||0)>=1);
+      if(!sellable.length){document.getElementById('sell-screen')?.remove();return;}
+      rows.innerHTML=sellable.map(([rk,rrate])=>{
+        const q=Math.floor(G.res[rk]||0);
+        const e2=Math.floor(q*rrate*mult2);
+        return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="font-size:18px">${RES_ICO[rk]}</span><div style="flex:1"><div style="font-size:10px;font-weight:700;color:var(--txt)">${q}</div><div style="font-size:8px;color:var(--txt-d)">→ +${e2} 💰</div></div><button onclick="sellOne('${rk}')" style="padding:5px 10px;background:rgba(64,200,112,.15);border:1px solid rgba(64,200,112,.3);border-radius:7px;color:var(--grn2);font-size:9px;font-weight:700;cursor:pointer">SELL</button></div>`;
+      }).join('');
+    }
+  },50);
+}
+
+let _tapIndicator=null;
+function showTapIndicator(wx,wz){
+  if(!scene)return;
+  if(_tapIndicator)scene.remove(_tapIndicator);
+  const ring=new THREE.Mesh(
+    new THREE.RingGeometry(.3,.45,16),
+    new THREE.MeshBasicMaterial({color:0x80ffb0,transparent:true,opacity:.7,side:THREE.DoubleSide,depthWrite:false})
+  );
+  ring.rotation.x=-Math.PI/2;
+  ring.position.set(wx,sampleH(wx,wz)+.05,wz);
+  scene.add(ring);_tapIndicator=ring;
+  // Fade out
+  let op=.7;
+  const fade=setInterval(()=>{
+    op-=.04;ring.material.opacity=Math.max(0,op);
+    if(op<=0){clearInterval(fade);scene.remove(ring);_tapIndicator=null;}
+  },40);
+}
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
@@ -3956,7 +4124,12 @@ function eEarn(amount,source){
       const pill=document.getElementById('emp-pill');
       if(pill){pill.style.boxShadow='0 0 14px rgba(245,216,64,.7)';setTimeout(()=>pill.style.boxShadow='',300);}
     }
-  }E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));if(Math.abs(amount)>=0.5)addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');}
+    }
+  E.res.emp=Math.max(0,Math.min(E.cap.emp,(E.res.emp||0)+amount));
+  // Sync to G.res.emp for topbar display
+  G.res.emp=(E.res.emp||0);
+  if(Math.abs(amount)>=0.5) addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');
+}
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
 function eEff(b){const def=MBLD[b.type];if(!def||!b.active)return 0; const innBonus=G.bld.inn?1.15:1;const wRatio=def.workers>0?Math.min(1,(b.workers||0)/def.workers):1;let inputOk=1;if(def.inp&&Object.keys(def.inp).length>0){const met=Object.entries(def.inp).filter(([k,v])=>(E.res[k]||0)>=v).length;inputOk=.3+.7*(met/Object.keys(def.inp).length);}const sci=E.sciBonus?1.25:1,guild=E.guildBonus?1.20:1,pres=1+(E.prestigeBonus||0);return Math.max(0,Math.min(2.0,(.3+.7*wRatio)*inputOk*E.logMult*sci*guild*pres*innBonus));}
 
@@ -4203,6 +4376,7 @@ function renderEconStats(pop){
 }
 
 function renderEconMarket(){
+  // Also show world resources (G.res) for selling
   const empBal=Math.floor(E.res.emp||0);
   let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px">TRADE RESOURCES</div>
