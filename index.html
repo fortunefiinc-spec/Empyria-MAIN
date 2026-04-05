@@ -3047,6 +3047,7 @@ async function dbSyncPlayer() {
       first_name:    tgUser.first_name || 'Player',
       wallet_address: walletAddr || null,
       emp_balance:   empBal,
+      emp_spent:     Math.floor(E.empSpent||0),
       prestige_level: G.prestige || 0,
       era:           G.era || 1,
       play_streak:   G.streak || 0,
@@ -3135,7 +3136,7 @@ function buildSaveState() {
     eHappiness:E.happiness, eStability:E.stability, eDefense:E.defense,
     eYear:E.year, eDay:E.day, eTick:E.tick, eSeason:E.season,
     eUpgradesDone:E.upgradesDone, ePriceBonus:E.priceBonus,
-    ePrestigeBonus:E.prestigeBonus, eEmpRate:E.empRate, eEmpMult:E.empMult, eTotalEarned:E.totalEmpEarned,
+    ePrestigeBonus:E.prestigeBonus, eEmpRate:E.empRate, eEmpMult:E.empMult, eTotalEarned:E.totalEmpEarned, eEmpSpent:E.empSpent||0,
     savedAt: Date.now(),
   };
 }
@@ -3160,7 +3161,7 @@ function restoreSaveState(s) {
     E.happiness=s.eHappiness??70;E.stability=s.eStability??80;E.defense=s.eDefense??0;
     E.year=s.eYear??1;E.day=s.eDay??0;E.tick=s.eTick??0;E.season=s.eSeason??0;
     E.upgradesDone=s.eUpgradesDone||[];E.priceBonus=s.ePriceBonus??1;
-    E.prestigeBonus=s.ePrestigeBonus??0;E.empRate=s.eEmpRate??0;E.empMult=s.eEmpMult??1.0;E.totalEmpEarned=s.eTotalEarned??0;
+    E.prestigeBonus=s.ePrestigeBonus??0;E.empRate=s.eEmpRate??0;E.empMult=s.eEmpMult??1.0;E.totalEmpEarned=s.eTotalEarned??0;E.empSpent=s.eEmpSpent??0;
     updateHUD();
   } catch(e) { console.warn('restoreSaveState error:', e); }
 }
@@ -3266,6 +3267,12 @@ async function initTONConnect(){
         updateWalletUI(true);
         fetchTONBalance(walletAddr);
         saveWalletLink(walletAddr);
+        // Immediately sync to Supabase to register wallet
+        setTimeout(dbSyncPlayer,500);
+        toast('✅ Wallet connected — presale boosts unlocked!',3000);
+        sfxEMP?.();
+        // Re-render $EMP tab if open
+        if(empireSection==='$emp') renderEmpirePanel();
         dbSyncPlayer(); // update wallet in DB
         toast('✅ Wallet connected!');
       } else {
@@ -3283,7 +3290,7 @@ function updateWalletUI(connected){
   const addrEl=document.getElementById('wallet-address-display');
   const empEl=document.getElementById('wallet-emp-display');
   if(connected&&walletAddr){
-    if(btn){btn.innerHTML='💼<span style="font-size:9px;margin-left:2px">✓</span>';btn.style.color='var(--grn2)';btn.style.borderColor='rgba(64,200,112,.4)';}
+    if(btn){btn.innerHTML='💼<span style="font-size:9px;margin-left:2px;color:var(--grn2)">✓</span>';btn.style.background='rgba(32,64,32,.9)';btn.style.color='var(--grn2)';btn.style.borderColor='rgba(64,200,112,.4)';}
     if(info)info.style.display='block';
     if(addrEl)addrEl.textContent=walletAddr;
     if(empEl)empEl.textContent=Math.floor(G.res.emp||0)+' $EMP';
@@ -4257,6 +4264,32 @@ function hideLoadingScreen(){
   const ls=document.getElementById('loading-screen');
   if(ls){ls.style.transition='opacity .4s';ls.style.opacity='0';setTimeout(()=>ls.remove(),400);}
 }
+
+function showWalletGate(){
+  const existing=document.getElementById('wallet-gate');
+  if(existing){existing.remove();return;}
+  const modal=document.createElement('div');
+  modal.id='wallet-gate';
+  modal.style.cssText='position:fixed;inset:0;z-index:400;background:rgba(0,0,8,.85);display:flex;align-items:flex-end;justify-content:center;pointer-events:all';
+  modal.innerHTML=`
+    <div style="background:var(--bg2);border:1.5px solid rgba(240,184,64,.35);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:24px 20px 36px">
+      <div style="font-family:Cinzel,serif;font-size:18px;color:var(--gold-b);margin-bottom:6px">Wallet Required</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:20px">
+        A TON wallet is required to participate in the presale and lock in your token allocation.<br><br>
+        <span style="color:var(--txt-d);font-size:11px">Playing the game and earning $EMP does not require a wallet. Your airdrop score is tracked via Telegram.</span>
+      </div>
+      <button onclick="document.getElementById('wallet-gate').remove();toggleWallet();"
+        style="width:100%;padding:14px;background:linear-gradient(135deg,#0e3a5a,#164870);border:1.5px solid rgba(96,160,240,.4);border-radius:12px;color:#88c8ff;font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px">
+        Connect TON Wallet
+      </button>
+      <button onclick="document.getElementById('wallet-gate').remove()"
+        style="width:100%;padding:11px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:var(--txt-d);font-family:Rajdhani,sans-serif;font-size:13px;cursor:pointer">
+        Continue without wallet
+      </button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
@@ -4435,7 +4468,24 @@ function eBuyRes(k,qty){
   toast('🛒 Bought '+qty+(MRES_ECO[k]?.ico||k)+' for '+empCost+' $EMP');
   updateEconomyDisplay();
 }
-function eBuyUpgrade(id){const u=EMP_UPGRADES.find(x=>x.id===id);if(!u)return;if(E.upgradesDone.includes(id)){toast('Already purchased!');return;}if((E.res.emp||0)<u.cost){toast('Need '+u.cost+' $EMP!');return;}E.res.emp=Math.max(0,E.res.emp-u.cost);u.effect();E.upgradesDone.push(id);toast('✅ '+u.n);updateEconomyDisplay();}
+function eBuyUpgrade(id){
+  const u=EMP_UPGRADES.find(x=>x.id===id);if(!u)return;
+  if(E.upgradesDone.includes(id)){toast('Already purchased!');return;}
+  // Wallet required for presale purchases
+  if(!walletAddr){
+    showWalletGate();
+    return;
+  }
+  if((E.res.emp||0)<u.cost){toast('Need '+u.cost+' $EMP!');return;}
+  E.res.emp=Math.max(0,E.res.emp-u.cost);
+  // Track spend in Supabase
+  E.empSpent=(E.empSpent||0)+u.cost;
+  u.effect();
+  E.upgradesDone.push(id);
+  toast('✅ '+u.n+' activated!');
+  updateEconomyDisplay();
+  dbSyncPlayer(); // immediately sync wallet + spend
+}
 function eBuyImport(k,qty,cost){if((E.res.emp||0)<cost){toast('Need '+cost+' $EMP!');return;}E.res.emp=Math.max(0,E.res.emp-cost);E.res[k]=Math.min(E.cap[k]||999,(E.res[k]||0)+qty);toast('📦 +'+qty+' '+(MRES_ECO[k]?.ico||k));updateEconomyDisplay();}
 function eLaunchExpedition(id){const ex=EMP_EXPEDITIONS.find(e=>e.id===id);if(!ex)return;if((E.res.emp||0)<ex.cost){toast('Need '+ex.cost+' $EMP!');return;}if(E.expeditions.some(e=>e.id===id)){toast('Already at sea!');return;}E.res.emp=Math.max(0,E.res.emp-ex.cost);E.expeditions.push({...ex,ticksLeft:120+~~(Math.random()*80)});addLog('⛵ '+ex.n+' departed','neutral');toast('⛵ '+ex.n+' on its way!');}
 function eResolveExpedition(ex){const fail=Math.random()<ex.risk;if(fail){eEarn(-Math.floor(ex.cost*.25),'Mislukt: '+ex.n);toast('💔 '+ex.n+' failed!');}else{const gain=ex.minRet+~~(Math.random()*(ex.maxRet-ex.minRet));eEarn(gain,ex.n);toast('🎉 '+ex.n+': +'+gain+' $EMP!');}}
@@ -4592,6 +4642,28 @@ function renderEconEMP(){
       <span style="font-size:8px;color:var(--txt-d)">Early = best rates</span>
     </div>`:'';
 
+  // Wallet status banner
+  const walletBanner=walletAddr?`
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(64,200,112,.08);border:1px solid rgba(64,200,112,.25);border-radius:10px;padding:8px 12px;margin-bottom:10px">
+      <div style="width:8px;height:8px;background:var(--grn);border-radius:50%;flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:9px;color:var(--grn2);font-weight:700">WALLET CONNECTED</div>
+        <div style="font-size:8px;color:var(--txt-d);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${walletAddr}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:9px;color:var(--txt-d)">spent</div>
+        <div style="font-size:11px;font-weight:700;color:var(--emp)">${Math.floor(E.empSpent||0)} $EMP</div>
+      </div>
+    </div>`:`
+    <div onclick="showWalletGate()" style="display:flex;align-items:center;gap:10px;background:rgba(96,160,240,.08);border:1.5px solid rgba(96,160,240,.3);border-radius:10px;padding:10px 12px;margin-bottom:10px;cursor:pointer">
+      <div style="font-size:22px">💼</div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:700;color:#88c8ff">Connect wallet to join presale</div>
+        <div style="font-size:9px;color:var(--txt-d);margin-top:1px">Required to lock in your token allocation</div>
+      </div>
+      <div style="font-size:11px;color:#88c8ff;font-weight:700">→</div>
+    </div>`;
+
   const presaleHtml=`
     <div style="background:linear-gradient(135deg,#0a1820,#0c1c10);border:1.5px solid rgba(240,184,64,.35);border-radius:16px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden">
       <div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:.04;pointer-events:none">💰</div>
@@ -4673,7 +4745,7 @@ function renderEconEMP(){
         </button>
       </div>
     </div>`;
-  return countdownHtml + presaleHtml + shareHtml + upgHtml;
+  return walletBanner + countdownHtml + presaleHtml + shareHtml + upgHtml;
 }
 
 
