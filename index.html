@@ -3261,14 +3261,11 @@ function restoreSaveState(s) {
 
 // Small cloud indicator in topbar
 function updateDBStatusBadge(ok) {
-  const ico = document.getElementById('save-ico');
-  const btn = document.getElementById('save-btn');
-  // Only show error state if not currently in a manual save animation
-  if(!ok && ico && ico.textContent==='☁️'){
-    ico.textContent='⚠️';
-    if(btn) btn.style.borderColor='rgba(224,88,88,.4)';
-    if(btn) btn.title='Cloud sync failed — tap to retry';
-  }
+  // Don't change the save button appearance based on background sync
+  // The save button shows LOCAL save status only
+  // Cloud status is silent — local save is always the source of truth
+  const badge = document.getElementById('db-status');
+  if(badge) badge.textContent = ok ? '' : ''; // silent
 }
 
 // Auto-sync every 2 minutes + on important events
@@ -4484,65 +4481,45 @@ async function manualSave(){
   const lbl=document.getElementById('save-lbl');
   if(!btn) return;
 
-  // Visual: saving state
   if(ico) ico.textContent='🔄';
   if(lbl) lbl.textContent='SAVING';
-  btn.style.borderColor='rgba(240,184,64,.5)';
 
-  try {
-    // 1. Save locally
-    saveGame();
-    eSave();
+  // STEP 1: Local save always first — this is the reliable part
+  try{ saveGame(); eSave(); }catch(e){}
 
-    // 2. Sync to Supabase
-    if(db && tgUser?.id){
-      await dbSyncPlayer();
-    }
+  // STEP 2: Show LOCAL success immediately — don't wait for cloud
+  _lastSaveTime=Date.now();
+  const t=new Date();
+  const ts=t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+  if(ico) ico.textContent='✅';
+  if(lbl) lbl.textContent='SAVED';
+  btn.style.borderColor='rgba(64,200,112,.5)';
+  btn.style.background='rgba(20,40,25,.85)';
+  btn.title='Saved locally at '+ts;
+  window.haptic?.('success');
+  toast('💾 Saved at '+ts, 2000);
 
-    // 3. Telegram CloudStorage backup
+  // STEP 3: Cloud sync in background — failure does NOT affect the ✅
+  setTimeout(async()=>{
     try{
-      window.Telegram?.WebApp?.CloudStorage?.setItem(
-        'empyria_airdrop',
-        String(Math.floor(E.totalEmpEarned||0)),
-        ()=>{}
-      );
-    }catch(e){}
+      if(db && tgUser?.id) await dbSyncPlayer();
+      window.Telegram?.WebApp?.CloudStorage?.setItem('empyria_airdrop',String(Math.floor(E.totalEmpEarned||0)),()=>{});
+      btn.title='Saved locally + cloud at '+ts;
+    }catch(e){
+      // Cloud failed — local save is still fine, just note it
+      btn.title='Saved locally at '+ts+' (cloud sync failed)';
+    }
+  }, 200);
 
-    // 4. Success state
-    _lastSaveTime=Date.now();
-    if(ico) ico.textContent='✅';
-    if(lbl) lbl.textContent='SAVED';
-    btn.style.borderColor='rgba(64,200,112,.5)';
-    btn.style.background='rgba(20,40,25,.85)';
-    window.haptic?.('success');
-
-    // Show when saved
-    const t=new Date();
-    const timeStr=t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
-    btn.title='Last saved: '+timeStr;
-
-    setTimeout(()=>{
-      if(ico) ico.textContent='☁️';
-      if(lbl) lbl.textContent='SAVE';
-      btn.style.borderColor='rgba(80,140,200,.3)';
-      btn.style.background='rgba(20,30,40,.85)';
-    }, 2500);
-
-  } catch(err) {
-    // Error state
-    if(ico) ico.textContent='⚠️';
-    if(lbl) lbl.textContent='RETRY';
-    btn.style.borderColor='rgba(224,88,88,.5)';
-    btn.style.background='rgba(40,15,15,.85)';
-    setTimeout(()=>{
-      if(ico) ico.textContent='☁️';
-      if(lbl) lbl.textContent='SAVE';
-      btn.style.borderColor='rgba(80,140,200,.3)';
-      btn.style.background='rgba(20,30,40,.85)';
-    }, 3000);
-    console.warn('Manual save error:', err);
-  }
+  // Reset button after 2.5s
+  setTimeout(()=>{
+    if(ico) ico.textContent='☁️';
+    if(lbl) lbl.textContent='SAVE';
+    btn.style.borderColor='rgba(80,140,200,.3)';
+    btn.style.background='rgba(20,30,40,.85)';
+  }, 2500);
 }
+
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
