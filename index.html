@@ -689,7 +689,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <!-- ═══ THREE.JS ═══ -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 
 // Global error boundary
@@ -1183,71 +1182,6 @@ function buildDecorations(){
   }
 }
 
-// Load Kenney GLB models as extra decorations (async, appears when loaded)
-function loadGLBDecorations(){
-  if(!glbLoader)return;
-  // Kenney trees scattered around
-  var treeFiles=['tree.glb','tree-high.glb','tree-high-crooked.glb'];
-  var treePositions=[[-24,-12],[-22,6],[-26,14],[22,-18],[26,8],[18,22],[-12,26],[14,-24],[-28,0],[28,-4]];
-  treePositions.forEach(function(pos){
-    var file=treeFiles[Math.floor(Math.random()*treeFiles.length)];
-    loadGLB(file,function(m){
-      if(!m)return;
-      var gy=sampleH(pos[0],pos[1]);
-      if(gy<-0.5)return;
-      m.scale.setScalar(1.5+Math.random()*1);
-      m.position.set(pos[0],gy,pos[1]);
-      m.rotation.y=Math.random()*Math.PI*2;
-      scene.add(m);
-    });
-  });
-  // Kenney rocks near resource areas
-  var rockPositions=[[8,6],[-8,-6],[14,-10],[-14,12],[6,-14]];
-  rockPositions.forEach(function(pos){
-    loadGLB(Math.random()>.5?'rock-large.glb':'rock-small.glb',function(m){
-      if(!m)return;
-      var gy=sampleH(pos[0],pos[1]);
-      m.scale.setScalar(.8+Math.random()*.5);
-      m.position.set(pos[0],gy,pos[1]);
-      m.rotation.y=Math.random()*Math.PI*2;
-      scene.add(m);
-    });
-  });
-  // Kenney lanterns along paths
-  var lanternPositions=[[4,0],[-4,0],[0,4],[0,-4],[8,0],[-8,0],[0,8],[0,-8]];
-  lanternPositions.forEach(function(pos){
-    loadGLB('lantern.glb',function(m){
-      if(!m)return;
-      var gy=sampleH(pos[0],pos[1]);
-      m.scale.setScalar(.7);
-      m.position.set(pos[0],gy,pos[1]);
-      scene.add(m);
-    });
-  });
-  // Kenney fountain in town center
-  loadGLB('fountain-square.glb',function(m){
-    if(!m)return;
-    m.scale.setScalar(1.2);
-    m.position.set(0,sampleH(0,0),0);
-    scene.add(m);
-  });
-  // Kenney windmill at the edge
-  loadGLB('windmill.glb',function(m){
-    if(!m)return;
-    m.scale.setScalar(1);
-    m.position.set(-20,sampleH(-20,-20),-20);
-    scene.add(m);
-  });
-  // Kenney watermill near water
-  loadGLB('watermill.glb',function(m){
-    if(!m)return;
-    m.scale.setScalar(.9);
-    m.position.set(20,sampleH(20,20)-0.5,20);
-    m.rotation.y=Math.PI/4;
-    scene.add(m);
-  });
-}
-
 function buildResourceNodes(){
   resourceNodes=[];
   const POS=[
@@ -1307,110 +1241,12 @@ function addCone(g,r,h,col,x=0,y=0,z=0,s=8){
   const m=mk(cone(r,h,s),col);m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;
 }
 
-// ═══ KENNEY GLB MODEL LOADER ═══════════════════════════════════════════════
-var glbLoader=null,glbCache={},glbTexture=null,MODELS_PATH='models/';
-
-function initModelLoader(){
-  if(typeof THREE.GLTFLoader==='undefined'){console.warn('GLTFLoader not loaded');return;}
-  glbLoader=new THREE.GLTFLoader();
-  var tl=new THREE.TextureLoader();
-  tl.load(MODELS_PATH+'colormap.png',function(t){t.flipY=false;glbTexture=t;},undefined,function(){});
-}
-
-function loadGLB(fn,cb){
-  if(glbCache[fn]){cb(glbCache[fn].clone());return;}
-  if(!glbLoader){cb(null);return;}
-  glbLoader.load(MODELS_PATH+fn,function(gltf){
-    var m=gltf.scene;
-    m.traverse(function(ch){
-      if(ch.isMesh){ch.castShadow=true;ch.receiveShadow=true;
-        if(glbTexture)ch.material=new THREE.MeshStandardMaterial({map:glbTexture,roughness:.82,metalness:.05});
-      }
-    });
-    glbCache[fn]=m;cb(m.clone());
-  },undefined,function(){cb(null);});
-}
-
-// Which GLB models to assemble per building type
-var BLD_GLB={
-  mine:[{f:'rock-large.glb',s:1.2},{f:'lantern.glb',s:.8,x:.9},{f:'cart.glb',s:.5,x:-1,z:.8}],
-  lumber:[{f:'wall-wood-door.glb',s:.9},{f:'roof-high.glb',s:.9,y:.95}],
-  forge:[{f:'wall-door.glb',s:.9},{f:'roof-high.glb',s:.9,y:.95},{f:'chimney.glb',s:.8,x:.4,y:1.2},{f:'chimney-top.glb',s:.6,x:.4,y:1.8}],
-  market:[{f:'stall-green.glb',s:.8,x:-.8},{f:'stall-red.glb',s:.8,x:.8},{f:'lantern.glb',s:.6,z:.8}],
-  smelter:[{f:'wall-door.glb',s:.85},{f:'chimney.glb',s:.9,x:.5,y:.8},{f:'chimney-top.glb',s:.7,x:.5,y:1.6}],
-  workshop:[{f:'wall-wood-door.glb',s:.9},{f:'roof-high.glb',s:.95,y:.95},{f:'wheel.glb',s:.5,x:1,y:.5}],
-  academy:[{f:'wall-window-shutters.glb',s:.9},{f:'wall-window-shutters.glb',s:.9,y:.95},{f:'roof-high.glb',s:.95,y:1.9},{f:'banner-red.glb',s:.7,x:.6,y:1.2}],
-  temple:[{f:'pillar-stone.glb',s:.8,x:-.6,z:.5},{f:'pillar-stone.glb',s:.8,x:.6,z:.5},{f:'pillar-stone.glb',s:.8,x:-.6,z:-.5},{f:'pillar-stone.glb',s:.8,x:.6,z:-.5},{f:'roof-high.glb',s:1.1,y:1.5}],
-  hq:[{f:'wall-door.glb',s:1.1},{f:'wall-window-shutters.glb',s:1.1,y:.95},{f:'roof-high.glb',s:1.2,y:1.9},{f:'banner-red.glb',s:.8,x:.8,y:1.8},{f:'fence.glb',s:.8,x:-1.2,z:.5},{f:'fence.glb',s:.8,x:1.2,z:.5}],
-  treasury:[{f:'wall-window-shutters.glb',s:1},{f:'wall-window-shutters.glb',s:1,y:.95},{f:'roof-high.glb',s:1.1,y:1.9},{f:'pillar-stone.glb',s:.6,x:-.7,z:.7},{f:'pillar-stone.glb',s:.6,x:.7,z:.7}],
-  observatory:[{f:'wall-window-shutters.glb',s:.9},{f:'wall-window-shutters.glb',s:.9,y:.95},{f:'roof-high.glb',s:1,y:1.9}],
-  alchemist:[{f:'wall-wood-door.glb',s:.85},{f:'roof-high.glb',s:.9,y:.95},{f:'chimney-top.glb',s:.6,x:.3,y:1.4}],
-  citadel:[{f:'wall-door.glb',s:1.2},{f:'wall-window-shutters.glb',s:1.2,y:.95},{f:'wall-window-shutters.glb',s:1.2,y:1.9},{f:'roof-high.glb',s:1.3,y:2.85},{f:'banner-red.glb',s:.9,x:1,y:2.5}],
-  dragonforge:[{f:'wall-door.glb',s:1},{f:'roof-high.glb',s:1.1,y:.95},{f:'chimney.glb',s:1,x:.5,y:1.2},{f:'chimney-top.glb',s:.8,x:.5,y:2}],
-  vault:[{f:'wall-window-shutters.glb',s:1},{f:'wall-window-shutters.glb',s:1,y:.95},{f:'roof-high.glb',s:1.1,y:1.9},{f:'pillar-stone.glb',s:.7,x:-.8,z:.6},{f:'pillar-stone.glb',s:.7,x:.8,z:.6}],
-  starforge:[{f:'fountain-square.glb',s:.9},{f:'rock-large.glb',s:.8,y:.8},{f:'lantern.glb',s:.7,x:.8,y:.5}],
-  portal:[{f:'pillar-stone.glb',s:1,x:-1},{f:'pillar-stone.glb',s:1,x:1},{f:'rock-large.glb',s:.6,y:1.5}],
-  nexus:[{f:'fountain-square.glb',s:1},{f:'pillar-stone.glb',s:.6,x:-.7,z:-.7},{f:'pillar-stone.glb',s:.6,x:.7,z:-.7},{f:'pillar-stone.glb',s:.6,x:-.7,z:.7},{f:'pillar-stone.glb',s:.6,x:.7,z:.7}],
-  shadowkeep:[{f:'wall-door.glb',s:1.3},{f:'wall-window-shutters.glb',s:1.3,y:.95},{f:'wall-window-shutters.glb',s:1.3,y:1.9},{f:'wall-window-shutters.glb',s:1.3,y:2.85},{f:'roof-high.glb',s:1.4,y:3.8}],
-  empirebank:[{f:'wall-window-shutters.glb',s:1.2},{f:'wall-window-shutters.glb',s:1.2,y:.95},{f:'wall-window-shutters.glb',s:1.2,y:1.9},{f:'roof-high.glb',s:1.3,y:2.85},{f:'pillar-stone.glb',s:.8,x:-1,z:.8},{f:'pillar-stone.glb',s:.8,x:1,z:.8},{f:'banner-red.glb',s:1,x:1.2,y:2.5}],
-  // Also map the non-standard building IDs from the game
-  farm:[{f:'fence.glb',s:.9,x:-.5},{f:'fence.glb',s:.9,x:.5},{f:'cart.glb',s:.4,x:0,z:.5}],
-  watchtower:[{f:'pillar-stone.glb',s:1.2},{f:'lantern.glb',s:.8,y:1.8},{f:'banner-red.glb',s:.6,x:.4,y:1.5}],
-  empaltar:[{f:'fountain-square.glb',s:.7},{f:'lantern.glb',s:.6,y:.8}],
-  marketplace:[{f:'stall-green.glb',s:.85,x:-.6},{f:'stall-red.glb',s:.85,x:.6}],
-  mill:[{f:'windmill.glb',s:.7}],
-  barracks:[{f:'wall-door.glb',s:1.1},{f:'wall-window-shutters.glb',s:1.1,y:.95},{f:'roof-high.glb',s:1.2,y:1.9},{f:'banner-red.glb',s:.8,x:.7,y:1.5}],
-  coinmaster:[{f:'wall-window-shutters.glb',s:.9},{f:'roof-high.glb',s:1,y:.95},{f:'pillar-stone.glb',s:.5,x:-.5,z:.5},{f:'pillar-stone.glb',s:.5,x:.5,z:.5}],
-  tradepost:[{f:'stall-green.glb',s:.9},{f:'fence.glb',s:.7,z:.8}],
-  townhall:[{f:'wall-door.glb',s:1.1},{f:'wall-window-shutters.glb',s:1.1,y:.95},{f:'wall-window-shutters.glb',s:1.1,y:1.9},{f:'roof-high.glb',s:1.2,y:2.85},{f:'pillar-stone.glb',s:.7,x:-.8,z:.7},{f:'pillar-stone.glb',s:.7,x:.8,z:.7}]
-};
-
-// Lights to add per building after GLB loads
-var BLD_LIGHTS={
-  mine:{color:0xffaa22,intensity:.8,dist:5,y:1},
-  forge:{color:0xff4400,intensity:1.5,dist:7,y:.6},
-  smelter:{color:0xff4400,intensity:.8,dist:5,y:.5},
-  dragonforge:{color:0xff4400,intensity:1.5,dist:7,y:.8},
-  hq:{color:0xc9a84c,intensity:.5,dist:7,y:1.5},
-  citadel:{color:0x8844cc,intensity:.6,dist:6,y:2},
-  treasury:{color:0xc9a84c,intensity:.4,dist:6,y:1.5},
-  empirebank:{color:0xc9a84c,intensity:.6,dist:8,y:2},
-  portal:{color:0x6644cc,intensity:.8,dist:6,y:1.5},
-  starforge:{color:0xffcc44,intensity:.6,dist:6,y:1},
-  shadowkeep:{color:0x6622aa,intensity:.6,dist:8,y:2.5},
-  empaltar:{color:0xf0d840,intensity:1.2,dist:6,y:.9}
-};
-
-function tryBuildGLB(id,g){
-  var parts=BLD_GLB[id];
-  if(!parts||!glbLoader)return false;
-  var remaining=parts.length;
-  parts.forEach(function(p){
-    loadGLB(p.f,function(model){
-      if(model){model.scale.setScalar(p.s||1);model.position.set(p.x||0,p.y||0,p.z||0);if(p.ry)model.rotation.y=p.ry;g.add(model);}
-      remaining--;
-      if(remaining<=0){
-        var ldef=BLD_LIGHTS[id];
-        if(ldef){var pl=new THREE.PointLight(ldef.color,ldef.intensity,ldef.dist);pl.position.y=ldef.y||1;g.add(pl);}
-      }
-    });
-  });
-  return true;
-}
-// ════════════════════════════════════════════════════════════════════════════
-
 function buildBldMesh(id,wx,wz){
   const gy=sampleH(wx,wz);
   const g=new THREE.Group();
   g.position.set(wx,gy,wz);
 
-  // Try loading Kenney GLB models first — falls back to hand-coded geometry below
-  if(tryBuildGLB(id,g)){
-    scene.add(g);buildingMeshes[id]=g;
-    return; // GLB models loading async, they'll appear when ready
-  }
-
-  // Common material shortcuts (fallback geometry)
+  // Common material shortcuts
   const STONE=0x8a8878, DARK_STONE=0x5a5850, WOOD=0x6a4828, DARK_WOOD=0x4a3018,
         THATCH=0x8a6830, SLATE=0x4a5058, RED_TILE=0x8a3018, PLASTER=0xd4c8a0,
         GOLD=0xc8920a, IRON=0x787888, SAND=0xa09060;
@@ -1834,7 +1670,6 @@ function camR(d){camAngle+=d*.35;}
 function resetCam(){camTarget={x:0,z:0};camDist=22;camAngle=Math.PI*.65;}
 
 function initThree(){
-  initModelLoader(); // Load Kenney GLB model system
   buildTextures();
   const canvas=document.getElementById('three-canvas');
   renderer=new THREE.WebGLRenderer({canvas,antialias:true});
@@ -1851,7 +1686,7 @@ function initThree(){
   const sun=new THREE.DirectionalLight(0xfff0d0,1.15);sun.position.set(40,60,25);sun.castShadow=true;sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;sun.shadow.camera.left=sun.shadow.camera.bottom=-55;sun.shadow.camera.right=sun.shadow.camera.top=55;sun.shadow.camera.far=200;sun.shadow.bias=-.0003;scene.add(sun);
   const fill=new THREE.DirectionalLight(0x8ab8e8,.3);fill.position.set(-30,20,-20);scene.add(fill);
   scene.add(new THREE.HemisphereLight(0x88c0d8,0x183a0c,.65));
-  buildTerrain();buildDecorations();loadGLBDecorations();buildResourceNodes();buildPlayer();
+  buildTerrain();buildDecorations();buildResourceNodes();buildPlayer();
   buildAmbientDetails();
   buildClouds();buildBirds();
   // Store light refs for day/night
