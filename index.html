@@ -1584,6 +1584,16 @@ function buildBldMesh(id,wx,wz){
   }
 
   g.traverse(m=>{if(m.isMesh)m.castShadow=true;});
+  // Show upgrade level as small colored sphere on top
+  const upgLvl=G.upgrades?.[id]||0;
+  if(upgLvl>0){
+    const upgDot=new THREE.Mesh(
+      new THREE.SphereGeometry(.15,6,4),
+      new THREE.MeshBasicMaterial({color:upgLvl>=2?0xf5d840:0x80ee90})
+    );
+    upgDot.position.set(.4,2.8,.4);
+    g.add(upgDot);
+  }
   scene.add(g);
   buildingMeshes[id]=g;
 }
@@ -1657,6 +1667,7 @@ function initThree(){
   renderer=new THREE.WebGLRenderer({canvas,antialias:true});
   renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.shadowMap.autoUpdate=false; // manual update for performance
   renderer.setClearColor(0x7ab8d8);
   renderer.toneMapping=1;// LinearToneMapping
   scene=new THREE.Scene();
@@ -2159,6 +2170,29 @@ function onWorldTap(e){
 }
 
 // ═══ WORLD ACTIONS ═══
+function respawnResourceNodes(count){
+  if(!scene)return;
+  const types=['stone','wood','gold','iron','crystal','mana','starstone','darkore'];
+  const weights=[30,28,20,15,8,5,3,2];
+  for(let i=0;i<count;i++){
+    let attempts=0;
+    let rx,rz;
+    do{ rx=(Math.random()-.5)*50; rz=(Math.random()-.5)*50; attempts++; }
+    while((Math.abs(rx)<5&&Math.abs(rz)<5)&&attempts<20);
+    const gy=sampleH(rx,rz);
+    if(gy<0.3||gy>3.5) continue;
+    // Pick type by weight
+    const total=weights.reduce((a,b)=>a+b,0);
+    let roll=Math.random()*total;
+    let type=types[0];
+    for(let t=0;t<types.length;t++){roll-=weights[t];if(roll<=0){type=types[t];break;}}
+    // Only spawn advanced if ERA unlocked
+    if((type==='mana'||type==='starstone')&&G.era<4) type='iron';
+    if(type==='darkore'&&G.era<5) type='stone';
+    buildSingleNode(rx,gy,rz,type);
+  }
+}
+
 function nearestNode(){let best=null,bd=Infinity;resourceNodes.forEach(n=>{if(!n.parent)return;const dx=n.position.x-pPos.x,dz=n.position.z-pPos.z,d=Math.sqrt(dx*dx+dz*dz);if(d<7&&d<bd){best=n;bd=d;}});return best;}
 function rollRareDrop(type){const drops=RARE_DROPS[type];if(!drops)return null;for(const d of drops)if(Math.random()<d.chance)return d;return null;}
 
@@ -2302,6 +2336,8 @@ function confirmPlace(wx,wz){
   G.bld[id]=true;removeSuperseded(id);buildBldMesh(id,snap.x,snap.z);startPassive();updateEra();updateHUD();renderBuildGrid();checkQuestProgress('build',1);
   checkAchievements();
   window.haptic?.('heavy');sfxBuild();
+  // Max buildings per era tier
+  const _builtCount=Object.values(G.bld).filter(v=>v===true).length;
   const _bdef=BLD_DEF[id];
   const _empMsg=_bdef?.empOut>0?' · +'+(_bdef.empOut*(E.empMult||1)).toFixed(2)+'💰/tick':'';
   toast('✅ '+_bdef?.name+' built!'+_empMsg,3000);
@@ -2781,7 +2817,13 @@ function updateHUD(){
   }
   const _empV=Math.floor(E.res.emp||G.res.emp||0);
   const ep=document.getElementById('emp-val');
-  if(ep&&ep.textContent!==String(_empV))ep.textContent=_empV;
+  if(ep&&ep.textContent!==String(_empV)){
+    ep.textContent=_empV;
+    // Brief scale pop when value increases
+    const prev=parseInt(ep.dataset.prev||0);
+    if(_empV>prev){ep.style.transform='scale(1.2)';setTimeout(()=>ep.style.transform='',120);}
+    ep.dataset.prev=_empV;
+  }
   // Show passive EMP rate in topbar
   const pr=document.getElementById('passive-rate');
   const prv=document.getElementById('passive-rate-val');
@@ -3756,6 +3798,7 @@ function checkAchievements(){
       done.push(a.id);
       localStorage.setItem('empyria_achievements',JSON.stringify(done));
       window.haptic?.('heavy');
+      sfxQuest?.();
       setTimeout(()=>showAchievementToast(a),500);
     }
   });
@@ -4180,6 +4223,12 @@ function sellOne(k){
 }
 
 let _tapIndicator=null;
+
+let _walkArrow=null;
+function cancelWalkTarget(){
+  if(_walkArrow){scene?.remove(_walkArrow);_walkArrow=null;}
+  walkTarget=null;
+}
 function showTapIndicator(wx,wz){
   if(!scene)return;
   if(_tapIndicator)scene.remove(_tapIndicator);
@@ -4288,6 +4337,11 @@ function eTick(){
 function eUpdatePop(){
   // Refresh worker NPCs every 5th pop update (~100 ticks)
   if(E.tick%90===0) setTimeout(updateWorkerNPCs,0);
+  // Respawn depleted resource nodes every 5 minutes
+  if(E.tick%37===0){
+    const needed=12-resourceNodes.filter(n=>n.parent).length;
+    if(needed>0) setTimeout(()=>respawnResourceNodes(needed),500);
+  }
   const pop=ePop(),foodSupply=E.res.food/Math.max(1,pop*.25);
   const hd=(Math.min(1,foodSupply)*20-10)+(E.defense>20?3:-2);
   E.happiness=Math.max(0,Math.min(100,E.happiness+hd*.1));
