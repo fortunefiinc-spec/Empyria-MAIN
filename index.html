@@ -2376,7 +2376,8 @@ function confirmPlace(wx,wz){
     toast('⛔ Too close! Choose another spot.');
     const def2=BLD_DEF[id];if(def2)for(const[r,v]of Object.entries(def2.cost))G.res[r]=(G.res[r]||0)+v;updateHUD();return;
   }
-  G.bld[id]=true;removeSuperseded(id);buildBldMesh(id,snap.x,snap.z);startPassive();updateEra();updateHUD();renderBuildGrid();checkQuestProgress('build',1);
+  G.bld[id]={x:Math.round(snap.x*10)/10,z:Math.round(snap.z*10)/10};
+  removeSuperseded(id);buildBldMesh(id,snap.x,snap.z);startPassive();updateEra();updateHUD();renderBuildGrid();checkQuestProgress('build',1);
   checkAchievements();
   window.haptic?.('heavy');sfxBuild();
   // Max buildings per era tier
@@ -3239,6 +3240,17 @@ function restoreSaveState(s) {
   try {
     if(s.res)Object.assign(G.res,s.res);
     if(s.bld)Object.assign(G.bld,s.bld);
+    // Rebuild world meshes at saved positions
+    setTimeout(()=>{
+      let sp=0;
+      Object.entries(G.bld).forEach(([id,built])=>{
+        if(!window.BLD_DEF?.[id]||window.buildingMeshes?.[id])return;
+        if(typeof built==='object'&&built.x!==undefined) buildBldMesh(id,built.x,built.z);
+        else if(built===true){const bx=((sp*4.5)%36)-18,bz=Math.floor(sp/8)*5-10;buildBldMesh(id,bx,bz);}
+        sp++;
+      });
+      updateHUD?.();
+    },300);
     if(s.cd)Object.assign(G.cd,s.cd);
     if(s.stats)Object.assign(G.stats,s.stats);
     if(s.upgrades)Object.assign(G.upgrades,s.upgrades);
@@ -3576,8 +3588,12 @@ function launch(){
   if(loaded.length>0){
     loaded.forEach(([id],i)=>{
       if(!buildingMeshes[id]){
-        const bx=((i*4.5)%36)-18, bz=Math.floor(i/8)*5-10;
-        buildBldMesh(id,bx,bz);
+        if(typeof G.bld[id]==='object'&&G.bld[id].x!==undefined){
+          buildBldMesh(id,G.bld[id].x,G.bld[id].z);
+        } else {
+          const bx=((i*4.5)%36)-18, bz=Math.floor(i/8)*5-10;
+          buildBldMesh(id,bx,bz);
+        }
       }
     });
     startPassive();
