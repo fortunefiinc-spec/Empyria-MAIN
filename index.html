@@ -374,6 +374,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
 
 <!-- Loading screen -->
+
+<!-- Landscape warning -->
+<div id="landscape-warn" style="display:none;position:fixed;inset:0;z-index:999;background:#060c14;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div style="font-size:48px">📱</div>
+  <div style="font-family:Cinzel,serif;font-size:16px;color:var(--gold-b)">Rotate your phone</div>
+  <div style="font-size:12px;color:var(--txt-d)">Empyria is best played in portrait mode</div>
+</div>
 <div id="loading-screen" style="position:fixed;inset:0;z-index:600;background:radial-gradient(ellipse at 50% 35%,#0e1e28 0%,#060c14 100%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div style="font-family:Cinzel,serif;font-size:36px;font-weight:900;background:linear-gradient(135deg,#f0c060,#ffd870);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px">EMPYRIA</div>
   <div style="width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden">
@@ -919,7 +926,7 @@ let dayT=0;           // 0..1 day cycle (full cycle = 8 real minutes)
 let clouds=[];        // cloud meshes
 let birds=[];         // bird flock groups
 let sunLight=null, fillLight=null, ambLight=null, hemiLight=null;
-const moving={};const SPD=0.16;
+const moving={};const SPD=0.04;
 const TX={};
 
 function sampleH(x,z){
@@ -1740,7 +1747,7 @@ function initThree(){
         // Single-finger drag → rotate camera (third person)
         camAngle+=dx*0.006;
         // Vertical drag → adjust pitch
-        camDist=Math.max(6,Math.min(52,camDist+dy*0.04));
+        camDist=Math.max(8,Math.min(40,camDist+dy*0.04));
       }
       fpDragX=t.clientX;fpDragY=t.clientY;
       e.preventDefault();
@@ -2125,6 +2132,8 @@ function animate(){requestAnimationFrame(animate);if(document.hidden)return; // 
     n.traverse(cv=>{
       if(cv.userData&&cv.userData.isGoldCrystal) cv.rotation.y+=.025;
     });
+    // Very slow idle rotation on all nodes
+    n.rotation.y+=.004;
     // Pulse nearest node
     const dx=n.position.x-pPos.x, dz=n.position.z-pPos.z;
     const dist=Math.sqrt(dx*dx+dz*dz);
@@ -2206,7 +2215,13 @@ function doMine(){
   const type=n.userData.type;n.userData.hp--;
   const op=n.position.clone();let si=0;
   const sv=setInterval(()=>{si++;n.position.x=op.x+(Math.random()-.5)*.28;n.position.z=op.z+(Math.random()-.5)*.28;if(si>6){clearInterval(sv);n.position.copy(op);}},38);
-  if(n.userData.hp<=0){let sc=1;const sv2=setInterval(()=>{sc-=.16;n.scale.setScalar(Math.max(0,sc));if(sc<=0){clearInterval(sv2);scene.remove(n);resourceNodes=resourceNodes.filter(x=>x!==n);}},55);}
+  if(n.userData.hp<=0){let sc=1;const sv2=setInterval(()=>{sc-=.16;n.scale.setScalar(Math.max(0,sc));if(sc<=0){
+    clearInterval(sv2);
+    scene.remove(n);
+    n.geometry?.dispose();
+    n.material?.dispose();
+    resourceNodes=resourceNodes.filter(x=>x!==n);
+  }},55);}
   const bonus=(G.bld.mine&&type==='stone')?.8:(G.bld.lumber&&type==='wood')?.8:(G.bld.smelter&&type==='iron')?1:(G.bld.academy&&type==='crystal')?.8:(G.bld.observatory&&type==='mana')?1.2:(G.bld.starforge&&type==='starstone')?1.5:(G.bld.shadowkeep&&type==='darkore')?2:0;
   const amt=Math.ceil(Math.random()*2+bonus);const earned=applyMult(amt,type);
   addRes(type,earned);
@@ -2228,6 +2243,7 @@ function doMine(){
 function doSell(){
   document.getElementById('sell-screen')?.remove();
   const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const rateLabels={stone:'Common',wood:'Common',gold:'Uncommon',iron:'Uncommon',crystal:'Rare',mana:'Rare',starstone:'Epic',darkore:'Legendary'};
   const erates={food:.5,tools:3};
   const sold=[];let t=0;
   Object.entries(rates).forEach(([k,v])=>{const qty=G.res[k]||0;if(qty>0){t+=qty*v;sold.push(RES_ICO[k]+'×'+qty);G.res[k]=0;}});
@@ -2259,12 +2275,12 @@ function processMove(){
     const dx=walkTarget.x-pPos.x, dz=walkTarget.z-pPos.z;
     const dist=Math.sqrt(dx*dx+dz*dz);
     if(dist>0.4){
-      const spd=SPD*1.5;
+      const spd=SPD*1.2; // walk-to slightly faster than manual
       pPos.x+=dx/dist*spd; pPos.z+=dz/dist*spd;
       const gy=sampleH(pPos.x,pPos.z);
       playerGroup.position.set(pPos.x,gy+.20,pPos.z);
       playerGroup.rotation.y=Math.atan2(-dx,-dz);
-      walkT+=.28;
+      walkT+=.14; // slower leg animation to match speed
       if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;
       if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.6;
       if(!fpMode){camTarget.x+=(pPos.x-camTarget.x)*.08;camTarget.z+=(pPos.z-camTarget.z)*.08;}
@@ -2286,7 +2302,7 @@ function processMove(){
     const gy=sampleH(pPos.x,pPos.z);
     playerGroup.position.set(pPos.x,gy+.20,pPos.z);
     playerGroup.rotation.y=Math.atan2(-dx,-dz);
-    walkT+=.28;
+    walkT+=.14; // slower leg animation to match speed
     // Leg swing
     if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.55;
     if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.55;
@@ -2295,7 +2311,7 @@ function processMove(){
     if(playerGroup.children[4])playerGroup.children[4].rotation.x=Math.sin(walkT)*.35;
     // Subtle body bob
     if(playerGroup.children[0])playerGroup.children[0].position.y=.42+Math.abs(Math.sin(walkT))*.04;
-    if(!fpMode){camTarget.x+=(pPos.x-camTarget.x)*.06;camTarget.z+=(pPos.z-camTarget.z)*.06;}
+    if(!fpMode){camTarget.x+=(pPos.x-camTarget.x)*.04;camTarget.z+=(pPos.z-camTarget.z)*.04;}
     if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);
   }
 }
@@ -2310,6 +2326,7 @@ function updateHints(){const n=nearestNode(),hint=document.getElementById('actio
 
 // ═══ BUILDING ═══
 function startBuild(id){
+  cancelWalkTarget?.();
   closeCity();const def=BLD_DEF[id];if(!def)return;
   if(G.bld[id]===true){toast('Already built!');return;}
   if(!def.req.every(r=>G.bld[r])){toast('Build first: '+def.req.filter(r=>!G.bld[r]).map(r=>BLD_DEF[r].name).join(', '));return;}
@@ -3016,7 +3033,25 @@ setInterval(saveGame,30000);
 
 // ═══ TOAST ═══
 let _tT;
-function toast(msg,dur=2200){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.style.opacity='1';clearTimeout(_tT);_tT=setTimeout(()=>t.style.opacity='0',dur);}
+const _toastQ=[];let _toastBusy=false;
+function toast(msg,dur=2500){
+  _toastQ.push({msg,dur});
+  if(!_toastBusy) _nextToast();
+}
+function _nextToast(){
+  if(!_toastQ.length){_toastBusy=false;return;}
+  _toastBusy=true;
+  const {msg,dur}=_toastQ.shift();
+  const el=document.getElementById('toast');
+  if(!el){_toastBusy=false;return;}
+  el.textContent=msg;
+  el.style.transition='none';el.style.opacity='1';el.style.transform='translateY(0)';
+  setTimeout(()=>{
+    el.style.transition='opacity .3s,transform .3s';
+    el.style.opacity='0';el.style.transform='translateY(-10px)';
+    setTimeout(_nextToast,320);
+  },dur);
+}
 
 // ═══ LAUNCH ═══
 
@@ -3250,7 +3285,12 @@ function initTelegram(){
       tg.BackButton.hide?.();
     });
     // Haptic feedback helper
-    window.haptic=(type)=>tg.HapticFeedback?.impactOccurred?.(type||'light');
+    window.haptic=(type)=>{
+      if(type==='success') tg.HapticFeedback?.notificationOccurred?.('success');
+      else if(type==='error') tg.HapticFeedback?.notificationOccurred?.('error');
+      else if(type==='select') tg.HapticFeedback?.selectionChanged?.();
+      else tg.HapticFeedback?.impactOccurred?.(type||'light');
+    };
   }catch(e){console.log('Standalone mode');}
 }
 
@@ -3348,6 +3388,26 @@ function loadWalletLink(){
   if(data.address){walletAddr=data.address;updateWalletUI(true);fetchTONBalance(data.address);}
 }
 // ──────────────────────────────────────────────────────────────────────────────
+
+
+function checkOrientation(){
+  const warn=document.getElementById('landscape-warn');
+  if(!warn)return;
+  const isLandscape=window.innerWidth>window.innerHeight&&window.innerWidth>600;
+  warn.style.display=isLandscape?'flex':'none';
+}
+window.addEventListener('resize',checkOrientation);
+checkOrientation();
+function updateSplashCountdown(){
+  const el=document.getElementById('splash-countdown');
+  if(!el)return;
+  const ms=new Date('2026-06-15T00:00:00Z')-Date.now();
+  if(ms<=0){el.textContent='Presale closed';return;}
+  const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000);
+  el.textContent='Presale closes in '+d+'d '+h+'h · Early access now open';
+}
+setInterval(updateSplashCountdown,60000);
+updateSplashCountdown();
 
 function startLaunch(){
   // Hide splash, show loading screen, then launch
@@ -3458,7 +3518,7 @@ function launch(){
   }
 
   setTimeout(()=>{
-    const isNew=!Object.values(G.res).some(v=>v>0)&&!E.buildings.length;
+    const isNew=!Object.values(G.bld).some(v=>v===true);
     if(isNew){
       addRes('stone',30); addRes('wood',30); addRes('gold',10); addRes('emp',15);
       E.res.gold+=150; E.res.wood+=80; E.res.stone+=60;
@@ -3752,7 +3812,7 @@ function showBuildingPopup(id){
       </div>
     </div>
     <div style="display:flex;gap:6px">
-      ${G.upgrades?.[id]<(UPG_DEF[id]?.length||0)?`<button onclick="document.getElementById('bld-popup').remove();openCity();setTimeout(()=>empTab('upgrades'),50)" style="flex:1;padding:8px;background:rgba(240,184,64,.15);border:1px solid rgba(240,184,64,.3);border-radius:8px;color:var(--gold-b);font-size:11px;font-weight:700;cursor:pointer">⬆️ Upgrade</button>`:''}
+      ${BLD_DEF[id]?`<button onclick="document.getElementById('bld-popup').remove();openCity();setTimeout(()=>{cpTab('empire');empTab('build');},50)" style="flex:1;padding:8px;background:rgba(240,184,64,.15);border:1px solid rgba(240,184,64,.3);border-radius:8px;color:var(--gold-b);font-size:11px;font-weight:700;cursor:pointer">📊 Stats</button>`:''}
       <button onclick="startMoveWorldBld('${id}');document.getElementById('bld-popup').remove()" style="flex:1;padding:8px;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;color:var(--txt2);font-size:11px;font-weight:700;cursor:pointer">↔️ Move</button>
     </div>
   `;
@@ -3957,12 +4017,16 @@ function toggleMinimap(){
   renderMinimap();
 }
 
-let _mmFrame=0;
+let _mmFrame=0,_mmLastX=0,_mmLastZ=0;
 function renderMinimap(){
   const canvas=document.getElementById('minimap-canvas');
   if(!canvas||!scene)return;
   // Only render every 3rd animate frame for performance
-  _mmFrame++;if(_mmFrame%3!==0&&!_mmBig)return;
+  _mmFrame++;
+  // Skip if player hasn't moved and not big mode
+  const moved=Math.abs((pPos.x||0)-_mmLastX)>.05||Math.abs((pPos.z||0)-_mmLastZ)>.05;
+  if(_mmFrame%3!==0&&!_mmBig&&!moved)return;
+  _mmLastX=pPos.x||0;_mmLastZ=pPos.z||0;
 
   const ctx=canvas.getContext('2d');
   const W=canvas.width, H=canvas.height;
@@ -4034,7 +4098,7 @@ function renderMinimap(){
   // Camera FOV cone
   if(!fpMode){
     const fovAngle=Math.PI*.4;
-    const coneLen=_mmBig?30:20;
+    const coneLen=_mmBig?28:18;
     const px3=W/2+(pPos.x||0)*S, py3=H/2+(pPos.z||0)*S;
     // In rotated map, camera always looks from bottom (player is center)
     const viewDir=Math.PI; // always points toward top of rotated map
@@ -4159,7 +4223,7 @@ function spawnBuildParticles(wx,wz){
   const cols=[0xf5d840,0x80ee90,0xffffff,0xf0b840];
   for(let i=0;i<12;i++){
     const m=new THREE.Mesh(
-      new THREE.SphereGeometry(.12,4,4),
+      new THREE.SphereGeometry(.16,5,5),
       new THREE.MeshBasicMaterial({color:cols[i%cols.length]})
     );
     const gy=sampleH(wx,wz);
@@ -4182,6 +4246,7 @@ function showSellScreen(){
   const existing=document.getElementById('sell-screen');
   if(existing){existing.remove();return;}
   const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const rateLabels={stone:'Common',wood:'Common',gold:'Uncommon',iron:'Uncommon',crystal:'Rare',mana:'Rare',starstone:'Epic',darkore:'Legendary'};
   const sellable=Object.entries(rates).filter(([k])=>(G.res[k]||0)>=1);
   if(!sellable.length){toast('Nothing to sell!');return;}
 
@@ -4217,6 +4282,7 @@ function showSellScreen(){
 
 function sellOne(k){
   const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const rateLabels={stone:'Common',wood:'Common',gold:'Uncommon',iron:'Uncommon',crystal:'Rare',mana:'Rare',starstone:'Epic',darkore:'Legendary'};
   const rate=rates[k]||.1;
   const qty=G.res[k]||0;if(!qty)return;
   const mult2=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
@@ -4256,10 +4322,11 @@ function showTapIndicator(wx,wz){
   ring.position.set(wx,sampleH(wx,wz)+.05,wz);
   scene.add(ring);_tapIndicator=ring;
   // Fade out
-  let op=.7;
+  let op=.8;
   const fade=setInterval(()=>{
-    op-=.04;ring.material.opacity=Math.max(0,op);
-    if(op<=0){clearInterval(fade);scene.remove(ring);_tapIndicator=null;}
+    op-=.055;ring.material.opacity=Math.max(0,op);
+    ring.scale.setScalar(1+(1-op)*.4); // expands as it fades
+    if(op<=0){clearInterval(fade);scene.remove(ring);ring.geometry.dispose();ring.material.dispose();_tapIndicator=null;}
   },40);
 }
 
@@ -4503,7 +4570,10 @@ function eBuyUpgrade(id){
   E.empSpent=(E.empSpent||0)+u.cost;
   u.effect();
   E.upgradesDone.push(id);
-  toast('✅ '+u.n+' activated!');
+  sfxQuest?.();
+  window.haptic?.('heavy');
+  showEmpFloat(u.cost*-1);
+  toast('✅ '+u.n+' — ×'+((E.empMult||1).toFixed(1))+' production boost active!',3500);
   updateEconomyDisplay();
   dbSyncPlayer(); // immediately sync wallet + spend
 }
