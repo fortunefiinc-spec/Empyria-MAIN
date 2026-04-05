@@ -362,6 +362,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 @keyframes bounce{0%{transform:scale(1) rotate(-5deg)}100%{transform:scale(1.15) rotate(5deg)}}
 @keyframes fall{0%{top:-60px;opacity:1}80%{opacity:1}100%{top:110%;opacity:0}}
 @keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-60px);opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes empPop{0%{transform:translateY(0) scale(1);opacity:1}70%{transform:translateY(-45px) scale(1.1);opacity:1}100%{transform:translateY(-80px) scale(.8);opacity:0}}
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(240,192,96,.2)}50%{box-shadow:0 0 20px rgba(240,192,96,.5)}}
 @keyframes notifPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
@@ -2235,7 +2236,15 @@ function doMine(){
   else { if(empRoll<.20){empEarned=1;} }
   if(empEarned>0){ eEarn(empEarned,'Mining'); showEmpFloat(empEarned); }
   const rare=rollRareDrop(type);
-  if(rare){addRes(rare.res,rare.amt);window.haptic?.('medium');toast(rare.msg+' +'+rare.amt,3000);}
+  if(rare){
+    addRes(rare.res,rare.amt);
+    window.haptic?.('heavy');
+    sfxEMP?.();
+    // Brief screen shake
+    const cv=document.getElementById('three-canvas');
+    if(cv){cv.style.transform='translate(2px,-2px)';setTimeout(()=>{cv.style.transform='translate(-2px,2px)';setTimeout(()=>cv.style.transform='',50);},50);}
+    toast('💎 Rare drop! '+rare.msg+' +'+rare.amt,3500);
+  }
   else toast('+'+earned+' '+RES_ICO[type]+(empEarned?' · +'+empEarned+'💰':''));
   checkQuestProgress('mine',earned,type);checkMysteryBox();updateHUD();
 }
@@ -2301,8 +2310,12 @@ function processMove(){
     pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));
     const gy=sampleH(pPos.x,pPos.z);
     playerGroup.position.set(pPos.x,gy+.20,pPos.z);
-    playerGroup.rotation.y=Math.atan2(-dx,-dz);
-    walkT+=.14; // slower leg animation to match speed
+    // Smooth rotation - lerp toward target angle
+    const targetAngle=Math.atan2(-dx,-dz);
+    let da=targetAngle-playerGroup.rotation.y;
+    while(da>Math.PI)da-=Math.PI*2; while(da<-Math.PI)da+=Math.PI*2;
+    playerGroup.rotation.y+=da*.18;
+    walkT+=.14;
     // Leg swing
     if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.55;
     if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.55;
@@ -2626,14 +2639,18 @@ function openCity(){
   const sheet=document.getElementById('cp-sheet');
   if(sheet) sheet.style.height='62vh';
   panel.classList.add('open');
-  cpTab('empire');
-  empTab('build');
+  // Remember last tab
+  const lastTab=localStorage.getItem('empyria_last_tab')||'empire';
+  const lastEmpTab=localStorage.getItem('empyria_last_emp_tab')||'build';
+  cpTab(lastTab);
+  if(lastTab==='empire') empTab(lastEmpTab);
   window.Telegram?.WebApp?.BackButton?.show?.();
 }
 function closeCity(){document.getElementById('city-panel').classList.remove('open');window.Telegram?.WebApp?.BackButton?.hide?.();}
 function cityBgClick(e){if(e.target===document.getElementById('city-panel'))closeCity();}
 
 function cpTab(name){
+  localStorage.setItem('empyria_last_tab',name);
   document.querySelectorAll('.cp-tab').forEach(t=>t.classList.remove('on'));
   document.querySelectorAll('.cp-page').forEach(p=>p.classList.remove('on'));
   const page=document.getElementById('cp-'+name);if(page)page.classList.add('on');
@@ -2802,7 +2819,13 @@ function renderLogSection(){
 function renderBuildGrid(){if(document.getElementById('cp-empire')?.classList.contains('on'))renderEmpirePanel();}
 
 // ═══ HUD ═══
+let _hudPending=false;
 function updateHUD(){
+  if(_hudPending)return; // skip if already queued
+  _hudPending=true;
+  requestAnimationFrame(()=>{ _hudPending=false; _doUpdateHUD(); });
+}
+function _doUpdateHUD(){
   const rp=document.getElementById('res-compact');
   // Resource cap warnings
   const capWarn=Object.entries(G.res).filter(([k,v])=>{const cap=5000;return v>cap*.9&&k!=='emp';});
@@ -2828,8 +2851,9 @@ function updateHUD(){
       .map(r=>{
         const v=Math.floor(r.v);
         const low=r.always&&v<5;
-        const high=r.always&&v>200;
-        return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':high?'rgba(240,184,64,.3)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':high?'var(--gold-b)':'var(--txt)'}">${v}</span></div>`;
+        const high=v>500;
+        const vhigh=v>2000;
+        return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':vhigh?'rgba(64,200,112,.35)':high?'rgba(240,184,64,.25)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':vhigh?'var(--grn2)':high?'var(--gold-b)':'var(--txt)'}">${v}</span></div>`;
       }).join('');
   }
   const _empV=Math.floor(E.res.emp||G.res.emp||0);
@@ -4269,9 +4293,11 @@ function showSellScreen(){
     </div>`;
   });
 
+  const totalAll=sellable.reduce((s,[k,rate])=>s+Math.floor((G.res[k]||0)*rate*mult),0);
   panel.innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div style="font-size:11px;font-weight:700;color:var(--txt)">💱 Sell Resources</div>
+      <div style="font-size:10px;color:var(--emp);font-weight:700">+${totalAll} $EMP total</div>
       <div onclick="document.getElementById('sell-screen')?.remove()" style="color:rgba(255,255,255,.3);font-size:18px;cursor:pointer">×</div>
     </div>
     <div id="sell-rows">${rows}</div>
@@ -4378,6 +4404,25 @@ function showWalletGate(){
   `;
   document.body.appendChild(modal);
 }
+
+let _fpsFrames=0,_fpsLast=Date.now(),_fpsShow=false;
+function updateFPS(){
+  _fpsFrames++;
+  const now=Date.now();
+  if(now-_fpsLast>=1000){
+    const fps=Math.round(_fpsFrames*1000/(now-_fpsLast));
+    _fpsFrames=0;_fpsLast=now;
+    if(_fpsShow){
+      let el=document.getElementById('fps-badge');
+      if(!el){el=document.createElement('div');el.id='fps-badge';el.style.cssText='position:fixed;top:5px;right:5px;z-index:999;font-size:9px;color:rgba(255,255,255,.5);pointer-events:none';document.body.appendChild(el);}
+      el.textContent=fps+'fps · '+Math.round(performance.memory?.usedJSHeapSize/1048576||0)+'MB';
+    }
+  }
+}
+document.getElementById('topbar-row1')?.addEventListener('pointerdown',()=>{
+  const t=setTimeout(()=>{_fpsShow=!_fpsShow;const el=document.getElementById('fps-badge');if(!_fpsShow&&el)el.remove();toast(_fpsShow?'FPS counter on':'FPS counter off',1500);},3000);
+  document.getElementById('topbar-row1').addEventListener('pointerup',()=>clearTimeout(t),{once:true});
+});
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
