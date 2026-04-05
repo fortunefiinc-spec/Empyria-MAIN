@@ -412,7 +412,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div id="logo" style="flex-shrink:0">EMPYRIA<small id="era-label" style="font-size:7px;color:var(--txt-d);letter-spacing:1px;margin-left:5px">ERA I</small></div>
       <div style="flex:1;min-width:4px"></div>
       <!-- Cloud sync icon — tiny -->
-      <div id="db-badge" onclick="showLeaderboard()" style="font-size:12px;flex-shrink:0;cursor:pointer;padding:2px 4px;pointer-events:all">☁️</div>
+      <div id="save-btn" onclick="manualSave()" style="display:flex;align-items:center;gap:3px;background:rgba(20,30,40,.85);border:1px solid rgba(80,140,200,.3);border-radius:9px;padding:3px 8px;cursor:pointer;flex-shrink:0;pointer-events:all;transition:all .2s" title="Tap to save">
+        <span id="save-ico" style="font-size:11px">☁️</span>
+        <span id="save-lbl" style="font-size:8px;color:rgba(140,180,220,.8);font-weight:600">SAVE</span>
+      </div>
       <div id="weather-icon" style="font-size:12px;flex-shrink:0;padding:2px 2px;pointer-events:none">☀️</div>
       <div onclick="openEconomy()" style="background:rgba(224,88,88,.2);border:1px solid rgba(224,88,88,.4);border-radius:6px;padding:2px 5px;font-size:7px;color:#ff9090;font-weight:700;letter-spacing:.5px;flex-shrink:0;cursor:pointer;pointer-events:all">🔥LIVE</div>
       <!-- Wallet — icon only when not connected, short address when connected -->
@@ -3060,9 +3063,20 @@ function reactTap(){if(_react.on){const ms=Date.now()-_react.st;_react.on=false;
 function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rws.crystal=1;else if(_react.emp>=24)rws.gold=1;setCd('react');showResult('⚡ Lightning Forge!',`${_react.emp}🪙 earned · score ${_react.score}`,rws);}
 
 // ═══ SAVE / LOAD ═══
-function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({version:3,res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
-function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw)return;const sv=JSON.parse(raw);if(sv.version&&sv.version<2){localStorage.removeItem('empyria_v2');toast('🔄 Save updated!',2000);return;}// version 3if(sv.res)Object.assign(G.res,sv.res);if(sv.bld)Object.assign(G.bld,sv.bld);if(sv.cd)Object.assign(G.cd,sv.cd);if(sv.stats)Object.assign(G.stats,sv.stats);if(sv.upgrades)Object.assign(G.upgrades,sv.upgrades);G.era=sv.era||1;G.streak=sv.streak||0;G.lastLogin=sv.lastLogin||'';G.streakClaimed=sv.streakClaimed||false;G.quests=sv.quests||[];G.questsDate=sv.questsDate||'';G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings on world
-Object.entries(G.bld).forEach(([id,built])=>{if(built===true&&BLD_DEF[id]){const spacing=Object.keys(buildingMeshes).length;const bx=((spacing*4.5)%36)-18,bz=Math.floor(spacing/8)*5-10;buildBldMesh(id,bx,bz);}});toast('💾 Game loaded!',2000);}catch(e){if(window.location.hostname==='localhost')console.warn('Load:',e);}}
+function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({version:3,savedAt:Date.now(),res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
+function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw)return;const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
+  if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save format…',2000);return;}// v2+ safe to loadif(sv.res)Object.assign(G.res,sv.res);if(sv.bld)Object.assign(G.bld,sv.bld);if(sv.cd)Object.assign(G.cd,sv.cd);if(sv.stats)Object.assign(G.stats,sv.stats);if(sv.upgrades)Object.assign(G.upgrades,sv.upgrades);G.era=sv.era||1;G.streak=sv.streak||0;G.lastLogin=sv.lastLogin||'';G.streakClaimed=sv.streakClaimed||false;G.quests=sv.quests||[];G.questsDate=sv.questsDate||'';G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings — defer to ensure scene is ready
+  setTimeout(()=>{
+    Object.entries(G.bld).forEach(([id,built])=>{
+      if(built===true&&BLD_DEF[id]&&!buildingMeshes[id]){
+        const spacing=Object.keys(buildingMeshes).length;
+        const bx=((spacing*4.5)%36)-18, bz=Math.floor(spacing/8)*5-10;
+        buildBldMesh(id,bx,bz);
+      }
+    });
+    updateHUD();
+  },200);
+  toast('💾 Progress restored!',2000);}catch(e){if(window.location.hostname==='localhost')console.warn('Load:',e);}}
 setInterval(saveGame,30000);
 
 // ═══ TOAST ═══
@@ -3109,13 +3123,12 @@ function initDB() {
 async function dbSyncPlayer() {
   if (!db || !tgUser?.id) return;
   try {
-    const empBal = Math.floor(G.res.emp || E.res.emp || 0);
     const payload = {
       telegram_id:   tgUser.id,
       username:      tgUser.username || null,
       first_name:    tgUser.first_name || 'Player',
       wallet_address: walletAddr || null,
-      emp_balance:   empBal,
+      emp_balance:   Math.floor(E.totalEmpEarned||0), // airdrop score = total earned
       emp_spent:     Math.floor(E.empSpent||0),
       prestige_level: G.prestige || 0,
       era:           G.era || 1,
@@ -3151,11 +3164,22 @@ async function dbLoadPlayer() {
     dbPlayer = data;
     // Only restore if DB state exists and is newer than local
     if (data.game_state) {
-      const localEmp = G.res.emp || 0;
-      const dbEmp    = data.emp_balance || 0;
-      if (dbEmp > localEmp) {
+      // Compare using savedAt timestamp — take newest state
+      const localSavedAt  = JSON.parse(localStorage.getItem('empyria_v2')||'{}').savedAt || 0;
+      const cloudSavedAt  = data.game_state.savedAt || 0;
+      const localTotal    = E.totalEmpEarned || 0;
+      const cloudTotal    = data.emp_balance  || 0; // stored as totalEmpEarned now
+
+      // Use cloud if: cloud is newer AND has more total earned
+      const cloudIsNewer  = cloudSavedAt > localSavedAt;
+      const cloudHasMore  = cloudTotal > localTotal;
+
+      if (cloudIsNewer && cloudHasMore) {
         restoreSaveState(data.game_state);
-        toast('☁️ Game restored from cloud!', 3000);
+        toast('☁️ Progress restored from cloud!', 3000);
+        console.log('Cloud restore: cloud savedAt', new Date(cloudSavedAt).toISOString(), 'vs local', new Date(localSavedAt).toISOString());
+      } else {
+        console.log('Local save is newer or equal — keeping local');
       }
     }
     updateDBStatusBadge(true);
@@ -3237,21 +3261,27 @@ function restoreSaveState(s) {
 
 // Small cloud indicator in topbar
 function updateDBStatusBadge(ok) {
-  const el = document.getElementById('db-badge');
-  if (el) { el.textContent = ok ? '☁️' : '⚠️'; el.title = ok ? 'Cloud sync OK' : 'Sync failed'; }
+  const ico = document.getElementById('save-ico');
+  const btn = document.getElementById('save-btn');
+  // Only show error state if not currently in a manual save animation
+  if(!ok && ico && ico.textContent==='☁️'){
+    ico.textContent='⚠️';
+    if(btn) btn.style.borderColor='rgba(224,88,88,.4)';
+    if(btn) btn.title='Cloud sync failed — tap to retry';
+  }
 }
 
 // Auto-sync every 2 minutes + on important events
 let _dbSyncTimer = null;
 function startDBSync() {
   if (!db) return;
-  // Initial load from cloud
-  dbLoadPlayer().then(() => {
-    // Then start periodic sync
-    _dbSyncTimer = setInterval(() => dbSyncPlayer(), 120_000);
-    // Sync immediately after load
-    setTimeout(dbSyncPlayer, 3000);
-  });
+  // Load from cloud AFTER local state is set (800ms grace period)
+  setTimeout(() => {
+    dbLoadPlayer().then(() => {
+      _dbSyncTimer = setInterval(() => dbSyncPlayer(), 120_000);
+      setTimeout(dbSyncPlayer, 3000);
+    });
+  }, 800);
 }
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -3472,12 +3502,12 @@ function launch(){
       }
       setLoadProgress(60,'Loading buildings…');
 
-      // Step 3 — game systems
+      // Step 3 — load save FIRST, then start systems
       setTimeout(()=>{
-        startPassive();
-        initDailyQuests();
-        loadGame();
+        loadGame();  // MUST come before startPassive
         eLoad();
+        startPassive(); // start AFTER state is loaded
+        initDailyQuests();
         loadWalletLink();
         setLoadProgress(80,'Restoring progress…');
 
@@ -3517,7 +3547,12 @@ function launch(){
     window._eTick = setInterval(()=>{
       eTick();
       updateWeather();
-      if(E.tick%60===0){ eSave(); saveGame(); }
+      if(E.tick%20===0){
+        eSave(); saveGame();
+        // Subtle pulse on save button to show auto-save happened
+        const sl=document.getElementById('save-lbl');
+        if(sl&&sl.textContent==='SAVE'){sl.textContent='✓AUTO';setTimeout(()=>sl.textContent='SAVE',1200);}
+      }
       if(E.tick%300===0) dbSyncPlayer();
       // Upgrade reminder
       if(E.tick%200===0){
@@ -4441,6 +4476,73 @@ function getMineComboMult(){
   _mineComboT=setTimeout(()=>{_mineCombo=0;},3000);
   return 1+_mineCombo*.08; // +8% per consecutive tap, max +64%
 }
+
+let _lastSaveTime=0;
+async function manualSave(){
+  const btn=document.getElementById('save-btn');
+  const ico=document.getElementById('save-ico');
+  const lbl=document.getElementById('save-lbl');
+  if(!btn) return;
+
+  // Visual: saving state
+  if(ico) ico.textContent='🔄';
+  if(lbl) lbl.textContent='SAVING';
+  btn.style.borderColor='rgba(240,184,64,.5)';
+
+  try {
+    // 1. Save locally
+    saveGame();
+    eSave();
+
+    // 2. Sync to Supabase
+    if(db && tgUser?.id){
+      await dbSyncPlayer();
+    }
+
+    // 3. Telegram CloudStorage backup
+    try{
+      window.Telegram?.WebApp?.CloudStorage?.setItem(
+        'empyria_airdrop',
+        String(Math.floor(E.totalEmpEarned||0)),
+        ()=>{}
+      );
+    }catch(e){}
+
+    // 4. Success state
+    _lastSaveTime=Date.now();
+    if(ico) ico.textContent='✅';
+    if(lbl) lbl.textContent='SAVED';
+    btn.style.borderColor='rgba(64,200,112,.5)';
+    btn.style.background='rgba(20,40,25,.85)';
+    window.haptic?.('success');
+
+    // Show when saved
+    const t=new Date();
+    const timeStr=t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+    btn.title='Last saved: '+timeStr;
+
+    setTimeout(()=>{
+      if(ico) ico.textContent='☁️';
+      if(lbl) lbl.textContent='SAVE';
+      btn.style.borderColor='rgba(80,140,200,.3)';
+      btn.style.background='rgba(20,30,40,.85)';
+    }, 2500);
+
+  } catch(err) {
+    // Error state
+    if(ico) ico.textContent='⚠️';
+    if(lbl) lbl.textContent='RETRY';
+    btn.style.borderColor='rgba(224,88,88,.5)';
+    btn.style.background='rgba(40,15,15,.85)';
+    setTimeout(()=>{
+      if(ico) ico.textContent='☁️';
+      if(lbl) lbl.textContent='SAVE';
+      btn.style.borderColor='rgba(80,140,200,.3)';
+      btn.style.background='rgba(20,30,40,.85)';
+    }, 3000);
+    console.warn('Manual save error:', err);
+  }
+}
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
@@ -4645,8 +4747,26 @@ function eLaunchExpedition(id){const ex=EMP_EXPEDITIONS.find(e=>e.id===id);if(!e
 function eResolveExpedition(ex){const fail=Math.random()<ex.risk;if(fail){eEarn(-Math.floor(ex.cost*.25),'Mislukt: '+ex.n);toast('💔 '+ex.n+' failed!');}else{const gain=ex.minRet+~~(Math.random()*(ex.maxRet-ex.minRet));eEarn(gain,ex.n);toast('🎉 '+ex.n+': +'+gain+' $EMP!');}}
 
 // Economy save/load
-function eSave(){try{localStorage.setItem('empyria_eco',JSON.stringify({res:E.res,pop:E.pop,happiness:E.happiness,stability:E.stability,defense:E.defense,year:E.year,day:E.day,tick:E.tick,season:E.season,buildings:E.buildings,nextId:E.nextId,prices:E.prices,log:E.log.slice(0,20),upgradesDone:E.upgradesDone,priceBonus:E.priceBonus,logBonusExtra:E.logBonusExtra,raidResist:E.raidResist,prestigeBonus:E.prestigeBonus,empRate:E.empRate,empMult:E.empMult||1,totalEmpEarned:E.totalEmpEarned||0,empMult:E.empMult,totalEmpEarned:E.totalEmpEarned}));}catch(ex){}}
-function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);if(s.res)Object.assign(E.res,s.res);if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=s.empMult??1.0;E.totalEmpEarned=s.totalEmpEarned??0;
+function eSave(){
+  try{
+    const payload={
+      res:E.res, pop:E.pop, happiness:E.happiness, stability:E.stability,
+      defense:E.defense, year:E.year, day:E.day, tick:E.tick, season:E.season,
+      buildings:E.buildings, nextId:E.nextId, prices:E.prices,
+      log:E.log.slice(0,20), upgradesDone:E.upgradesDone||[],
+      priceBonus:E.priceBonus||1, logBonusExtra:E.logBonusExtra||0,
+      raidResist:E.raidResist||false, prestigeBonus:E.prestigeBonus||0,
+      empRate:E.empRate||0,
+      empMult: typeof E.empMult==='number'&&!isNaN(E.empMult) ? E.empMult : 1.0,
+      totalEmpEarned: typeof E.totalEmpEarned==='number' ? E.totalEmpEarned : 0,
+      empSpent: typeof E.empSpent==='number' ? E.empSpent : 0,
+    };
+    localStorage.setItem('empyria_eco', JSON.stringify(payload));
+  }catch(ex){}
+}
+function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);if(s.res)Object.assign(E.res,s.res);if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=(typeof s.empMult==='number'&&!isNaN(s.empMult)&&s.empMult>=1)?s.empMult:1.0;
+    E.totalEmpEarned=(typeof s.totalEmpEarned==='number'&&!isNaN(s.totalEmpEarned))?s.totalEmpEarned:0;
+    E.empSpent=(typeof s.empSpent==='number')?s.empSpent:0;
   // Rebuild 3D meshes for saved economy buildings
   setTimeout(()=>{
     E.buildings.forEach(b=>{if(b.wx!==undefined&&!econMeshes[b.id])buildEconMesh(b);});
