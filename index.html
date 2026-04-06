@@ -3568,24 +3568,29 @@ async function dbLoadPlayer() {
       .single();
     if (error || !data) return; // new player, no data yet
     dbPlayer = data;
-    // Only restore if DB state exists and is newer than local
+    // Only restore from cloud if NO local save exists
+    // Local save always wins if it exists — prevents cloud overwriting fresh local data
     if (data.game_state) {
-      // Compare using savedAt timestamp — take newest state
-      const localSavedAt  = JSON.parse(localStorage.getItem('empyria_v2')||'{}').savedAt || 0;
-      const cloudSavedAt  = data.game_state.savedAt || 0;
-      const localTotal    = E.totalEmpEarned || 0;
-      const cloudTotal    = data.emp_balance  || 0; // stored as totalEmpEarned now
+      const localRaw = localStorage.getItem('empyria_v2');
+      const localSavedAt = localRaw ? (JSON.parse(localRaw).savedAt || 0) : 0;
+      const cloudSavedAt = data.game_state.savedAt || 0;
 
-      // Use cloud if: cloud is newer AND has more total earned
-      const cloudIsNewer  = cloudSavedAt > localSavedAt;
-      const cloudHasMore  = cloudTotal > localTotal;
-
-      if (cloudIsNewer && cloudHasMore) {
+      if (!localRaw) {
+        // No local save at all — restore from cloud
         restoreSaveState(data.game_state);
         toast('☁️ Progress restored from cloud!', 3000);
-        console.log('Cloud restore: cloud savedAt', new Date(cloudSavedAt).toISOString(), 'vs local', new Date(localSavedAt).toISOString());
+        console.log('[Cloud] No local save — restoring from cloud');
+      } else if (cloudSavedAt > localSavedAt + 300000) {
+        // Cloud is more than 5 minutes newer than local — likely different device
+        const cloudBlds = Object.keys(data.game_state.bld||{}).length;
+        const localBlds = Object.keys(G.bld||{}).length;
+        if (cloudBlds > localBlds || (data.emp_balance||0) > (E.totalEmpEarned||0)) {
+          restoreSaveState(data.game_state);
+          toast('☁️ Newer progress restored from cloud!', 3000);
+          console.log('[Cloud] Cloud is newer device session — restoring');
+        }
       } else {
-        console.log('Local save is newer or equal — keeping local');
+        console.log('[Cloud] Local save is current — keeping local. Local:', new Date(localSavedAt).toLocaleTimeString(), 'Cloud:', new Date(cloudSavedAt).toLocaleTimeString());
       }
     }
     updateDBStatusBadge(true);
@@ -4155,7 +4160,10 @@ function shareTelegram(){
   } else {
     window.open(url,'_blank');
   }
-  addRes('crystal',1) // share reward: crystal not emp; toast('🎉 +5 $EMP share bonus!',2000); localStorage.setItem('empyria_shared','1'); checkAchievements();
+  addRes('crystal',1);
+  toast('🎉 +1 💎 Crystal share bonus!',2000);
+  localStorage.setItem('empyria_shared','1');
+  checkAchievements();
 }
 
 const EMP_MILESTONES=[10,50,100,500,1000,5000,10000,50000];
