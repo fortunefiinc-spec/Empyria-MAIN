@@ -897,7 +897,7 @@ const CAP=10000;
 
 // ═══ UTILS ═══
 function addRes(k,v){
-  if(k==='emp'){ G.res.emp=Math.max(0,(G.res.emp||0)+v); E.res.emp=G.res.emp; // single source updateHUD(); return; }
+  if(k==='emp'){ G.res.emp=Math.max(0,(G.res.emp||0)+v); E.res.emp=G.res.emp; updateHUD(); return; } // single source
   if(!v||v<=0)return;
   G.res[k]=Math.min(CAP,(G.res[k]||0)+v);
   G.stats[k]=(G.stats[k]||0)+v;
@@ -2273,11 +2273,8 @@ function respawnResourceNodes(count){
 function nearestNode(){let best=null,bd=Infinity;resourceNodes.forEach(n=>{if(!n.parent)return;const dx=n.position.x-pPos.x,dz=n.position.z-pPos.z,d=Math.sqrt(dx*dx+dz*dz);if(d<7&&d<bd){best=n;bd=d;}});return best;}
 function rollRareDrop(type){const drops=RARE_DROPS[type];if(!drops)return null;for(const d of drops)if(Math.random()<d.chance)return d;return null;}
 
-let _mineLast=0;
 function doMine(){
-  const now=Date.now();
-  if(now-_mineLast<150){return;} // 150ms cooldown between taps
-  _mineLast=now;
+  const _now=Date.now();if(_now-(window._ml||0)<150)return;window._ml=_now;
   const mb=document.querySelector('.mine-btn');
   if(mb){
     mb.style.transform='scale(.88)';
@@ -3148,7 +3145,17 @@ function loadGame(){try{const raw=localStorage.getItem('empyria_v2');
     }catch(fe){}
     showSaveDebug?.();return;
   }const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
-  if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save format…',2000);return;}// v2+ safe to loadif(sv.res)Object.assign(G.res,sv.res);if(sv.bld)Object.assign(G.bld,sv.bld);if(sv.cd)Object.assign(G.cd,sv.cd);if(sv.stats)Object.assign(G.stats,sv.stats);if(sv.upgrades)Object.assign(G.upgrades,sv.upgrades);G.era=sv.era||1;G.streak=sv.streak||0;G.lastLogin=sv.lastLogin||'';G.streakClaimed=sv.streakClaimed||false;G.quests=sv.quests||[];G.questsDate=sv.questsDate||'';G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings — defer to ensure scene is ready
+  if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save format…',2000);return;}
+  // v2+ safe to load
+  if(sv.res)Object.assign(G.res,sv.res);
+  if(sv.bld)Object.assign(G.bld,sv.bld);
+  if(sv.cd)Object.assign(G.cd,sv.cd);
+  if(sv.stats)Object.assign(G.stats,sv.stats);
+  if(sv.upgrades)Object.assign(G.upgrades,sv.upgrades);
+  G.era=sv.era||1;G.streak=sv.streak||0;G.lastLogin=sv.lastLogin||'';
+  G.streakClaimed=sv.streakClaimed||false;G.quests=sv.quests||[];G.questsDate=sv.questsDate||'';
+  G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;
+  G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings — defer to ensure scene is ready
   setTimeout(()=>{
     Object.entries(G.bld).forEach(([id,built])=>{
       if(built===true&&BLD_DEF[id]&&!buildingMeshes[id]){
@@ -4131,9 +4138,9 @@ function renderStatsTab(){
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
         ${ACHIEVEMENTS.map(a=>{
           const done=achievements.includes(a.id);
-          return`<div title="${a.name}: ${a.desc}" style="aspect-ratio:1;background:${done?'rgba(240,184,64,.12)':'rgba(255,255,255,.03)'};border:1px solid ${done?'rgba(240,184,64,.3)':'rgba(255,255,255,.07)'};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px">
-            <span style="font-size:18px;${done?'':'filter:grayscale(1);opacity:.3'}">${a.ico}</span>
-            <span style="font-size:7px;color:${done?'var(--gold-b)':'var(--txt-d)'};text-align:center;line-height:1.1">${a.name}</span>
+          return`<div title="${a.name}: ${a.desc}" style="aspect-ratio:1;background:${done?"rgba(240,184,64,.12)":"rgba(255,255,255,.03)"};border:1px solid ${done?"rgba(240,184,64,.3)":"rgba(255,255,255,.07)"};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px">
+            <span style="font-size:18px;${done?"":"filter:grayscale(1);opacity:.3"}">${a.ico}</span>
+            <span style="font-size:7px;color:${done?"var(--gold-b)":"var(--txt-d)"};text-align:center;line-height:1.1">${a.name}</span>
           </div>`;
         }).join('')}
       </div>
@@ -4708,8 +4715,7 @@ function eMineBridge(resType,amount){
 }
 function eTick(){
   if(G.paused)return;
-  // Sync shared resources: G.res is source of truth for stone/wood/gold/iron
-  ['stone','wood','gold','iron'].forEach(k=>{E.res[k]=Math.min(E.cap[k]||500,G.res[k]||0);});
+  // G.res is source of truth — E.res is internal economy only
   E.tick++;E.day++;
   if(E.day>=365){E.day=0;E.year++;eNewYear();}
   const prevSeason=E.season;E.season=Math.floor(E.day/91);
@@ -4735,7 +4741,7 @@ function eTick(){
     const tm=eff*wMult*sMult*TR;
     Object.entries(def.out||{}).forEach(([k,v])=>{
       if(k==='emp'){eEarn(v*tm*(E.priceBonus||1)*(E.empMult||1),def.n);}
-      else{const gained=v*tm;E.res[k]=Math.min(E.cap[k]||9999,(E.res[k]||0)+gained);G.res[k]=Math.min(9999,(G.res[k]||0)+gained);}
+      else{const gained=v*tm;G.res[k]=Math.min(CAP,(G.res[k]||0)+gained);E.res[k]=G.res[k];}
     });
   });
   if(E.tick%20===0)eUpdatePop();
@@ -4881,7 +4887,7 @@ function eResolveExpedition(ex){const fail=Math.random()<ex.risk;if(fail){eEarn(
 function eSave(){
   try{
     const payload={
-      res:{...G.res, emp:G.res.emp||0}, // G.res is canonical for all resources
+      // resources not saved here — empyria_v2 has G.res (canonical)
       pop:E.pop, happiness:E.happiness, stability:E.stability,
       defense:E.defense, year:E.year, day:E.day, tick:E.tick, season:E.season,
       buildings:E.buildings, nextId:E.nextId, prices:E.prices,
@@ -4896,7 +4902,9 @@ function eSave(){
     localStorage.setItem('empyria_eco', JSON.stringify(payload));
   }catch(ex){}
 }
-function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);if(s.res)Object.assign(E.res,s.res);if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=(typeof s.empMult==='number'&&!isNaN(s.empMult)&&s.empMult>=1)?s.empMult:1.0;
+function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);
+  // Don't restore E.res from eco — G.res is canonical (loaded by loadGame)
+  // Only restore economy-specific fields:if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=(typeof s.empMult==='number'&&!isNaN(s.empMult)&&s.empMult>=1)?s.empMult:1.0;
     E.totalEmpEarned=(typeof s.totalEmpEarned==='number'&&!isNaN(s.totalEmpEarned))?s.totalEmpEarned:0;
     E.empSpent=(typeof s.empSpent==='number')?s.empSpent:0;
   // Rebuild 3D meshes for saved economy buildings
