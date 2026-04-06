@@ -94,7 +94,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .rv{font-weight:700;color:var(--txt)}
 
 /* Action hint */
-#action-hint{position:fixed;top:88px;left:50%;transform:translateX(-50%);
+#action-hint{position:fixed;top:calc(max(5px,env(safe-area-inset-top)) + 52px);left:50%;transform:translateX(-50%);
   background:rgba(10,14,20,.92);
   border:1px solid rgba(100,180,120,.3);
   border-radius:22px;padding:6px 16px;font-size:11px;color:#a8d8b0;
@@ -130,21 +130,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   transform:translateY(-100%);transition:transform .35s cubic-bezier(.34,1.1,.64,1)}
 #presale-strip.visible{transform:translateY(0)}
 #action-bar{
-  position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  position:fixed;bottom:max(10px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
   z-index:30;
   background:rgba(8,12,18,.88);
   border:1px solid rgba(255,255,255,.1);
   border-radius:22px;
-  padding:4px 6px;
+  padding:4px 8px;
   display:flex;
-  gap:3px;
+  gap:4px;
   backdrop-filter:blur(12px);
   box-shadow:0 4px 24px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
+  max-width:calc(100vw - 24px);
 }
 .ab{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:2px;
-  width:60px;height:46px;
+  width:72px;height:50px;
   border-radius:14px;
   font-family:Rajdhani,sans-serif;font-size:8px;font-weight:700;
   cursor:pointer;
@@ -153,11 +154,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   letter-spacing:.6px;
   position:relative;
   overflow:hidden;
+  flex-shrink:0;
 }
 .ab::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:0;transition:opacity .15s;background:rgba(255,255,255,.08);}
 .ab:active::before{opacity:1;}
 .ab:active{transform:scale(.91);}
-.ab-ico{font-size:17px;line-height:1;margin-bottom:1px;}
+.ab-ico{font-size:18px;line-height:1;margin-bottom:2px;display:block;text-align:center;}
 .mine-btn{
   background:linear-gradient(160deg,#1a3a08,#2a5a10);
   border-color:rgba(80,200,60,.35);
@@ -2692,7 +2694,9 @@ function processMove(){
     if(ghostGroup&&placingBld)moveGhostTo(pPos.x,pPos.z);
   }
 }
-function updateHints(){const n=nearestNode(),hint=document.getElementById('action-hint');
+function updateHints(){
+  const n=nearestNode(),hint=document.getElementById('action-hint');
+  if(hint&&!placingBld){hint.style.color='';} // always reset color when not in combo
   const mb=document.querySelector('.mine-btn');
   // Glow MINE when near resource
   const wasNear=mb?.classList.contains('nearResource');
@@ -2943,6 +2947,9 @@ const ERA_REPLACES={}; // Buildings no longer supersede each other
 function removeSuperseded(id){const rem=ERA_REPLACES[id];if(!rem)return;rem.forEach(old=>{if(!G.bld[old])return;if(buildingMeshes[old]){scene.remove(buildingMeshes[old]);delete buildingMeshes[old];}G.bld[old]='superseded';toast('🔄 '+BLD_DEF[old].name+' replaced',2000);});}
 
 function showPlacementBar(id,def){
+  // Hide the mine hint while placing
+  const hint=document.getElementById('action-hint');
+  if(hint){hint.style.opacity='0';hint.style.display='none';}
   let bar=document.getElementById('placement-bar');
   if(!bar){bar=document.createElement('div');bar.id='placement-bar';document.body.appendChild(bar);}
   const topH=(document.getElementById('topbar')?.offsetHeight||60)+'px';
@@ -2969,7 +2976,12 @@ function showPlacementBar(id,def){
       '</div>'+
     '</div>';
 }
-function hidePlacementBar(){const bar=document.getElementById('placement-bar');if(bar)bar.remove();}
+function hidePlacementBar(){
+  const bar=document.getElementById('placement-bar');if(bar)bar.remove();
+  // Restore mine hint
+  const hint=document.getElementById('action-hint');
+  if(hint)hint.style.display='';
+}
 
 function buyUpgrade(id){
   if(!G.bld[id]){toast('Build '+BLD_DEF[id]?.name+' first');return;}
