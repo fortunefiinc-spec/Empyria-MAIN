@@ -382,6 +382,65 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div style="font-family:Cinzel,serif;font-size:16px;color:var(--gold-b)">Rotate your phone</div>
   <div style="font-size:12px;color:var(--txt-d)">Empyria is best played in portrait mode</div>
 </div>
+
+<!-- Onboarding overlay -->
+<div id="onboarding" style="display:none;position:fixed;inset:0;z-index:700;background:radial-gradient(ellipse at 50% 40%,#0e1e28 0%,#060c14 100%);overflow-y:auto;-webkit-overflow-scrolling:touch">
+  <div style="max-width:420px;margin:0 auto;padding:32px 20px 80px">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-family:Cinzel,serif;font-size:38px;font-weight:900;background:linear-gradient(135deg,#f0c060,#ffd870);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px">EMPYRIA</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4);letter-spacing:3px;margin-top:4px">MEDIEVAL PLAY-TO-EARN</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start">
+      <div style="font-size:32px;flex-shrink:0">⛏️</div>
+      <div>
+        <div style="font-family:Cinzel,serif;font-size:14px;color:#f0c060;margin-bottom:4px">1. Mine Resources</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6">Walk to glowing resource nodes and tap to collect stone, wood, gold and iron. These are your main currency.</div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start">
+      <div style="font-size:32px;flex-shrink:0">💱</div>
+      <div>
+        <div style="font-family:Cinzel,serif;font-size:14px;color:#f0c060;margin-bottom:4px">2. Sell for $EMP</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6">Tap SELL to trade your resources for $EMP tokens. Every $EMP you earn is permanently recorded as your airdrop allocation.</div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start">
+      <div style="font-size:32px;flex-shrink:0">🏗️</div>
+      <div>
+        <div style="font-family:Cinzel,serif;font-size:14px;color:#f0c060;margin-bottom:4px">3. Build Your Empire</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6">Spend resources + $EMP to place buildings. EMP buildings generate passive income every 8 seconds — even while offline.</div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div style="background:rgba(64,200,112,.06);border:1px solid rgba(64,200,112,.25);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start">
+      <div style="font-size:32px;flex-shrink:0">🚀</div>
+      <div>
+        <div style="font-family:Cinzel,serif;font-size:14px;color:var(--grn2);margin-bottom:4px">4. Join the Presale</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.6">Connect your TON wallet in the $EMP tab to buy production multipliers. The earlier you invest, the more your passive income compounds.</div>
+        <div style="margin-top:8px;font-size:11px;color:rgba(240,184,64,.7)">10 $EMP = 1 token at launch · Presale ends June 15, 2026</div>
+      </div>
+    </div>
+
+    <!-- Token info -->
+    <div style="background:rgba(240,184,64,.06);border:1px solid rgba(240,184,64,.2);border-radius:12px;padding:14px;margin-bottom:24px;text-align:center">
+      <div style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:6px">YOUR AIRDROP SCORE</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6)">Every $EMP you earn in the game = your share of the 10,000,000 token pool. It never decreases. Keep playing to grow it.</div>
+    </div>
+
+    <button onclick="closeOnboarding()" style="width:100%;padding:16px;background:linear-gradient(135deg,#1a4020,#2a6030);border:2px solid rgba(64,200,112,.5);border-radius:14px;color:#80ee90;font-family:Cinzel,serif;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:1px">
+      ▶ START BUILDING
+    </button>
+    <div style="text-align:center;margin-top:12px;font-size:10px;color:rgba(255,255,255,.2)" onclick="closeOnboarding()">Skip</div>
+  </div>
+</div>
+
 <div id="loading-screen" style="position:fixed;inset:0;z-index:600;background:radial-gradient(ellipse at 50% 35%,#0e1e28 0%,#060c14 100%);display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div style="font-family:Cinzel,serif;font-size:36px;font-weight:900;background:linear-gradient(135deg,#f0c060,#ffd870);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px">EMPYRIA</div>
   <div style="width:180px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden">
@@ -424,7 +483,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       <div id="worker-badge" onclick="openEconomy()" style="display:flex;align-items:center;gap:2px;background:rgba(20,30,20,.8);border:1px solid rgba(80,160,80,.25);border-radius:9px;padding:4px 7px;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:10px;color:rgba(140,220,140,.8);font-weight:600">👷<span id="worker-count">20</span></div>
       <!-- $EMP pill — the star of the show -->
       <div id="emp-pill" onclick="openEconomy()" style="display:flex;align-items:center;gap:3px;background:linear-gradient(135deg,#201800,#362400);border:1.5px solid rgba(240,192,96,.5);border-radius:11px;padding:4px 10px;cursor:pointer;flex-shrink:0;pointer-events:all;box-shadow:0 2px 8px rgba(240,192,96,.15)">
-        <span id="emp-val" style="color:var(--emp);font-weight:900;font-size:14px;min-width:16px">0</span>
+        <span id="emp-val" style="color:var(--emp);font-weight:900;font-size:14px;min-width:16px">0</span><span id="emp-hr" style="font-size:7px;color:rgba(240,184,64,.5);margin-left:2px"></span>
         <span style="font-size:7px;color:var(--gold);letter-spacing:.5px">$EMP</span>
       </div>
     </div>
@@ -716,50 +775,50 @@ const RES_ICO={stone:'🪨',wood:'🪵',gold:'🥇',iron:'⚙️',crystal:'💎'
 const BLD_DEF={
   // ═══ ERA I — STONE AGE ════════════════════════════════════════════════════
   // Resource buildings (small EMP, heavy resources)
-  mine:       {ico:'⛏️', name:'Mine Shaft',    era:1, cost:{emp:5,  stone:20},          req:[],                    passive:'+1🪨/tick',       empOut:0,    workers:2, desc:'Extracts stone from the earth'},
-  lumber:     {ico:'🪵', name:'Lumber Mill',   era:1, cost:{emp:5,  wood:18},            req:['mine'],              passive:'+1🪵/tick',       empOut:0,    workers:2, desc:'Chops wood from the forest'},
-  farm:       {ico:'🌾', name:'Farm',          era:1, cost:{emp:5,  wood:10,stone:8},    req:[],                    passive:'+2🍖/tick',       empOut:0,    workers:2, desc:'Grows food for workers'},
-  watchtower: {ico:'🗼', name:'Watchtower',    era:1, cost:{emp:8,  stone:30},           req:['mine'],              passive:'🛡️ Defense +10',     empOut:0,    workers:2, defense:10, desc:'Guards your settlement'},
+  mine:       {ico:'⛏️', name:'Mine Shaft',    era:1, cost:{emp:5,  stone:20},          req:[],                    passive:'+1🪨/tick',       empOut:0.0,    workers:2, desc:'Extracts stone from the earth'},
+  lumber:     {ico:'🪵', name:'Lumber Mill',   era:1, cost:{emp:5,  wood:18},            req:['mine'],              passive:'+1🪵/tick',       empOut:0.0,    workers:2, desc:'Chops wood from the forest'},
+  farm:       {ico:'🌾', name:'Farm',          era:1, cost:{emp:5,  wood:10,stone:8},    req:[],                    passive:'+2🍖/tick',       empOut:0.0,    workers:2, desc:'Grows food for workers'},
+  watchtower: {ico:'🗼', name:'Watchtower',    era:1, cost:{emp:8,  stone:30},           req:['mine'],              passive:'🛡️ Defense +10',     empOut:0.0,    workers:2, defense:10, desc:'Guards your settlement'},
   // 💰 EMP buildings (heavy EMP, small resources)
-  empaltar:   {ico:'🏮', name:'EMP Altar',     era:1, cost:{emp:20},                     req:['farm'],              passive:'+0.05💰/tick',    empOut:.05,  workers:1, desc:'💰 First $EMP source — pure EMP cost'},
-  marketplace:{ico:'⚖️', name:'Marketplace',  era:1, cost:{emp:40, gold:8},             req:['mine','lumber'],     passive:'+0.09💰/tick',    empOut:.09,  workers:2, desc:'💰 Generates $EMP from local trade'},
+  empaltar:   {ico:'🏮', name:'EMP Altar',     era:1, cost:{emp:20},                     req:['farm'],              passive:'+0.05💰/tick',    empOut:0.01,  workers:1, desc:'💰 First $EMP source — pure EMP cost'},
+  marketplace:{ico:'⚖️', name:'Marketplace',  era:1, cost:{emp:40, gold:8},             req:['mine','lumber'],     passive:'+0.09💰/tick',    empOut:0.018,  workers:2, desc:'💰 Generates $EMP from local trade'},
 
   // ═══ ERA II — IRON AGE ════════════════════════════════════════════════════
-  smelter:    {ico:'⚙️', name:'Smelter',       era:2, cost:{emp:10, stone:22,iron:5},    req:['mine'],              passive:'+1⚙️/tick',       empOut:0,    workers:2, desc:'Smelts iron ore into ingots'},
-  forge:      {ico:'🔥', name:'Forge',         era:2, cost:{emp:12, stone:15,wood:15},   req:['mine','lumber'],     passive:'+1🥇/tick',       empOut:0,    workers:2, desc:'Forges metals into goods'},
-  mill:       {ico:'💨', name:'Water Mill',    era:2, cost:{emp:10, wood:22,stone:12},   req:['lumber','farm'],     passive:'+2🍖+1🪵/tick',   empOut:0,    workers:2, desc:'Mills grain, boosts food production'},
-  barracks:   {ico:'⚔️', name:'Barracks',      era:2, cost:{emp:15, stone:25,iron:12},   req:['smelter'],           passive:'🛡️ Defense +20',     empOut:0,    workers:3, defense:20, desc:'Trains soldiers to protect trade'},
+  smelter:    {ico:'⚙️', name:'Smelter',       era:2, cost:{emp:10, stone:22,iron:5},    req:['mine'],              passive:'+1⚙️/tick',       empOut:0.0,    workers:2, desc:'Smelts iron ore into ingots'},
+  forge:      {ico:'🔥', name:'Forge',         era:2, cost:{emp:12, stone:15,wood:15},   req:['mine','lumber'],     passive:'+1🥇/tick',       empOut:0.0,    workers:2, desc:'Forges metals into goods'},
+  mill:       {ico:'💨', name:'Water Mill',    era:2, cost:{emp:10, wood:22,stone:12},   req:['lumber','farm'],     passive:'+2🍖+1🪵/tick',   empOut:0.0,    workers:2, desc:'Mills grain, boosts food production'},
+  barracks:   {ico:'⚔️', name:'Barracks',      era:2, cost:{emp:15, stone:25,iron:12},   req:['smelter'],           passive:'🛡️ Defense +20',     empOut:0.0,    workers:3, defense:20, desc:'Trains soldiers to protect trade'},
   // 💰 EMP buildings
-  coinmaster:  {ico:'🪙', name:'Coin Master',  era:2, cost:{emp:60, gold:12},            req:['marketplace'],       passive:'+0.18💰/tick',    empOut:.18,  workers:2, desc:'💰 Turns gold into $EMP tokens'},
-  tradepost:  {ico:'🐪', name:'Trade Post',    era:2, cost:{emp:80, wood:20,stone:15},   req:['forge','marketplace'],passive:'+0.22💰/tick',   empOut:.22,  workers:3, logBonus:.15, desc:'💰💰 Long-distance trade routes'},
+  coinmaster:  {ico:'🪙', name:'Coin Master',  era:2, cost:{emp:60, gold:12},            req:['marketplace'],       passive:'+0.18💰/tick',    empOut:0.036,  workers:2, desc:'💰 Turns gold into $EMP tokens'},
+  tradepost:  {ico:'🐪', name:'Trade Post',    era:2, cost:{emp:80, wood:20,stone:15},   req:['forge','marketplace'],passive:'+0.22💰/tick',   empOut:0.044,  workers:3, logBonus:.15, desc:'💰💰 Long-distance trade routes'},
 
   // ═══ ERA III — ARCANE AGE ═════════════════════════════════════════════════
-  workshop:   {ico:'🔨', name:'Workshop',      era:3, cost:{emp:20, wood:18,iron:12},    req:['lumber','smelter'],  passive:'+1🔨/tick',       empOut:0,    workers:3, desc:'Crafts tools and equipment'},
-  academy:    {ico:'🎓', name:'Academy',       era:3, cost:{emp:25, stone:30},           req:['forge'],             passive:'+1💎/tick',       empOut:0,    workers:3, desc:'Researches crystal extraction'},
-  townhall:   {ico:'🏠', name:'Town Hall',     era:3, cost:{emp:30, stone:20,wood:15},   req:['farm','barracks'],   passive:'👥 Grows population',     empOut:0,    workers:4, desc:'Grows your city population'},
-  inn:        {ico:'🍺', name:'Inn',           era:3, cost:{emp:25, wood:25,stone:10},   req:['farm','townhall'],   passive:'😊 +15% happiness',      empOut:0,    workers:3, desc:'Boosts worker happiness +15%'},
+  workshop:   {ico:'🔨', name:'Workshop',      era:3, cost:{emp:20, wood:18,iron:12},    req:['lumber','smelter'],  passive:'+1🔨/tick',       empOut:0.0,    workers:3, desc:'Crafts tools and equipment'},
+  academy:    {ico:'🎓', name:'Academy',       era:3, cost:{emp:25, stone:30},           req:['forge'],             passive:'+1💎/tick',       empOut:0.0,    workers:3, desc:'Researches crystal extraction'},
+  townhall:   {ico:'🏠', name:'Town Hall',     era:3, cost:{emp:30, stone:20,wood:15},   req:['farm','barracks'],   passive:'👥 Grows population',     empOut:0.0,    workers:4, desc:'Grows your city population'},
+  inn:        {ico:'🍺', name:'Inn',           era:3, cost:{emp:25, wood:25,stone:10},   req:['farm','townhall'],   passive:'😊 +15% happiness',      empOut:0.0,    workers:3, desc:'Boosts worker happiness +15%'},
   // 💰 EMP buildings
-  mint:       {ico:'🏧', name:'Royal Mint',    era:3, cost:{emp:90, gold:25},            req:['tradepost','forge'], passive:'+0.35💰/tick',    empOut:.35,  workers:3, desc:'💰💰 Mints $EMP from raw gold'},
-  harbour:    {ico:'⚓', name:'Harbour',        era:3, cost:{emp:150,wood:30,stone:25},   req:['tradepost'],         passive:'+0.40💰/tick',    empOut:.40,  workers:5, desc:'💰💰💰 Sea trade earns $EMP'},
+  mint:       {ico:'🏧', name:'Royal Mint',    era:3, cost:{emp:90, gold:25},            req:['tradepost','forge'], passive:'+0.35💰/tick',    empOut:0.07,  workers:3, desc:'💰💰 Mints $EMP from raw gold'},
+  harbour:    {ico:'⚓', name:'Harbour',        era:3, cost:{emp:150,wood:30,stone:25},   req:['tradepost'],         passive:'+0.40💰/tick',    empOut:0.08,  workers:5, desc:'💰💰💰 Sea trade earns $EMP'},
 
   // ═══ ERA IV — STELLAR AGE ═════════════════════════════════════════════════
-  observatory:{ico:'🔭', name:'Observatory',  era:4, cost:{emp:35, crystal:20},          req:['academy'],           passive:'+1🔮/tick',       empOut:0,    workers:3, desc:'Discovers mana from the stars'},
-  alchemist:  {ico:'⚗️', name:'Alchemist Lab',era:4, cost:{emp:40, iron:25,crystal:15},  req:['smelter','observatory'],passive:'+2🥇/tick',    empOut:0,    workers:3, desc:'Transmutes iron into gold'},
-  library:    {ico:'📚', name:'Library',       era:4, cost:{emp:45, crystal:20,stone:30}, req:['academy'],           passive:'+1💎+1🔮/tick',   empOut:0,    workers:3, desc:'Doubles crystal & mana research'},
-  fortress:   {ico:'🏯', name:'Fortress',      era:4, cost:{emp:50, stone:45,iron:35},   req:['barracks','townhall'],passive:'🛡️ Defense +40',     empOut:0,    workers:5, defense:40, desc:'Maximum military defense'},
+  observatory:{ico:'🔭', name:'Observatory',  era:4, cost:{emp:35, crystal:20},          req:['academy'],           passive:'+1🔮/tick',       empOut:0.0,    workers:3, desc:'Discovers mana from the stars'},
+  alchemist:  {ico:'⚗️', name:'Alchemist Lab',era:4, cost:{emp:40, iron:25,crystal:15},  req:['smelter','observatory'],passive:'+2🥇/tick',    empOut:0.0,    workers:3, desc:'Transmutes iron into gold'},
+  library:    {ico:'📚', name:'Library',       era:4, cost:{emp:45, crystal:20,stone:30}, req:['academy'],           passive:'+1💎+1🔮/tick',   empOut:0.0,    workers:3, desc:'Doubles crystal & mana research'},
+  fortress:   {ico:'🏯', name:'Fortress',      era:4, cost:{emp:50, stone:45,iron:35},   req:['barracks','townhall'],passive:'🛡️ Defense +40',     empOut:0.0,    workers:5, defense:40, desc:'Maximum military defense'},
   // 💰 EMP buildings
-  emptemple:  {ico:'⛩️', name:'EMP Temple',   era:4, cost:{emp:350},                     req:['guildhall','observatory'],passive:'+0.90💰/tick',empOut:.90, workers:4, desc:'💰💰💰 Pure $EMP — no resources needed'},
-  guildhall:  {ico:'🏛️', name:'Guild Hall',   era:4, cost:{emp:250,stone:35,iron:25},   req:['harbour','academy'], passive:'+0.55💰/tick',    empOut:.55,  workers:6, guildBonus:true, desc:'💰💰💰💰 Premium trade guild'},
+  emptemple:  {ico:'⛩️', name:'EMP Temple',   era:4, cost:{emp:350},                     req:['guildhall','observatory'],passive:'+0.90💰/tick',empOut:0.18, workers:4, desc:'💰💰💰 Pure $EMP — no resources needed'},
+  guildhall:  {ico:'🏛️', name:'Guild Hall',   era:4, cost:{emp:250,stone:35,iron:25},   req:['harbour','academy'], passive:'+0.55💰/tick',    empOut:0.11,  workers:6, guildBonus:true, desc:'💰💰💰💰 Premium trade guild'},
 
   // ═══ ERA V — SHADOW EMPIRE ════════════════════════════════════════════════
-  starforge:  {ico:'🌟', name:'Star Forge',    era:5, cost:{emp:400, crystal:30,mana:20}, req:['observatory','alchemist'],passive:'+1⭐/tick',  empOut:0,    workers:4, desc:'Forges rare starstone materials'},
-  citadel:    {ico:'🗼', name:'Citadel',        era:5, cost:{emp:500, stone:50,iron:40},  req:['guildhall','fortress'],passive:'+0.80💰/tick',   empOut:.80,  workers:6, desc:'💰 Military empire income'},
-  shadowmkt:  {ico:'🌑', name:'Shadow Market', era:5, cost:{emp:800, darkore:20},         req:['citadel'],           passive:'+1.50💰/tick',    empOut:1.50, workers:5, desc:'💰💰 Dark trade network'},
+  starforge:  {ico:'🌟', name:'Star Forge',    era:5, cost:{emp:400, crystal:30,mana:20}, req:['observatory','alchemist'],passive:'+1⭐/tick',  empOut:0.0,    workers:4, desc:'Forges rare starstone materials'},
+  citadel:    {ico:'🗼', name:'Citadel',        era:5, cost:{emp:500, stone:50,iron:40},  req:['guildhall','fortress'],passive:'+0.80💰/tick',   empOut:0.16,  workers:6, desc:'💰 Military empire income'},
+  shadowmkt:  {ico:'🌑', name:'Shadow Market', era:5, cost:{emp:800, darkore:20},         req:['citadel'],           passive:'+1.50💰/tick',    empOut:0.3, workers:5, desc:'💰💰 Dark trade network'},
   // 💰 Pure EMP buildings
-  vault:      {ico:'🗄️', name:'EMP Vault',     era:5, cost:{emp:800, gold:50,crystal:25}, req:['guildhall'],         passive:'+1.20💰/tick',    empOut:1.20, workers:5, desc:'💰💰💰 Secure $EMP storage vault'},
-  empnexus:   {ico:'💠', name:'EMP Nexus',      era:5, cost:{emp:2000},                    req:['vault','emptemple'], passive:'+3.50💰/tick',    empOut:3.50, workers:6, desc:'💰💰💰💰 Pure $EMP — enormous output'},
-  portal:     {ico:'🌀', name:'Void Portal',   era:5, cost:{emp:1200,mana:50,starstone:15},req:['starforge'],        passive:'+2.00💰/tick',    empOut:2.0,  workers:6, desc:'💰 Dimensional trade routes'},
-  empirebank: {ico:'🏦', name:'Empire Bank',   era:5, cost:{emp:3000,darkore:60,starstone:60},req:['vault','portal'],passive:'+5.00💰/tick',   empOut:5.0,  workers:8, desc:'💰💰💰💰💰 The ultimate $EMP machine'},
+  vault:      {ico:'🗄️', name:'EMP Vault',     era:5, cost:{emp:800, gold:50,crystal:25}, req:['guildhall'],         passive:'+1.20💰/tick',    empOut:0.24, workers:5, desc:'💰💰💰 Secure $EMP storage vault'},
+  empnexus:   {ico:'💠', name:'EMP Nexus',      era:5, cost:{emp:2000},                    req:['vault','emptemple'], passive:'+3.50💰/tick',    empOut:0.7, workers:6, desc:'💰💰💰💰 Pure $EMP — enormous output'},
+  portal:     {ico:'🌀', name:'Void Portal',   era:5, cost:{emp:1200,mana:50,starstone:15},req:['starforge'],        passive:'+2.00💰/tick',    empOut:0.4,  workers:6, desc:'💰 Dimensional trade routes'},
+  empirebank: {ico:'🏦', name:'Empire Bank',   era:5, cost:{emp:3000,darkore:60,starstone:60},req:['vault','portal'],passive:'+5.00💰/tick',   empOut:1.0,  workers:8, desc:'💰💰💰💰💰 The ultimate $EMP machine'},
 };
 
 const ERA_SECTIONS={
@@ -803,22 +862,22 @@ const MYSTERY_REWARDS=[
   {label:'🥇 Gold Nugget',res:{gold:15},weight:20},
   {label:'⚙️ Iron Ingots',res:{iron:10},weight:15},
   {label:'💎 Crystal Shard',res:{crystal:3},weight:8},
-  {label:'🪙 $EMP Reward',res:{emp:20},weight:12},
+  {label:'🪙 $EMP Reward',res:{emp:5},weight:8},
   {label:'🔮 Mana Surge',res:{mana:5},weight:5},
   {label:'⭐ Starstone',res:{starstone:1},weight:3},
-  {label:'👑 JACKPOT!',res:{emp:100,crystal:5},weight:1},
+  {label:'👑 JACKPOT!',res:{emp:30,crystal:5},weight:1},
 ];
 
 const QUEST_POOL=[
-  {id:'mine_stone',label:'⛏️ Mine 50 stone',type:'mine',res:'stone',need:50,reward:{emp:6}},
-  {id:'mine_wood',label:'🪵 Chop 40 wood',type:'mine',res:'wood',need:40,reward:{emp:5}},
-  {id:'mine_gold',label:'🥇 Mine 10 gold',type:'mine',res:'gold',need:10,reward:{emp:7,crystal:1}},
-  {id:'mine_iron',label:'⚙️ Mine 15 iron',type:'mine',res:'iron',need:15,reward:{emp:8}},
-  {id:'play_games',label:'🎮 Play 2 mini-games',type:'play',need:2,reward:{emp:4,stone:10}},
-  {id:'earn_emp',label:'🪙 Earn 100 $EMP',type:'earn',need:100,reward:{emp:5,crystal:1}},
-  {id:'sell_res',label:'💰 Sell resources ×3',type:'sell',need:3,reward:{emp:4,gold:3}},
-  {id:'open_box',label:'📦 Open 1 Mystery Box',type:'open_box',need:1,reward:{emp:3,stone:15}},
-  {id:'build_any',label:'🏗️ Build any building',type:'build',need:1,reward:{emp:15}},
+  {id:'mine_stone',label:'⛏️ Mine 50 stone',type:'mine',res:'stone',need:50,reward:{emp:2}},
+  {id:'mine_wood',label:'🪵 Chop 40 wood',type:'mine',res:'wood',need:40,reward:{emp:2}},
+  {id:'mine_gold',label:'🥇 Mine 10 gold',type:'mine',res:'gold',need:10,reward:{emp:3,crystal:1}},
+  {id:'mine_iron',label:'⚙️ Mine 15 iron',type:'mine',res:'iron',need:15,reward:{emp:3}},
+  {id:'play_games',label:'🎮 Play 2 mini-games',type:'play',need:2,reward:{emp:2,stone:10}},
+  {id:'earn_emp',label:'🪙 Earn 100 $EMP',type:'earn',need:100,reward:{emp:2,crystal:1}},
+  {id:'sell_res',label:'💰 Sell resources ×3',type:'sell',need:3,reward:{emp:2,gold:3}},
+  {id:'open_box',label:'📦 Open 1 Mystery Box',type:'open_box',need:1,reward:{emp:1,stone:15}},
+  {id:'build_any',label:'🏗️ Build any building',type:'build',need:1,reward:{emp:5}},
   {id:'mine_crystal',label:'💎 Mine 5 crystal',type:'mine',res:'crystal',need:5,reward:{emp:10,mana:1}},
 ];
 
@@ -827,7 +886,7 @@ const PRESTIGE_BADGES=['🏠','⛏️','🏗️','🏪','⚔️','🏯','🔮','
 
 // ═══ STATE ═══
 const G={
-  res:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:15},
+  res:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:5},
   bld:{},cd:{tap:0,aim:0,mem:0,block:0,react:0},upgrades:{},
   stats:{stone:0,wood:0,gold:0,iron:0,crystal:0,mana:0,starstone:0,darkore:0,emp:0},
   era:1,quests:generateDailyQuests(),questsDate:'',streak:0,lastLogin:'',streakClaimed:false,
@@ -838,7 +897,7 @@ const CAP=10000;
 
 // ═══ UTILS ═══
 function addRes(k,v){
-  if(k==='emp'){ G.res.emp=Math.max(0,(G.res.emp||0)+v); E.res.emp=G.res.emp; updateHUD(); return; }
+  if(k==='emp'){ G.res.emp=Math.max(0,(G.res.emp||0)+v); E.res.emp=G.res.emp; // single source updateHUD(); return; }
   if(!v||v<=0)return;
   G.res[k]=Math.min(CAP,(G.res[k]||0)+v);
   G.stats[k]=(G.stats[k]||0)+v;
@@ -2131,7 +2190,7 @@ function updateWorldLife(){
 }
 // ──────────────────────────────────────────────────────────────────────────
 
-function animate(){requestAnimationFrame(animate);if(document.hidden)return; // pause when hidden
+function animate(){requestAnimationFrame(animate);if(document.hidden||!document.hasFocus?.())return;
   animT+=.016;
   // Skip heavy updates when panel is fully open and not visible
   const panelOpen=document.getElementById('city-panel')?.classList.contains('open');
@@ -2214,7 +2273,11 @@ function respawnResourceNodes(count){
 function nearestNode(){let best=null,bd=Infinity;resourceNodes.forEach(n=>{if(!n.parent)return;const dx=n.position.x-pPos.x,dz=n.position.z-pPos.z,d=Math.sqrt(dx*dx+dz*dz);if(d<7&&d<bd){best=n;bd=d;}});return best;}
 function rollRareDrop(type){const drops=RARE_DROPS[type];if(!drops)return null;for(const d of drops)if(Math.random()<d.chance)return d;return null;}
 
+let _mineLast=0;
 function doMine(){
+  const now=Date.now();
+  if(now-_mineLast<150){return;} // 150ms cooldown between taps
+  _mineLast=now;
   const mb=document.querySelector('.mine-btn');
   if(mb){
     mb.style.transform='scale(.88)';
@@ -2261,7 +2324,7 @@ function doMine(){
 
 function doSell(){
   document.getElementById('sell-screen')?.remove();
-  const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const rates={stone:.3,wood:.3,gold:.8,iron:1.0,crystal:4,mana:8,starstone:25,darkore:60};
   const rateLabels={stone:'Common',wood:'Common',gold:'Uncommon',iron:'Uncommon',crystal:'Rare',mana:'Rare',starstone:'Epic',darkore:'Legendary'};
   const erates={food:.5,tools:3};
   const sold=[];let t=0;
@@ -2640,7 +2703,18 @@ function doPrestige(){
 function updateEra(){
   const eraReqs=[[1,[]],[2,['mine','lumber','forge','market','smelter']],[3,['workshop','academy','hq','treasury']],[4,['citadel','vault','observatory']],[5,['portal','nexus']]];
   let era=1;for(const[n,req]of eraReqs)if(req.every(r=>G.bld[r]))era=n;
-  if(era!==G.era){G.era=era;toast('🏰 ERA '+era+' unlocked!',3000);addLog('ERA '+era+' bereikt!','good');}
+  if(era!==G.era){
+    G.era=era;
+    // ERA unlock celebration
+    window.haptic?.('success');
+    sfxQuest?.();
+    setTimeout(()=>{
+      const ov=document.createElement('div');
+      ov.style.cssText='position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;pointer-events:none';
+      ov.innerHTML=`<div style="font-family:Cinzel,serif;font-size:32px;font-weight:900;color:var(--gold-b);text-shadow:0 0 30px rgba(240,184,64,.8);animation:empPop .5s ease-out">ERA ${era} UNLOCKED</div>`;
+      document.body.appendChild(ov);setTimeout(()=>ov.remove(),2000);
+    },100);
+    toast('🏰 ERA '+era+' unlocked!',3000);addLog('ERA '+era+' bereikt!','good');}
   const labels=['ERA I','ERA II','ERA III','ERA IV','ERA V'];
   const el=document.getElementById('era-label');if(el)el.textContent=labels[era-1];
 }
@@ -2870,7 +2944,7 @@ function _doUpdateHUD(){
         return`<div class="rcp" style="border-color:${low?'rgba(224,88,88,.35)':vhigh?'rgba(64,200,112,.35)':high?'rgba(240,184,64,.25)':''}"><span>${r.ico}</span><span class="rv" style="color:${low?'var(--red)':vhigh?'var(--grn2)':high?'var(--gold-b)':'var(--txt)'}">${v}</span></div>`;
       }).join('');
   }
-  const _empV=Math.floor(G.res.emp||E.res.emp||0); // G.res.emp is canonical
+  const _empV=Math.floor(G.res.emp||0); // G.res.emp is canonical
   const ep=document.getElementById('emp-val');
   if(ep&&ep.textContent!==String(_empV)){
     ep.textContent=_empV;
@@ -2884,7 +2958,7 @@ function _doUpdateHUD(){
   const prv=document.getElementById('passive-rate-val');
   if(pr&&prv){
     const ph2=passPerHour();
-    const empPerHr=Math.round((ph2.emp||0)+(Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0);},0)*450*(E.empMult||1)));
+    const empPerHr=Math.round((ph2.emp||0)+(Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0.0);},0)*450*(E.empMult||1)));
     if(empPerHr>0){pr.style.display='flex';prv.textContent='+'+empPerHr;pr.title='+'+empPerHr+' $EMP/hr passive';}else{pr.style.display='none';}
   }
   // Show multiplier on emp pill if above 1
@@ -2892,7 +2966,7 @@ function _doUpdateHUD(){
   // Show notification dot on $EMP button when upgrade affordable
   const empNotif=document.getElementById('emp-notif');
   if(empNotif){
-    const emp=E.res.emp||0;
+    const emp=G.res.emp||0;
     const nextU=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
     empNotif.style.display=(nextU&&emp>=nextU.cost)?'block':'none';
   }
@@ -2943,11 +3017,11 @@ function renderQuestProgress(q){
 
 function generateDailyQuests(){
   const pool=[
-    {id:'mine50',    label:'⛏️ Mine 50 stone',   type:'mine',  res:'stone',  need:50,  reward:{emp:8}},
-    {id:'mine30w',   label:'🪵 Chop 30 wood',    type:'mine',  res:'wood',   need:30,  reward:{emp:6}},
+    {id:'mine50',    label:'⛏️ Mine 50 stone',   type:'mine',  res:'stone',  need:50,  reward:{emp:3}},
+    {id:'mine30w',   label:'🪵 Chop 30 wood',    type:'mine',  res:'wood',   need:30,  reward:{emp:2}},
     {id:'mine20g',   label:'🥇 Mine 20 gold',    type:'mine',  res:'gold',   need:20,  reward:{emp:10}},
-    {id:'sell3',     label:'💱 Sell resources ×3',type:'sell',  need:3,       reward:{emp:15}},
-    {id:'build1',    label:'🏗️ Place a building', type:'build', need:1,       reward:{emp:20,stone:30}},
+    {id:'sell3',     label:'💱 Sell resources ×3',type:'sell',  need:3,       reward:{emp:5}},
+    {id:'build1',    label:'🏗️ Place a building', type:'build', need:1,       reward:{emp:8,stone:30}},
     {id:'earn50emp', label:'💰 Earn 50 $EMP',     type:'emp',   need:50,      reward:{emp:10}},
     {id:'play1',     label:'🎮 Play a mini-game', type:'play',  need:1,       reward:{emp:12}},
     {id:'open_box',  label:'📦 Open mystery box', type:'open_box',need:1,     reward:{emp:8,gold:10}},
@@ -2967,7 +3041,7 @@ function renderQuestsTab(){
   (G.quests||[]).forEach(q=>{const pct=Math.min(100,Math.round((q.progress||0)/q.need*100));const rwTxt=Object.entries(q.reward).map(([k,v])=>'+'+v+' '+(RES_ICO[k]||k)).join(' ');qhtml+=`<div style="background:var(--bg3);border:1px solid ${q.done?'rgba(76,175,122,.5)':'var(--bdr)'};border-radius:9px;padding:9px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><div style="font-size:12px;font-weight:700;color:${q.done?'var(--grn)':'var(--txt)'}">${q.label}</div><div style="font-size:10px;color:var(--txt-d)">${q.progress||0}/${q.need}</div></div><div style="height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:4px"><div style="height:100%;width:${pct}%;background:${q.done?'var(--grn)':'linear-gradient(90deg,var(--gold-d),var(--gold-b))'};border-radius:2px;transition:width .3s"></div></div><div style="font-size:9px;color:var(--txt-d)">Reward: ${rwTxt}${q.done?' ✓':''}</div></div>`;});
   el.innerHTML=`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-b)">🔥 Daily Streak</div><div style="font-size:18px;font-weight:900;color:${sc}">×${G.streak}</div></div><div style="display:flex;gap:3px;margin-bottom:8px">${fires}</div><button onclick="claimStreakBonus()" style="width:100%;padding:8px;border-radius:7px;border:none;font-family:Rajdhani,sans-serif;font-size:12px;font-weight:700;${btnSt}">${btnTxt}</button></div><div style="font-family:Cinzel,serif;font-size:10px;letter-spacing:2px;color:var(--txt-d);margin-bottom:6px">📋 DAILY QUESTS</div>${qhtml}`;
 }
-function claimStreakBonus(){if(G.streakClaimed){toast('Already claimed!');return;}const bonus=Math.min(G.streak*2,40);eEarn(bonus,'Streak bonus');G.streakClaimed=true;toast('🔥 Streak ×'+G.streak+' — +'+bonus+' $EMP!',3500);updateHUD();renderQuestsTab();}
+function claimStreakBonus(){if(G.streakClaimed){toast('Already claimed!');return;}const bonus=Math.min(G.streak,10);eEarn(bonus,'Streak bonus');G.streakClaimed=true;toast('🔥 Streak ×'+G.streak+' — +'+bonus+' $EMP!',3500);updateHUD();renderQuestsTab();}
 function renderUpgradesTab(){const el=document.getElementById('cp-upgrades');if(!el)return;el.innerHTML=renderUpgradeSection();setTimeout(()=>{el.querySelectorAll('button[data-upg]').forEach(btn=>{btn.onclick=()=>buyUpgrade(btn.dataset.upg);});},0);}
 function renderPrestigeTab(){
   const el=document.getElementById('cp-prestige');if(!el)return;
@@ -3065,7 +3139,15 @@ function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rw
 
 // ═══ SAVE / LOAD ═══
 function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({version:3,savedAt:Date.now(),res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
-function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw){showSaveDebug?.();return;}const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
+function loadGame(){try{const raw=localStorage.getItem('empyria_v2');
+  if(!raw){
+    // Try to restore G.res from eco save as fallback
+    try{
+      const eco=localStorage.getItem('empyria_eco');
+      if(eco){const se=JSON.parse(eco);if(se.res)Object.assign(G.res,se.res);console.warn('[loadGame] no v2 save, restored from eco');}
+    }catch(fe){}
+    showSaveDebug?.();return;
+  }const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
   if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save format…',2000);return;}// v2+ safe to loadif(sv.res)Object.assign(G.res,sv.res);if(sv.bld)Object.assign(G.bld,sv.bld);if(sv.cd)Object.assign(G.cd,sv.cd);if(sv.stats)Object.assign(G.stats,sv.stats);if(sv.upgrades)Object.assign(G.upgrades,sv.upgrades);G.era=sv.era||1;G.streak=sv.streak||0;G.lastLogin=sv.lastLogin||'';G.streakClaimed=sv.streakClaimed||false;G.quests=sv.quests||[];G.questsDate=sv.questsDate||'';G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings — defer to ensure scene is ready
   setTimeout(()=>{
     Object.entries(G.bld).forEach(([id,built])=>{
@@ -3077,6 +3159,7 @@ function loadGame(){try{const raw=localStorage.getItem('empyria_v2');if(!raw){sh
     });
     updateHUD();
   },200);
+  console.log('[loadGame] restored: stone='+G.res.stone+' wood='+G.res.wood+' emp='+G.res.emp+' blds='+Object.keys(G.bld).length);
   toast('💾 Progress restored!',2000); showSaveDebug?.(); }catch(e){ console.warn('Load error:',e); showSaveDebug?.(); }}
 setInterval(saveGame,30000);
 
@@ -3526,6 +3609,16 @@ function launch(){
           checkDailyLogin();
           checkRefBonus();
           setTimeout(calcOfflineIncome,2000);
+  // Definitive EMP sync 2s after launch — catches any remaining desync
+  setTimeout(()=>{
+    const canonical=Math.max(G.res.emp||0, G.res.emp||0);
+    if(canonical>0){
+      G.res.emp=canonical;
+      E.res.emp=canonical;
+      updateHUD();
+      console.log('Post-load EMP sync:', canonical);
+    }
+  }, 2000);
           // Telegram CloudStorage backup restore
           try{
             const tgCloud=window.Telegram?.WebApp?.CloudStorage;
@@ -3565,7 +3658,7 @@ function launch(){
       if(E.tick%300===0) dbSyncPlayer();
       // Upgrade reminder
       if(E.tick%200===0){
-        const emp=E.res.emp||0;
+        const emp=G.res.emp||0;
         const next=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
         if(next&&emp>=next.cost&&Math.random()<.4)
           toast('💡 You can afford '+next.n+' ('+next.cost+'💰)! Tap $EMP to upgrade.',4000);
@@ -3606,12 +3699,12 @@ function launch(){
     const hasProgress = (E.totalEmpEarned||0)>0 || (G.res.emp||0)>15;
     const isNew = !hasSave && !hasBuildings && !hasProgress;
     if(isNew){
-      addRes('stone',30); addRes('wood',30); addRes('gold',10); addRes('emp',15);
+      addRes('stone',50); addRes('wood',50); addRes('gold',5); addRes('emp',5);
       E.res.gold+=150; E.res.wood+=80; E.res.stone+=60;
       updateHUD();
       toast('🏰 Welcome to Empyria! Mine · Build · Earn $EMP!', 4000);
     } else {
-      const dispEmp=G.res.emp||E.res.emp||0;
+      const dispEmp=G.res.emp||G.res.emp||0;
       if(dispEmp>15) toast('⚔️ Welcome back! '+Math.floor(dispEmp).toLocaleString()+' $EMP ready.', 2500);
     }
     updateHUD();
@@ -3648,22 +3741,22 @@ const MRES_ECO_KEYS=Object.keys(MRES_ECO);
 // Economy imports/expeditions/$EMP upgrades
 const EMP_UPGRADES=[
   // ── Presale Production Boosters ──────────────────────────────────────────
-  {id:'boost1',n:'Early Investor I',  ico:'🌱',cost:10, tier:1,
+  {id:'boost1',n:'Early Investor I',  ico:'🌱',cost:200, tier:1,
    desc:'x1.5 all $EMP production',
    effect:()=>{ E.empMult=+(((E.empMult||1)*1.5).toFixed(2)); }},
-  {id:'boost2',n:'Early Investor II', ico:'🌿',cost:30, tier:2,
+  {id:'boost2',n:'Early Investor II', ico:'🌿',cost:1000, tier:2,
    desc:'x1.5 all $EMP production (stacks)',
    effect:()=>{ E.empMult=+(((E.empMult||1)*1.5).toFixed(2)); }},
-  {id:'boost3',n:'Early Investor III',ico:'🌳',cost:80, tier:3,
+  {id:'boost3',n:'Early Investor III',ico:'🌳',cost:5000, tier:3,
    desc:'x2.0 all $EMP production (stacks)',
    effect:()=>{ E.empMult=+(((E.empMult||1)*2.0).toFixed(2)); }},
-  {id:'boost4',n:'Founding Merchant', ico:'⚖️',cost:200,tier:4,
+  {id:'boost4',n:'Founding Merchant', ico:'⚖️',cost:20000,tier:4,
    desc:'x2.0 all $EMP production (stacks)',
    effect:()=>{ E.empMult=+(((E.empMult||1)*2.0).toFixed(2)); }},
-  {id:'boost5',n:'Empire Architect',  ico:'🏛️',cost:500,tier:5,
+  {id:'boost5',n:'Empire Architect',  ico:'🏛️',cost:60000,tier:5,
    desc:'x2.5 all $EMP production (stacks)',
    effect:()=>{ E.empMult=+(((E.empMult||1)*2.5).toFixed(2)); }},
-  {id:'boost6',n:'Token Whale',       ico:'🐋',cost:1500,tier:6,
+  {id:'boost6',n:'Token Whale',       ico:'🐋',cost:200000,tier:6,
    desc:'x3.0 all $EMP production (stacks)',
    effect:()=>{ E.empMult=+(((E.empMult||1)*3.0).toFixed(2)); }},
   // ── Utility ──────────────────────────────────────────────────────────────
@@ -3909,6 +4002,19 @@ function showBuildingPopup(id){
   window.haptic?.('light');
 }
 
+function showOfflineNotif(mins, earned){
+  if(!earned||Object.values(earned).every(v=>!v))return;
+  const lines=Object.entries(earned).filter(([,v])=>v>0).map(([k,v])=>'+'+Math.floor(v)+' '+(k==='emp'?'$EMP':k)).join('  ');
+  const panel=document.createElement('div');
+  panel.style.cssText='position:fixed;top:70px;left:8px;right:8px;z-index:200;background:rgba(10,20,10,.95);border:1px solid rgba(64,200,112,.4);border-radius:12px;padding:12px 14px;pointer-events:all';
+  panel.innerHTML=`<div style="font-size:10px;color:var(--grn2);font-weight:700;margin-bottom:4px">Away for ${mins} min — earned:</div><div style="font-size:12px;color:#fff">${lines}</div>`;
+  const btn=document.createElement('button');
+  btn.textContent='✓';btn.style.cssText='position:absolute;top:8px;right:10px;background:none;border:none;color:var(--txt-d);font-size:16px;cursor:pointer';
+  btn.onclick=()=>panel.remove();
+  panel.appendChild(btn);
+  document.body.appendChild(panel);
+  setTimeout(()=>panel?.remove(),8000);
+}
 function calcOfflineIncome(){
   const lastSeen=parseInt(localStorage.getItem('empyria_last_seen')||Date.now());
   const now=Date.now();
@@ -3980,7 +4086,7 @@ function renderStatsTab(){
   const el=document.getElementById('cp-stats');if(!el)return;
   const bldCount=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
   const totalMined=Object.values(G.stats||{}).reduce((a,b)=>a+(typeof b==='number'?b:0),0);
-  const passRate=Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0);},0)*(E.empMult||1);
+  const passRate=Object.entries(G.bld).reduce((s,[id,b])=>{const d=BLD_DEF[id];return s+(b===true&&d?.empOut?d.empOut:0.0);},0)*(E.empMult||1);
   const empPerHr=Math.round(passRate*450);
   const loginStreak=parseInt(localStorage.getItem('empyria_login_streak')||0);
   const achievements=JSON.parse(localStorage.getItem('empyria_achievements')||'[]');
@@ -4038,7 +4144,7 @@ function renderStatsTab(){
 function updateTelegramMainBtn(){
   const tg=window.Telegram?.WebApp;
   if(!tg?.MainButton) return;
-  const emp=E.res.emp||0;
+  const emp=G.res.emp||0;
   const next=EMP_UPGRADES.find(u=>!E.upgradesDone.includes(u.id)&&u.tier);
   if(next&&emp>=next.cost){
     tg.MainButton.setText('⚡ Buy '+next.n+' ('+next.cost+' $EMP)');
@@ -4332,7 +4438,7 @@ function spawnBuildParticles(wx,wz){
 function showSellScreen(){
   const existing=document.getElementById('sell-screen');
   if(existing){existing.remove();return;}
-  const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const rates={stone:.3,wood:.3,gold:.8,iron:1.0,crystal:4,mana:8,starstone:25,darkore:60};
   const rateLabels={stone:'Common',wood:'Common',gold:'Uncommon',iron:'Uncommon',crystal:'Rare',mana:'Rare',starstone:'Epic',darkore:'Legendary'};
   const sellable=Object.entries(rates).filter(([k])=>(G.res[k]||0)>=1);
   if(!sellable.length){toast('Nothing to sell!');return;}
@@ -4370,7 +4476,7 @@ function showSellScreen(){
 }
 
 function sellOne(k){
-  const rates={stone:.12,wood:.12,gold:.25,iron:.35,crystal:1.5,mana:3,starstone:8,darkore:20};
+  const rates={stone:.3,wood:.3,gold:.8,iron:1.0,crystal:4,mana:8,starstone:25,darkore:60};
   const rateLabels={stone:'Common',wood:'Common',gold:'Uncommon',iron:'Uncommon',crystal:'Rare',mana:'Rare',starstone:'Epic',darkore:'Legendary'};
   const rate=rates[k]||.1;
   const qty=G.res[k]||0;if(!qty)return;
@@ -4547,35 +4653,25 @@ function bldBuilt(id){ const v=G.bld[id]; return v===true||typeof v==='object'; 
 function bldPos(id){ const v=G.bld[id]; return typeof v==='object'?v:null; }
 
 function showSaveDebug(){
+  // Debug panel removed from production
   try{
-    const raw = localStorage.getItem('empyria_v2');
-    const eco = localStorage.getItem('empyria_eco');
-    
-    let msg = '';
-    if(!raw){
-      msg = '❌ NO SAVE FOUND (empyria_v2 empty)\nFirst launch or localStorage cleared.';
-    } else {
-      const sv = JSON.parse(raw);
-      const blds = Object.keys(sv.bld||{}).length;
-      const hasPosn = Object.values(sv.bld||{}).some(v=>typeof v==='object');
-      msg = '✅ SAVE FOUND\n'
-          + 'EMP: '+sv.res?.emp+' | ERA: '+sv.era+' | Buildings: '+blds
-          + (hasPosn?' (with positions)':'(no positions - legacy)')
-          + '\nSaved: '+(sv.savedAt?new Date(sv.savedAt).toLocaleTimeString():'unknown');
-      if(eco){
-        const se = JSON.parse(eco);
-        msg += '\nMultiplier: ×'+se.empMult+' | Airdrop: '+se.totalEmpEarned;
-      }
-    }
-    
-    const panel = document.createElement('div');
-    panel.style.cssText = 'position:fixed;top:60px;left:8px;right:8px;z-index:9999;background:rgba(0,0,0,.92);border:2px solid '+(raw?'#40c040':'#ff4040')+';border-radius:10px;padding:10px;font-family:monospace;font-size:10px;color:#fff;white-space:pre-wrap;pointer-events:none';
-    panel.textContent = '🔍 SAVE DEBUG\n' + msg;
-    document.body.appendChild(panel);
-    setTimeout(()=>panel.remove(), 8000);
-  }catch(e){
-    console.warn('Debug panel error:', e);
-  }
+    const raw=localStorage.getItem('empyria_v2');
+    const eco=localStorage.getItem('empyria_eco');
+    if(raw){const sv=JSON.parse(raw);console.log('[Save]',{emp:sv.res?.emp,era:sv.era,blds:Object.keys(sv.bld||{}).length,savedAt:sv.savedAt?new Date(sv.savedAt).toLocaleTimeString():'-'});}
+    if(eco){const se=JSON.parse(eco);console.log('[Eco]',{mult:se.empMult,earned:se.totalEmpEarned});}
+  }catch(e){}
+}
+
+function showOnboarding(){
+  const done=localStorage.getItem('empyria_tutorial_done');
+  if(done) return;
+  const el=document.getElementById('onboarding');
+  if(el) el.style.display='block';
+}
+function closeOnboarding(){
+  const el=document.getElementById('onboarding');
+  if(el){el.style.transition='opacity .3s';el.style.opacity='0';setTimeout(()=>el.style.display='none',300);}
+  localStorage.setItem('empyria_tutorial_done','1');
 }
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
@@ -4596,9 +4692,8 @@ function eEarn(amount,source){
       if(pill){pill.style.boxShadow='0 0 14px rgba(245,216,64,.7)';setTimeout(()=>pill.style.boxShadow='',300);}
     }
     }
-  const newEmp=Math.max(0,Math.min(E.cap.emp||999999,(E.res.emp||0)+amount));
-  E.res.emp=newEmp;
-  G.res.emp=newEmp; // always identical — G is canonical for save
+  const newEmp=Math.max(0,Math.min(E.cap.emp||999999,(G.res.emp||0)+amount));
+  G.res.emp=newEmp;E.res.emp=newEmp; // always identical — G is canonical for save
   if(Math.abs(amount)>=0.5) addLog((amount>0?'+':'')+Math.round(amount*10)/10+' $EMP — '+source,amount>0?'good':'bad');
 }
 function eLogMult(){let b=E.logBonusExtra||0;E.buildings.forEach(b2=>{const d=MBLD[b2.type];if(d&&d.logBonus&&b2.active)b+=d.logBonus;});return Math.min(1.0,.45+b);}
@@ -4640,17 +4735,18 @@ function eTick(){
     const tm=eff*wMult*sMult*TR;
     Object.entries(def.out||{}).forEach(([k,v])=>{
       if(k==='emp'){eEarn(v*tm*(E.priceBonus||1)*(E.empMult||1),def.n);}
-      else{E.res[k]=Math.min(E.cap[k]||9999,(E.res[k]||0)+v*tm);}
+      else{const gained=v*tm;E.res[k]=Math.min(E.cap[k]||9999,(E.res[k]||0)+gained);G.res[k]=Math.min(9999,(G.res[k]||0)+gained);}
     });
   });
   if(E.tick%20===0)eUpdatePop();
   if(E.tick%30===0)eUpdatePrices();
   if(E.tick%180===0&&E.events.length===0&&ePop()>=5)eMaybeEvent();
   E.expeditions=E.expeditions.filter(exp=>{exp.ticksLeft=(exp.ticksLeft||150)-1;if(exp.ticksLeft<=0){eResolveExpedition(exp);return false;}return true;});
-  // Sync back: write economy-processed shared resources back to G.res
+  // Sync economy resources back to G.res (for display)
   ['stone','wood','gold','iron'].forEach(k=>{G.res[k]=Math.max(0,Math.floor(E.res[k]||0));});
-  // Mirror $EMP
-  G.res.emp=Math.floor(E.res.emp||0);
+  // Do NOT overwrite G.res.emp here — G.res.emp is canonical
+  // Only sync E.res.emp → G.res.emp, never reverse
+  if(E.res.emp!==G.res.emp) G.res.emp=G.res.emp;
   updateEconomyDisplay();
 }
 
@@ -4746,8 +4842,8 @@ function eSell(k,qty){
 }
 function eBuyRes(k,qty){
   const empCost=Math.round((MRES_ECO[k]?.base||8)*(E.prices[k]||1)*1.4*qty);
-  if((E.res.emp||0)<empCost){toast('Need '+empCost+' $EMP to buy '+qty+' '+MRES_ECO[k]?.n+'!');return;}
-  E.res.emp=Math.max(0,E.res.emp-empCost);
+  if((G.res.emp||0)<empCost){toast('Need '+empCost+' $EMP to buy '+qty+' '+MRES_ECO[k]?.n+'!');return;}
+  G.res.emp=Math.max(0,(G.res.emp||0)-empCost);E.res.emp=G.res.emp;
   // sync to G.res
   G.res.emp=Math.max(0,G.res.emp-empCost);
   E.res[k]=Math.min(E.cap[k]||500,(E.res[k]||0)+qty);
@@ -4763,8 +4859,9 @@ function eBuyUpgrade(id){
     showWalletGate();
     return;
   }
-  if((E.res.emp||0)<u.cost){toast('Need '+u.cost+' $EMP!');return;}
-  E.res.emp=Math.max(0,E.res.emp-u.cost);
+  if((G.res.emp||0)<u.cost){toast('Need '+u.cost+' $EMP!');return;}
+  const newBal=Math.max(0,(G.res.emp||0)-u.cost);
+  G.res.emp=newBal;E.res.emp=newBal; // keep in sync
   // Track spend in Supabase
   E.empSpent=(E.empSpent||0)+u.cost;
   u.effect();
@@ -4776,15 +4873,15 @@ function eBuyUpgrade(id){
   updateEconomyDisplay();
   dbSyncPlayer(); // immediately sync wallet + spend
 }
-function eBuyImport(k,qty,cost){if((E.res.emp||0)<cost){toast('Need '+cost+' $EMP!');return;}E.res.emp=Math.max(0,E.res.emp-cost);E.res[k]=Math.min(E.cap[k]||999,(E.res[k]||0)+qty);toast('📦 +'+qty+' '+(MRES_ECO[k]?.ico||k));updateEconomyDisplay();}
-function eLaunchExpedition(id){const ex=EMP_EXPEDITIONS.find(e=>e.id===id);if(!ex)return;if((E.res.emp||0)<ex.cost){toast('Need '+ex.cost+' $EMP!');return;}if(E.expeditions.some(e=>e.id===id)){toast('Already at sea!');return;}E.res.emp=Math.max(0,E.res.emp-ex.cost);E.expeditions.push({...ex,ticksLeft:120+~~(Math.random()*80)});addLog('⛵ '+ex.n+' departed','neutral');toast('⛵ '+ex.n+' on its way!');}
+function eBuyImport(k,qty,cost){if((G.res.emp||0)<cost){toast('Need '+cost+' $EMP!');return;}const nb2=Math.max(0,(G.res.emp||0)-cost);E.res.emp=nb2;G.res.emp=nb2;E.res[k]=Math.min(E.cap[k]||999,(E.res[k]||0)+qty);toast('📦 +'+qty+' '+(MRES_ECO[k]?.ico||k));updateEconomyDisplay();}
+function eLaunchExpedition(id){const ex=EMP_EXPEDITIONS.find(e=>e.id===id);if(!ex)return;if((G.res.emp||0)<ex.cost){toast('Need '+ex.cost+' $EMP!');return;}if(E.expeditions.some(e=>e.id===id)){toast('Already at sea!');return;}const nb3=Math.max(0,(G.res.emp||0)-ex.cost);E.res.emp=nb3;G.res.emp=nb3;E.expeditions.push({...ex,ticksLeft:120+~~(Math.random()*80)});addLog('⛵ '+ex.n+' departed','neutral');toast('⛵ '+ex.n+' on its way!');}
 function eResolveExpedition(ex){const fail=Math.random()<ex.risk;if(fail){eEarn(-Math.floor(ex.cost*.25),'Mislukt: '+ex.n);toast('💔 '+ex.n+' failed!');}else{const gain=ex.minRet+~~(Math.random()*(ex.maxRet-ex.minRet));eEarn(gain,ex.n);toast('🎉 '+ex.n+': +'+gain+' $EMP!');}}
 
 // Economy save/load
 function eSave(){
   try{
     const payload={
-      res:{...E.res, emp:G.res.emp||E.res.emp||0}, // emp from G.res (canonical)
+      res:{...G.res, emp:G.res.emp||0}, // G.res is canonical for all resources
       pop:E.pop, happiness:E.happiness, stability:E.stability,
       defense:E.defense, year:E.year, day:E.day, tick:E.tick, season:E.season,
       buildings:E.buildings, nextId:E.nextId, prices:E.prices,
@@ -4832,7 +4929,7 @@ function openEconomy(){
 }
 function updateEconomyDisplay(){
   // Update $EMP from economy
-  const ep=document.getElementById('emp-val');if(ep)ep.textContent=Math.floor(E.res.emp||0);
+  const ep=document.getElementById('emp-val');if(ep)ep.textContent=Math.floor(G.res.emp||0);
   // If economy panel is open, refresh it
   const pg=document.getElementById('cp-economy');if(pg&&pg.classList.contains('on'))renderEconomyPanel();
 }
@@ -4848,7 +4945,7 @@ function renderEconomyPanel(){
   E.events.forEach(evt=>{events+=`<div style="background:var(--bg3);border:1px solid rgba(240,140,40,.3);border-radius:9px;padding:10px;margin-bottom:8px"><div style="font-size:12px;font-weight:700;color:var(--gold-b);margin-bottom:4px">${evt.title}</div><div style="font-size:9px;color:var(--txt2);margin-bottom:8px">${evt.desc}</div>${evt.choices.map((ch,i)=>{const afford=!ch.cost||Object.entries(ch.cost).every(([k,v])=>(E.res[k]||0)>=v);return`<div onclick="${afford?`eHandleChoice('${evt.id}',${i})`:'void(0)'}" style="padding:7px 10px;margin-bottom:3px;border-radius:6px;border:1px solid rgba(200,180,100,.45);background:rgba(255,255,255,.04);cursor:${afford?'pointer':'default'};opacity:${afford?1:.4};font-size:9px;color:var(--txt)">${ch.l} <span style="color:var(--txt-d)">→ ${ch.rw}</span></div>`;}).join('')}</div>`;});
 
   const pop=ePop();
-  const header=`<div style="background:linear-gradient(135deg,#141c28,#1c2838);border:1.5px solid rgba(240,184,64,.35);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="font-size:8px;color:var(--gold);letter-spacing:2px">💰 $EMP ECONOMY</div><div style="font-size:24px;font-weight:900;color:var(--emp);font-family:Georgia,serif">${Math.floor(E.res.emp||0)}</div></div><div style="text-align:right;font-size:8px;color:rgba(180,150,100,.6)"><div>Yr ${E.year} · ${['Spring','Summer','Autumn','Winter'][E.season]}</div><div>${pop} pop · 😊 ${Math.round(E.happiness)}%</div><div>🛡️ ${E.defense} defense</div></div></div>`;
+  const header=`<div style="background:linear-gradient(135deg,#141c28,#1c2838);border:1.5px solid rgba(240,184,64,.35);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:center"><div style="flex:1"><div style="font-size:8px;color:var(--gold);letter-spacing:2px">💰 $EMP ECONOMY</div><div style="font-size:24px;font-weight:900;color:var(--emp);font-family:Georgia,serif">${Math.floor(G.res.emp||0)}</div></div><div style="text-align:right;font-size:8px;color:rgba(180,150,100,.6)"><div>Yr ${E.year} · ${['Spring','Summer','Autumn','Winter'][E.season]}</div><div>${pop} pop · 😊 ${Math.round(E.happiness)}%</div><div>🛡️ ${E.defense} defense</div></div></div>`;
 
   let content='';
   if(activeEconTab==='econ-build')content=renderEconBuild();
@@ -4892,7 +4989,7 @@ function renderEconStats(pop){
 
 function renderEconMarket(){
   // Also show world resources (G.res) for selling
-  const empBal=Math.floor(E.res.emp||0);
+  const empBal=Math.floor(G.res.emp||0);
   let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px">TRADE RESOURCES</div>
     <div style="font-size:10px;color:var(--emp);font-weight:700">${empBal} 💰 available</div>
@@ -4909,7 +5006,7 @@ function renderEconMarket(){
     const sellEmp=Math.round((MRES_ECO[k]?.base||8)*pr*(E.priceBonus||1)*20);
     // Buy 10 units → cost $EMP
     const buyEmp=Math.round((MRES_ECO[k]?.base||8)*pr*1.4*10);
-    const canBuy=(E.res.emp||0)>=buyEmp;
+    const canBuy=(G.res.emp||0)>=buyEmp;
     html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)">
       <span style="font-size:20px;width:24px;flex-shrink:0">${MRES_ECO[k].ico}</span>
       <div style="flex:1;min-width:0">
@@ -4931,11 +5028,11 @@ function renderEconMarket(){
 function renderEconEMP(){
   const mult=E.empMult||1;
   const totalEarned=Math.floor(E.totalEmpEarned||0);
-  const currentEmp=Math.floor(E.res.emp||0);
+  const currentEmp=Math.floor(G.res.emp||0);
   const nextUpgrade=EMP_UPGRADES.filter(u=>!E.upgradesDone.includes(u.id)&&u.tier)[0];
   const passEmpRate=Object.entries(G.bld).reduce((sum,[id,built])=>{
     if(built!==true&&typeof built!=='object')return sum;
-    const def=BLD_DEF[id];return sum+(def&&def.empOut?def.empOut:0);
+    const def=BLD_DEF[id];return sum+(def&&def.empOut?def.empOut:0.0);
   },0)*(E.empMult||1)*(E.priceBonus||1);
   const hrRate=(passEmpRate*450).toFixed(1); // 3600s / 8s tick
   // Countdown timer
@@ -5023,7 +5120,7 @@ function renderEconEMP(){
   const upgHtml=[
     '<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">⚡ PRODUCTION BOOSTS</div>',
     ...boostUpgrades.map(u=>{
-      const has=E.upgradesDone.includes(u.id),can=(E.res.emp||0)>=u.cost;
+      const has=E.upgradesDone.includes(u.id),can=(G.res.emp||0)>=u.cost;
       const tierCols=['#40ee80','#60c8ff','#f0c060','#f08040','#c080ff','#ff80b0'];
       const tc=tierCols[(u.tier||1)-1]||'var(--emp)';
       return`<div style="background:${has?'rgba(32,80,40,.3)':'rgba(255,255,255,.03)'};border:1.5px solid ${has?'rgba(64,200,112,.35)':can?'rgba(240,184,64,.25)':'rgba(255,255,255,.07)'};border-radius:12px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:10px">
@@ -5040,7 +5137,7 @@ function renderEconEMP(){
     }),
     '<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">🔧 UTILITY</div>',
     ...utilUpgrades.map(u=>{
-      const has=E.upgradesDone.includes(u.id),can=(E.res.emp||0)>=u.cost;
+      const has=E.upgradesDone.includes(u.id),can=(G.res.emp||0)>=u.cost;
       return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="font-size:16px">${u.ico}</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:${has?'var(--grn)':'var(--txt)'}">${u.n}</div><div style="font-size:8px;color:var(--txt-d)">${u.desc}</div></div>${has?'<span style="font-size:9px;color:var(--grn)">✓</span>':`<button onclick="eBuyUpgrade('${u.id}')" style="padding:5px 10px;background:${can?'rgba(180,140,60,.2)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(240,184,64,.3)':'rgba(255,255,255,.1)'};border-radius:6px;color:${can?'var(--emp)':'rgba(255,255,255,.2)'};font-size:9px;cursor:pointer">${u.cost}💰</button>`}</div>`;
     }),
   ].join('');
