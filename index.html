@@ -94,12 +94,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .rv{font-weight:700;color:var(--txt)}
 
 /* Action hint */
-#action-hint{position:fixed;top:calc(max(5px,env(safe-area-inset-top)) + 52px);left:50%;transform:translateX(-50%);
-  background:rgba(10,14,20,.92);
-  border:1px solid rgba(100,180,120,.3);
-  border-radius:22px;padding:6px 16px;font-size:11px;color:#a8d8b0;
-  opacity:0;transition:opacity .3s;z-index:25;pointer-events:none;white-space:nowrap;
-  backdrop-filter:blur(6px)}
+#action-hint{position:fixed;top:calc(max(6px,env(safe-area-inset-top)) + 78px);left:50%;transform:translateX(-50%);background:rgba(10,14,20,.92);border:1px solid rgba(100,180,120,.3);border-radius:20px;padding:5px 14px;font-size:11px;color:#a8d8b0;opacity:0;transition:opacity .2s;z-index:25;pointer-events:none;white-space:nowrap;backdrop-filter:blur(6px);max-width:80vw}
 
 /* ── Controls ──────────────────────────────────────────────────────────── */
 #mode-toggle{display:none}
@@ -130,31 +125,34 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   transform:translateY(-100%);transition:transform .35s cubic-bezier(.34,1.1,.64,1)}
 #presale-strip.visible{transform:translateY(0)}
 #action-bar{
-  position:fixed;bottom:max(10px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  position:fixed;
+  bottom:max(8px,env(safe-area-inset-bottom));
+  left:10px;right:10px;
   z-index:30;
-  background:rgba(8,12,18,.88);
+  background:rgba(8,12,18,.9);
   border:1px solid rgba(255,255,255,.1);
-  border-radius:22px;
-  padding:4px 8px;
-  display:flex;
-  gap:4px;
+  border-radius:20px;
+  padding:4px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:3px;
   backdrop-filter:blur(12px);
-  box-shadow:0 4px 24px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
-  max-width:calc(100vw - 24px);
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
 }
 .ab{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:2px;
-  width:72px;height:50px;
+  width:100%;
+  height:52px;
   border-radius:14px;
   font-family:Rajdhani,sans-serif;font-size:8px;font-weight:700;
   cursor:pointer;
-  transition:transform .12s,box-shadow .12s,background .12s;
+  transition:transform .12s,box-shadow .12s;
   border:1px solid transparent;
   letter-spacing:.6px;
   position:relative;
   overflow:hidden;
-  flex-shrink:0;
+  box-sizing:border-box;
 }
 .ab::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:0;transition:opacity .15s;background:rgba(255,255,255,.08);}
 .ab:active::before{opacity:1;}
@@ -1091,11 +1089,11 @@ const UPG_DEF={
 const RARE_DROPS={
   stone:[{res:'crystal',amt:1,chance:.04,msg:'💎 Crystal found in stone!'},{res:'iron',amt:3,chance:.12,msg:'⚙️ Iron vein found!'}],
   wood:[{res:'crystal',amt:1,chance:.03,msg:'💎 Crystal in the wood!'},{res:'gold',amt:2,chance:.10,msg:'🥇 Gold!'}],
-  gold:[{res:'emp',amt:1,chance:.12,msg:'🪙 $EMP gevonden!'},{res:'crystal',amt:2,chance:.06,msg:'💎 Cluster!'}],
+  gold:[{res:'emp',amt:1,chance:.12,msg:'🪙 $EMP found!'},{res:'crystal',amt:2,chance:.06,msg:'💎 Cluster!'}],
   iron:[{res:'emp',amt:1,chance:.10,msg:'🪙 Iron → $EMP!'},{res:'crystal',amt:1,chance:.05,msg:'💎 Crystal!'}],
-  crystal:[{res:'emp',amt:2,chance:.18,msg:'🪙 Kristal → $EMP!'},{res:'mana',amt:2,chance:.10,msg:'🔮 Mana!'}],
+  crystal:[{res:'emp',amt:2,chance:.18,msg:'🪙 Crystal → $EMP!'},{res:'mana',amt:2,chance:.10,msg:'🔮 Mana!'}],
   mana:[{res:'emp',amt:2,chance:.15,msg:'🪙 Mana condensed!'},{res:'starstone',amt:1,chance:.05,msg:'⭐ Starstone!'}],
-  starstone:[{res:'emp',amt:5,chance:.20,msg:'🪙 Stellaire energie!'},{res:'darkore',amt:1,chance:.04,msg:'🌑 Dark ore!'}],
+  starstone:[{res:'emp',amt:5,chance:.20,msg:'🪙 Stellar energy!'},{res:'darkore',amt:1,chance:.04,msg:'🌑 Dark ore!'}],
   darkore:[{res:'emp',amt:8,chance:.22,msg:'🪙 Dark energy!'},{res:'starstone',amt:2,chance:.08,msg:'⭐ Reversed!'}],
 };
 
@@ -2703,7 +2701,9 @@ function updateHints(){
   if(mb) mb.classList.toggle('nearResource',!!n&&!placingBld);
   // Subtle haptic when first entering range
   if(n&&!wasNear&&!placingBld) window.haptic?.('light');
-  if(!hint)return;if(placingBld){hint.textContent='🏗️ Tap to place · ESC cancels';hint.style.opacity='1';return;}if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
+  if(!hint)return;
+  if(placingBld||document.getElementById('placement-bar')){hint.style.opacity='0';return;}
+  if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
 
 // ═══ BUILDING ═══
 function startBuild(id){
@@ -3408,7 +3408,7 @@ function initTap(){_tap={stone:0,wood:0,gold:0,iron:0,crystal:0,emp:0,combo:0,co
 const ORE_TYPES=[{emoji:'🪨',res:'stone',val:1,color:'#a09080',size:52},{emoji:'🪵',res:'wood',val:1,color:'#8B5E3C',size:48},{emoji:'🥇',res:'gold',val:1,color:'#f5c830',size:44},{emoji:'⚙️',res:'iron',val:1,color:'#8aa4b8',size:44},{emoji:'💎',res:'crystal',val:1,color:'#8855ff',size:40},{emoji:'🪙',res:'emp',val:3,color:'var(--gold-b)',size:44},{emoji:'💣',res:null,val:0,color:'#cc2200',size:46}];
 function startMineDash(){const arena=document.getElementById('tap-arena');arena.innerHTML='';_tap.active=true;_tap.timeLeft=30;_tapT=setInterval(()=>{_tap.timeLeft--;const el=document.getElementById('ts-timer');if(el){el.textContent=_tap.timeLeft+'s';el.style.color=_tap.timeLeft<=5?'#ff2222':'var(--red)';}if(_tap.timeLeft<=0){clearInterval(_tapT);clearInterval(_tapSpawnT);endTap();}},1000);_tapSpawnT=setInterval(spawnOre,600);spawnOre();spawnOre();}
 function spawnOre(){if(!_tap.active)return;const arena=document.getElementById('tap-arena'),W=arena.offsetWidth||300;const wts=[25,25,20,15,8,10,Math.max(2,15-_tap.combo*2)],total=wts.reduce((a,b)=>a+b,0);let roll=Math.random()*total,type=ORE_TYPES[0];for(let i=0;i<ORE_TYPES.length;i++){roll-=wts[i];if(roll<=0){type=ORE_TYPES[i];break;}}const el=document.createElement('div'),x=Math.random()*(W-type.size),dur=1.8+Math.random()*1.2;el.style.cssText=`position:absolute;left:${x}px;top:-60px;width:${type.size}px;height:${type.size}px;font-size:${type.size-8}px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;filter:drop-shadow(0 2px 6px ${type.color});animation:fall ${dur}s linear forwards`;el.textContent=type.emoji;el.dataset.t=JSON.stringify(type);el.addEventListener('pointerdown',e=>{e.stopPropagation();if(!_tap.active)return;const t=JSON.parse(el.dataset.t);el.style.transform='scale(1.4)';el.style.opacity='0';setTimeout(()=>el.remove(),150);clearTimeout(_tap.comboT);_tap.combo=Math.min(_tap.combo+1,10);_tap.comboT=setTimeout(()=>{_tap.combo=0;const tc=document.getElementById('ts-combo');if(tc)tc.textContent='×1';},1500);const m2=1+_tap.combo*.15;const tc2=document.getElementById('ts-combo');if(tc2)tc2.textContent='×'+_tap.combo.toFixed(1);if(t.res===null){_tap.combo=0;const tc3=document.getElementById('ts-combo');if(tc3){tc3.style.color='#ff4444';setTimeout(()=>tc3.style.color='var(--gold-b)',400);}}else if(t.res){const earned=Math.ceil(t.val*m2);_tap[t.res]=(_tap[t.res]||0)+earned;const sid=document.getElementById(t.res==='emp'?'ts-e':'ts-'+t.res[0]);if(sid)sid.textContent=_tap[t.res]||0;if(t.res==='crystal'){const rc=document.getElementById('ts-rare');if(rc)rc.textContent=_tap.crystal||0;}}_tap.taps++;checkMysteryBox();});arena.appendChild(el);setTimeout(()=>{if(el.parentNode)el.remove();},dur*1000+200);}
-function endTap(){_tap.active=false;clearInterval(_tapT);clearInterval(_tapSpawnT);const rws={};if(_tap.stone>0)rws.stone=_tap.stone;if(_tap.wood>0)rws.wood=_tap.wood;if(_tap.gold>0)rws.gold=_tap.gold;if(_tap.iron>0)rws.iron=_tap.iron;if(_tap.crystal>0)rws.crystal=_tap.crystal;rws.emp=Math.max(2,Math.floor((_tap.emp||0)*.25))+Math.floor(_tap.taps*.12);setCd('tap');showResult('⛏️ Mine Dash Complete!',`${_tap.taps} erts getikt · max combo ×${_tap.combo.toFixed(1)}`,rws);}
+function endTap(){_tap.active=false;clearInterval(_tapT);clearInterval(_tapSpawnT);const rws={};if(_tap.stone>0)rws.stone=_tap.stone;if(_tap.wood>0)rws.wood=_tap.wood;if(_tap.gold>0)rws.gold=_tap.gold;if(_tap.iron>0)rws.iron=_tap.iron;if(_tap.crystal>0)rws.crystal=_tap.crystal;rws.emp=Math.max(2,Math.floor((_tap.emp||0)*.25))+Math.floor(_tap.taps*.12);setCd('tap');showResult('⛏️ Mine Dash!',`${_tap.taps} ore tapped · max combo ×${_tap.combo.toFixed(1)}`,rws);}
 
 // GAME 2: TOWER DEFENSE
 let _aim={},_aimT=null,_aimST=null,_aimOn=false,_aimAF=null,_aimCtx=null;
@@ -3458,8 +3458,23 @@ function reactTap(){if(_react.on){const ms=Date.now()-_react.st;_react.on=false;
 function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rws.crystal=1;else if(_react.emp>=24)rws.gold=1;setCd('react');showResult('⚡ Lightning Forge!',`${_react.emp}🪙 earned · score ${_react.score}`,rws);}
 
 // ═══ SAVE / LOAD ═══
-function saveGame(){try{localStorage.setItem('empyria_v2',JSON.stringify({version:3,savedAt:Date.now(),res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)}));}catch(e){}}
-function loadGame(){try{const raw=localStorage.getItem('empyria_v2');
+function saveGame(){try{
+  const _saveData={version:3,savedAt:Date.now(),res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)};
+  const _saveStr=JSON.stringify(_saveData);
+  localStorage.setItem('empyria_v2',_saveStr);
+  // Also backup to sessionStorage
+  try{sessionStorage.setItem('empyria_v2_bak',_saveStr);}catch(e){}
+  }catch(e){}}
+function loadGame(){try{
+  let raw=localStorage.getItem('empyria_v2');
+  // Fallback: try sessionStorage backup
+  if(!raw){
+    raw=sessionStorage.getItem('empyria_v2_bak')||null;
+    if(raw){
+      localStorage.setItem('empyria_v2',raw); // restore to localStorage
+      console.log('[loadGame] Restored from sessionStorage backup');
+    }
+  }
   if(!raw){
     // Try to restore G.res from eco save as fallback
     try{
@@ -3468,7 +3483,7 @@ function loadGame(){try{const raw=localStorage.getItem('empyria_v2');
     }catch(fe){}
     showSaveDebug?.();return;
   }const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
-  if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save format…',2000);return;}
+  if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save…',2000);return;}
   // v2+ safe to load
   if(sv.res)Object.assign(G.res,sv.res);
   if(sv.bld)Object.assign(G.bld,sv.bld);
@@ -3552,7 +3567,13 @@ async function dbSyncPlayer() {
       era:           G.era || 1,
       play_streak:   G.streak || 0,
       last_login:    new Date().toISOString().slice(0,10),
-      game_state:    buildSaveState(),
+      game_state: { ...buildSaveState(), eco: {
+          empMult: E.empMult||1,
+          totalEmpEarned: E.totalEmpEarned||0,
+          empSpent: E.empSpent||0,
+          upgradesDone: E.upgradesDone||[]
+        }
+      },
     };
     const { data, error } = await db
       .from('players')
@@ -3578,36 +3599,47 @@ async function dbLoadPlayer() {
       .select('*')
       .eq('telegram_id', tgUser.id)
       .single();
-    if (error || !data) return; // new player, no data yet
-    dbPlayer = data;
-    // Only restore from cloud if NO local save exists
-    // Local save always wins if it exists — prevents cloud overwriting fresh local data
-    if (data.game_state) {
-      const localRaw = localStorage.getItem('empyria_v2');
-      const localSavedAt = localRaw ? (JSON.parse(localRaw).savedAt || 0) : 0;
-      const cloudSavedAt = data.game_state.savedAt || 0;
-
-      if (!localRaw) {
-        // No local save at all — restore from cloud
-        restoreSaveState(data.game_state);
-        toast('☁️ Progress restored from cloud!', 3000);
-        console.log('[Cloud] No local save — restoring from cloud');
-      } else if (cloudSavedAt > localSavedAt + 300000) {
-        // Cloud is more than 5 minutes newer than local — likely different device
-        const cloudBlds = Object.keys(data.game_state.bld||{}).length;
-        const localBlds = Object.keys(G.bld||{}).length;
-        if (cloudBlds > localBlds || (data.emp_balance||0) > (E.totalEmpEarned||0)) {
-          restoreSaveState(data.game_state);
-          toast('☁️ Newer progress restored from cloud!', 3000);
-          console.log('[Cloud] Cloud is newer device session — restoring');
-        }
-      } else {
-        console.log('[Cloud] Local save is current — keeping local. Local:', new Date(localSavedAt).toLocaleTimeString(), 'Cloud:', new Date(cloudSavedAt).toLocaleTimeString());
-      }
+    if (error || !data) {
+      console.log('[Cloud] No cloud save found for this user');
+      return;
     }
+    dbPlayer = data;
     updateDBStatusBadge(true);
+
+    if (!data.game_state) return;
+
+    const localRaw = localStorage.getItem('empyria_v2');
+    const localSavedAt = localRaw ? (JSON.parse(localRaw).savedAt || 0) : 0;
+    const cloudSavedAt = data.game_state.savedAt || 0;
+
+    console.log('[Cloud] Local savedAt:', localSavedAt ? new Date(localSavedAt).toLocaleTimeString() : 'NONE');
+    console.log('[Cloud] Cloud savedAt:', cloudSavedAt ? new Date(cloudSavedAt).toLocaleTimeString() : 'NONE');
+
+    if (cloudSavedAt > localSavedAt) {
+      // Cloud is newer — this is the authoritative state
+      console.log('[Cloud] Cloud is newer — restoring from cloud');
+      restoreSaveState(data.game_state);
+      // Restore eco state (multiplier, airdrop score, boost tiers)
+      const eco = data.game_state.eco;
+      if (eco) {
+        if(typeof eco.empMult==='number'&&eco.empMult>=1) E.empMult=eco.empMult;
+        if(typeof eco.totalEmpEarned==='number'&&eco.totalEmpEarned>E.totalEmpEarned) E.totalEmpEarned=eco.totalEmpEarned;
+        if(typeof eco.empSpent==='number') E.empSpent=eco.empSpent;
+        if(Array.isArray(eco.upgradesDone)) E.upgradesDone=eco.upgradesDone;
+      }
+      // Update localStorage with this fresh cloud data
+      localStorage.setItem('empyria_v2', JSON.stringify(data.game_state));
+      if (localSavedAt === 0) {
+        toast('☁️ Progress restored from cloud!', 3000);
+      }
+    } else if (localSavedAt > 0) {
+      console.log('[Cloud] Local is newer or equal — keeping local state');
+      // Local is newer — upload it to cloud to keep in sync
+      setTimeout(dbSyncPlayer, 2000);
+    }
   } catch(e) {
-    console.warn('DB load failed:', e.message);
+    console.warn('[Cloud] Load failed:', e.message);
+    updateDBStatusBadge(false);
   }
 }
 
@@ -3793,7 +3825,7 @@ function initTelegram(){
 
 async function initTONConnect(){
   try{
-    if(!window.TON_CONNECT_UI){console.warn('TON Connect not loaded');return;}
+    if(!window.TON_CONNECT_UI){console.log('[Empyria] TON Connect: not available in this context');return;}
     tonUI=new TON_CONNECT_UI.TonConnectUI({
       manifestUrl:'https://fortunefiinc-spec.github.io/Empyria-MAIN/tonconnect-manifest.json',
       buttonRootId:'ton-connect-btn',
@@ -3997,7 +4029,7 @@ function launch(){
         const sl=document.getElementById('save-lbl');
         if(sl&&sl.textContent==='SAVE'){sl.textContent='✓AUTO';setTimeout(()=>sl.textContent='SAVE',1200);}
       }
-      if(E.tick%300===0) dbSyncPlayer();
+      if(E.tick%75===0) dbSyncPlayer(); // sync every 10min (75 ticks × 8s)
       // Upgrade reminder
       if(E.tick%200===0){
         const emp=G.res.emp||0;
