@@ -134,30 +134,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   border-radius:20px;
   padding:4px;
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  grid-template-rows:54px;
   gap:3px;
   backdrop-filter:blur(12px);
   box-shadow:0 4px 24px rgba(0,0,0,.5);
-}
-.ab{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:2px;
-  width:100%;
-  height:52px;
-  border-radius:14px;
-  font-family:Rajdhani,sans-serif;font-size:8px;font-weight:700;
-  cursor:pointer;
-  transition:transform .12s,box-shadow .12s;
-  border:1px solid transparent;
-  letter-spacing:.6px;
-  position:relative;
   overflow:hidden;
-  box-sizing:border-box;
 }
-.ab::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:0;transition:opacity .15s;background:rgba(255,255,255,.08);}
-.ab:active::before{opacity:1;}
-.ab:active{transform:scale(.91);}
-.ab-ico{font-size:18px;line-height:1;margin-bottom:2px;display:block;text-align:center;}
+.ab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;height:54px;border-radius:14px;font-family:Rajdhani,sans-serif;font-size:9px;font-weight:700;cursor:pointer;border:1px solid transparent;letter-spacing:.5px;position:relative;overflow:hidden;box-sizing:border-box;transition:transform .1s;}
+.ab:active{transform:scale(.93);}
+.ab-ico{font-size:20px;line-height:1;display:block;}
 .mine-btn{
   background:linear-gradient(160deg,#1a3a08,#2a5a10);
   border-color:rgba(80,200,60,.35);
@@ -365,8 +351,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(240,192,96,.2)}50%{box-shadow:0 0 20px rgba(240,192,96,.5)}}
 @keyframes notifPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
 #emp-notif{animation:notifPulse 1.2s ease-in-out infinite;}
-@keyframes mineGlow{0%,100%{box-shadow:0 2px 12px rgba(60,160,40,.25),inset 0 1px 0 rgba(255,255,255,.08)}50%{box-shadow:0 3px 20px rgba(80,220,40,.45),inset 0 1px 0 rgba(255,255,255,.1)}}
+@keyframes mineGlow{0%,100%{box-shadow:0 0 0 1px rgba(80,220,40,.3)}50%{box-shadow:0 0 12px rgba(80,220,40,.5)),inset 0 1px 0 rgba(255,255,255,.1)}}
 .mine-btn.nearResource{animation:mineGlow 1s ease-in-out infinite;}
+
+.ab-mine{background:linear-gradient(160deg,#1a3a08,#2a5a10);border-color:rgba(80,200,60,.35);color:#90ee70;height:54px !important;}
+.ab-mine.nearResource{animation:mineGlow 1s ease-in-out infinite;}
+.ab-city{background:linear-gradient(160deg,#0a1e3a,#102848);border-color:rgba(70,140,255,.3);color:#78b8ff;height:54px !important;}
+.ab-emp{background:linear-gradient(160deg,#1e1400,#362200);border-color:rgba(240,184,64,.45);color:#f5d840;height:54px !important;}
+.ab-sell{background:linear-gradient(160deg,#0a2018,#10361e);border-color:rgba(50,180,90,.3);color:#60ee90;height:54px !important;}
 </style>
 </head>
 <body>
@@ -763,19 +755,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div id="minimap-label" style="text-align:center;font-size:7px;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.5px">MAP</div>
 </div>
 <div id="action-bar">
-  <div class="ab mine-btn" onclick="doMine()">
-    <span class="ab-ico">⛏️</span>MINE
-  </div>
-  <div class="ab" onclick="openCity()" style="background:linear-gradient(160deg,#0a1e3a,#102848);border-color:rgba(70,140,255,.3);color:#78b8ff;box-shadow:0 2px 12px rgba(40,100,220,.2),inset 0 1px 0 rgba(255,255,255,.06)">
-    <span class="ab-ico">🏰</span>CITY
-  </div>
-  <div class="ab" onclick="openEconomy()" id="emp-action-btn" style="background:linear-gradient(160deg,#1e1400,#362200);border-color:rgba(240,184,64,.45);color:#f5d840;box-shadow:0 2px 14px rgba(200,140,0,.25),inset 0 1px 0 rgba(255,255,255,.07)">
-    <span class="ab-ico">💰</span>$EMP
-    <div id="emp-notif" style="display:none;position:absolute;top:6px;right:8px;width:7px;height:7px;background:#f5d840;border-radius:50%;box-shadow:0 0 5px #f5d840"></div>
-  </div>
-  <div class="ab" onclick="showSellScreen()" style="background:linear-gradient(160deg,#0a2018,#10361e);border-color:rgba(50,180,90,.3);color:#60ee90;box-shadow:0 2px 12px rgba(30,140,60,.2),inset 0 1px 0 rgba(255,255,255,.06)">
-    <span class="ab-ico">💱</span>SELL
-  </div>
+  <div class="ab ab-mine" onclick="doMine()"><span class="ab-ico">⛏️</span>MINE</div>
+  <div class="ab ab-city" onclick="openCity()"><span class="ab-ico">🏰</span>CITY</div>
+  <div class="ab ab-emp" onclick="openEconomy()" id="emp-action-btn"><span class="ab-ico">💰</span>$EMP<div id="emp-notif" style="display:none;position:absolute;top:5px;right:7px;width:6px;height:6px;background:#f5d840;border-radius:50%"></div></div>
+  <div class="ab ab-sell" onclick="showSellScreen()" id="ab-sell"><span class="ab-ico">💱</span>SELL</div>
 </div>
 
 <div id="city-panel" onclick="cityBgClick(event)">
@@ -2540,7 +2523,7 @@ function rollRareDrop(type){const drops=RARE_DROPS[type];if(!drops)return null;f
 
 function doMine(){
   const _now=Date.now();if(_now-(window._ml||0)<150)return;window._ml=_now;
-  const mb=document.querySelector('.mine-btn');
+  const mb=document.querySelector('.ab-mine');
   if(mb){
     mb.style.transform='scale(.88)';
     setTimeout(()=>{mb.style.transform='scale(1.04)';setTimeout(()=>mb.style.transform='',80);},90);
@@ -2695,7 +2678,7 @@ function processMove(){
 function updateHints(){
   const n=nearestNode(),hint=document.getElementById('action-hint');
   if(hint&&!placingBld){hint.style.color='';} // always reset color when not in combo
-  const mb=document.querySelector('.mine-btn');
+  const mb=document.querySelector('.ab-mine');
   // Glow MINE when near resource
   const wasNear=mb?.classList.contains('nearResource');
   if(mb) mb.classList.toggle('nearResource',!!n&&!placingBld);
