@@ -386,6 +386,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 <!-- Onboarding overlay -->
 
 <!-- How To Play Modal -->
+
+<div id="bld-tooltip" style="display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:150;background:rgba(8,12,20,.96);border:1.5px solid rgba(240,184,64,.3);border-radius:14px;padding:12px 16px;min-width:200px;max-width:280px;pointer-events:all;box-shadow:0 4px 20px rgba(0,0,0,.5)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div id="btt-name" style="font-family:Cinzel,serif;font-size:13px;font-weight:700;color:var(--gold-b)"></div>
+    <button onclick="document.getElementById('bld-tooltip').style.display='none'" style="background:none;border:none;color:var(--txt-d);font-size:16px;cursor:pointer;padding:0 0 0 8px">✕</button>
+  </div>
+  <div id="btt-stats" style="font-size:10px;color:var(--txt-d);line-height:1.8;margin-bottom:8px"></div>
+  <div id="btt-actions" style="display:flex;gap:6px"></div>
+</div>
+
 <div id="htp-modal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.92);overflow:hidden">
   <div style="height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto">
 
@@ -2392,6 +2402,16 @@ function doMine(){
   checkQuestProgress('mine',earned,type);checkMysteryBox();updateHUD();
 }
 
+function sellOne(k){
+  const rates={stone:.15,wood:.15,gold:.4,iron:.6,crystal:2.5,mana:5,starstone:15,darkore:40};
+  const r=rates[k];if(!r)return;
+  const qty=G.res[k]||0;if(qty<=0){toast('No '+k+' to sell!');return;}
+  const emp=Math.floor(qty*r);
+  G.res[k]=0;
+  eEarn(emp,'Sell '+k);
+  toast('+'+emp+' $EMP from '+(RES_ICO[k]||k),2000);
+  updateHUD();saveGame();
+}
 function doSell(){
   document.getElementById('sell-screen')?.remove();
   const rates={stone:.15,wood:.15,gold:.4,iron:.6,crystal:2.5,mana:5,starstone:15,darkore:40};
@@ -2782,12 +2802,21 @@ function updateEra(){
     window.haptic?.('success');
     sfxQuest?.();
     setTimeout(()=>{
+      const eraNames={2:'Iron Age',3:'Arcane Age',4:'Stellar Age',5:'Shadow Empire'};
+      const eraColors={2:'#c0a060',3:'#a080d0',4:'#60c0a0',5:'#d06080'};
+      const col=eraColors[era]||'var(--gold-b)';
       const ov=document.createElement('div');
-      ov.style.cssText='position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;pointer-events:none';
-      ov.innerHTML=`<div style="font-family:Cinzel,serif;font-size:32px;font-weight:900;color:var(--gold-b);text-shadow:0 0 30px rgba(240,184,64,.8);animation:empPop .5s ease-out">ERA ${era} UNLOCKED</div>`;
-      document.body.appendChild(ov);setTimeout(()=>ov.remove(),2000);
+      ov.style.cssText=`position:fixed;inset:0;z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(ellipse,${col}22 0%,transparent 70%)`;
+      ov.innerHTML=`
+        <div style="font-size:11px;letter-spacing:4px;color:${col};font-family:Cinzel,serif;margin-bottom:8px;opacity:.8">ERA ${era}</div>
+        <div style="font-family:Cinzel,serif;font-size:36px;font-weight:900;color:${col};text-shadow:0 0 40px ${col};animation:empPop .4s ease-out;text-align:center">${eraNames[era]||'ERA '+era}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:10px">UNLOCKED</div>
+      `;
+      document.body.appendChild(ov);
+      setTimeout(()=>{ov.style.transition='opacity .5s';ov.style.opacity='0';setTimeout(()=>ov.remove(),500);},2500);
     },100);
-    toast('🏰 ERA '+era+' unlocked!',3000);addLog('ERA '+era+' bereikt!','good');}
+    toast('🏰 ERA '+era+': '+(({2:'Iron Age',3:'Arcane Age',4:'Stellar Age',5:'Shadow Empire'})[era]||'Unlocked')+'!',3500);
+    addLog('ERA '+era+' unlocked!','good');}
   const labels=['ERA I','ERA II','ERA III','ERA IV','ERA V'];
   const el=document.getElementById('era-label');if(el)el.textContent=labels[era-1];
 }
@@ -2988,6 +3017,13 @@ function updateHUD(){
 }
 function _doUpdateHUD(){
   const rp=document.getElementById('res-compact');
+  // Highlight SELL button when resources are plentiful
+  const _totalRes=Object.entries(G.res).filter(([k])=>k!=='emp').reduce((s,[,v])=>s+(v||0),0);
+  const sellBtn=document.getElementById('ab-sell');
+  if(sellBtn){
+    if(_totalRes>500){ sellBtn.style.borderColor='rgba(64,200,112,.5)'; sellBtn.style.boxShadow='0 0 8px rgba(64,200,112,.2)'; }
+    else { sellBtn.style.borderColor=''; sellBtn.style.boxShadow=''; }
+  }
   // Resource cap warnings
   const capWarn=Object.entries(G.res).filter(([k,v])=>{const cap=5000;return v>cap*.9&&k!=='emp';});
   if(capWarn.length>0&&E.tick%120===0){
@@ -4031,6 +4067,8 @@ function updatePresaleStrip(){
 }
 
 function showPresaleStrip(){
+  // Don't show if player already has top tier
+  if(E.upgradesDone?.includes('boost6'))return;
   if(_stripDismissed) return;
   const strip=document.getElementById('presale-strip');
   if(strip) strip.classList.add('visible');
@@ -4116,10 +4154,17 @@ function showOfflineNotif(mins, earned){
   panel.style.cssText='position:fixed;top:70px;left:8px;right:8px;z-index:200;background:rgba(10,20,10,.95);border:1px solid rgba(64,200,112,.4);border-radius:12px;padding:12px 14px;pointer-events:all';
   // Quick sell-all button at top
   const _quickTotal=Object.entries(rates).reduce((s,[k,r])=>s+Math.floor((G.res[k]||0)*r),0);
+  const sellableBreakdown=Object.entries(rates).filter(([k])=>(G.res[k]||0)>0).map(([k,r])=>`
+    <button onclick="sellOne('${k}');renderSellScreen()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;width:100%">
+      <span style="font-size:12px">${RES_ICO[k]||k} ${Math.floor(G.res[k]||0).toLocaleString()}</span>
+      <span style="font-size:11px;color:var(--emp)">+${Math.floor((G.res[k]||0)*r).toLocaleString()} $EMP</span>
+    </button>`).join('');
+
   panel.innerHTML=`
     <button onclick="doSell();document.getElementById('sell-screen')?.remove()" style="width:100%;padding:12px;margin-bottom:10px;background:linear-gradient(135deg,#1a3a10,#2a5020);border:1.5px solid rgba(64,200,112,.4);border-radius:12px;color:var(--grn2);font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
       SELL ALL — +${_quickTotal.toLocaleString()} $EMP
-    </button>`+`<div style="font-size:10px;color:var(--grn2);font-weight:700;margin-bottom:4px">Away for ${mins} min — earned:</div><div style="font-size:12px;color:#fff">${lines}</div>`;
+    </button>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">${sellableBreakdown}</div>`+`<div style="font-size:10px;color:var(--grn2);font-weight:700;margin-bottom:4px">Away for ${mins} min — earned:</div><div style="font-size:12px;color:#fff">${lines}</div>`;
   const btn=document.createElement('button');
   btn.textContent='✓';btn.style.cssText='position:absolute;top:8px;right:10px;background:none;border:none;color:var(--txt-d);font-size:16px;cursor:pointer';
   btn.onclick=()=>panel.remove();
@@ -4592,10 +4637,17 @@ function showSellScreen(){
   const rateInfo=sellable.length>0?sellable.slice(0,2).map(([k,r])=>rateLabels[k]+': '+r+'/unit').join(' · '):'';
   // Quick sell-all button at top
   const _quickTotal=Object.entries(rates).reduce((s,[k,r])=>s+Math.floor((G.res[k]||0)*r),0);
+  const sellableBreakdown=Object.entries(rates).filter(([k])=>(G.res[k]||0)>0).map(([k,r])=>`
+    <button onclick="sellOne('${k}');renderSellScreen()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;width:100%">
+      <span style="font-size:12px">${RES_ICO[k]||k} ${Math.floor(G.res[k]||0).toLocaleString()}</span>
+      <span style="font-size:11px;color:var(--emp)">+${Math.floor((G.res[k]||0)*r).toLocaleString()} $EMP</span>
+    </button>`).join('');
+
   panel.innerHTML=`
     <button onclick="doSell();document.getElementById('sell-screen')?.remove()" style="width:100%;padding:12px;margin-bottom:10px;background:linear-gradient(135deg,#1a3a10,#2a5020);border:1.5px solid rgba(64,200,112,.4);border-radius:12px;color:var(--grn2);font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
       SELL ALL — +${_quickTotal.toLocaleString()} $EMP
-    </button>`+`
+    </button>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">${sellableBreakdown}</div>`+`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div style="font-size:11px;font-weight:700;color:var(--txt)">💱 Sell Resources</div>
       <div style="font-size:10px;color:var(--emp);font-weight:700">+${totalAll} $EMP total</div>
@@ -5219,6 +5271,17 @@ function eUpdatePrices(){
 
 function eNewYear(){addLog('📅 Year '+E.year+' begins','neutral');const h=E.buildings.filter(b=>b.type==='harbour'&&b.active).length;if(h>0)eEarn(h*15,'Harbour bonus');}
 function eSeasonChange(season){if(E.events.length>0)return;const key=['spring','summer','autumn','winter'][season];const evt=MEVENTS.find(e=>e.seasonal===key);if(!evt)return;E.events.push({...evt});toast('🗓️ '+['Spring','Summer','Autumn','Winter'][season]+': '+evt.title);}
+function showEventBanner(title,desc){
+  const banner=document.createElement('div');
+  banner.style.cssText='position:fixed;top:70px;left:8px;right:8px;z-index:300;background:rgba(8,20,40,.97);border:1.5px solid rgba(80,140,255,.4);border-radius:12px;padding:10px 14px;pointer-events:all;animation:slideDown .3s ease-out';
+  banner.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
+    <div style="font-size:20px">⚡</div>
+    <div style="flex:1"><div style="font-size:11px;font-weight:700;color:#80b0ff">${title}</div><div style="font-size:10px;color:var(--txt-d);margin-top:2px">${desc}</div></div>
+    <button onclick="openCity('log');this.closest('[style]').remove()" style="font-size:9px;background:rgba(80,140,255,.15);border:1px solid rgba(80,140,255,.3);border-radius:6px;padding:4px 8px;color:#80b0ff;cursor:pointer">VIEW</button>
+  </div>`;
+  document.body.appendChild(banner);
+  setTimeout(()=>{banner.style.transition='opacity .4s';banner.style.opacity='0';setTimeout(()=>banner.remove(),400);},5000);
+}
 function eMaybeEvent(){const pool=MEVENTS.filter(e=>!e.seasonal);if(!pool.length)return;E.events.push({...pool[~~(Math.random()*pool.length)]});toast('⚠️ '+E.events[E.events.length-1].title);}
 
 function eHandleChoice(evtId,ci){
