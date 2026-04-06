@@ -769,6 +769,17 @@ window.addEventListener('unhandledrejection',e=>{
 
 'use strict';
 
+
+// Performance detection — runs once at startup
+const _perf = (() => {
+  const mem = navigator.deviceMemory || 4;
+  const cores = navigator.hardwareConcurrency || 4;
+  const px = window.devicePixelRatio || 1;
+  if(mem<=2||cores<=2) return 'low';
+  if(mem<=4||cores<=4) return 'mid';
+  return 'high';
+})();
+console.log('[Empyria] Performance tier:', _perf);
 // ═══ CONSTANTS ═══
 const SEASONS=['SPRING','SUMMER','AUTUMN','WINTER'];
 const RES_ICO={stone:'🪨',wood:'🪵',gold:'🥇',iron:'⚙️',crystal:'💎',mana:'🔮',starstone:'⭐',darkore:'🌑',emp:'🪙'};
@@ -834,16 +845,16 @@ const ERA_COLORS={'ERA I':'#5090d0','ERA II':'#60b870','ERA III':'#a070e0','ERA 
 const PASS_DEF={mine:{stone:1},lumber:{wood:1},farm:{food:2},mill:{food:2,wood:1},smelter:{iron:1},forge:{gold:1},workshop:{tools:1},academy:{crystal:1},library:{crystal:1,mana:1},observatory:{mana:1},alchemist:{gold:2},starforge:{starstone:1},watchtower:{},barracks:{},townhall:{},inn:{},fortress:{},guildhall:{},harbour:{},marketplace:{},tradepost:{},coinmaster:{},mint:{},empaltar:{},emptemple:{},citadel:{},shadowmkt:{},vault:{},empnexus:{},portal:{},empirebank:{}};
 
 const UPG_DEF={
-  mine:[{cost:{stone:200,emp:30},bonus:'Stone ×1.5'},{cost:{stone:500,iron:50,emp:100},bonus:'Stone ×2.0'}],
-  lumber:[{cost:{wood:200,emp:30},bonus:'Wood ×1.5'},{cost:{wood:500,iron:50,emp:100},bonus:'Wood ×2.0'}],
-  forge:[{cost:{stone:200,iron:30,emp:50},bonus:'ALLES ×1.25'},{cost:{iron:200,crystal:20,emp:150},bonus:'ALLES ×1.50'}],
-  market:[{cost:{gold:100,emp:50},bonus:'Gold ×1.5'},{cost:{gold:300,crystal:30,emp:200},bonus:'Gold ×2.0'}],
-  hq:[{cost:{stone:400,gold:200,emp:100},bonus:'$EMP ×1.5'},{cost:{gold:500,crystal:100,emp:300},bonus:'$EMP ×2.0'}],
-  smelter:[{cost:{iron:100,emp:40},bonus:'Iron ×1.5'},{cost:{iron:300,crystal:30,emp:120},bonus:'Iron ×2.0'}],
-  workshop:[{cost:{wood:200,iron:50,emp:60},bonus:'ALLES ×1.3'},{cost:{iron:200,mana:20,emp:200},bonus:'ALLES ×1.6'}],
-  academy:[{cost:{crystal:50,emp:80},bonus:'Crystal ×1.5'},{cost:{crystal:150,mana:30,emp:250},bonus:'Crystal ×2.0'}],
-  temple:[{cost:{gold:200,crystal:50,emp:100},bonus:'$EMP +30/u'},{cost:{crystal:100,mana:50,emp:300},bonus:'$EMP +80/u'}],
-  treasury:[{cost:{gold:400,crystal:80,emp:150},bonus:'$EMP ×1.5'},{cost:{crystal:200,mana:100,emp:500},bonus:'$EMP ×2.5'}],
+  mine:[{cost:{stone:200,emp:150},bonus:'Stone ×1.5'},{cost:{stone:500,iron:50,emp:400},bonus:'Stone ×2.0'}],
+  lumber:[{cost:{wood:200,emp:150},bonus:'Wood ×1.5'},{cost:{wood:500,iron:50,emp:400},bonus:'Wood ×2.0'}],
+  forge:[{cost:{stone:200,iron:30,emp:250},bonus:'ALLES ×1.25'},{cost:{iron:200,crystal:20,emp:800},bonus:'ALLES ×1.50'}],
+  market:[{cost:{gold:100,emp:300},bonus:'Gold ×1.5'},{cost:{gold:300,crystal:30,emp:1000},bonus:'Gold ×2.0'}],
+  hq:[{cost:{stone:400,gold:200,emp:500},bonus:'$EMP ×1.5'},{cost:{gold:500,crystal:100,emp:2000},bonus:'$EMP ×2.0'}],
+  smelter:[{cost:{iron:100,emp:200},bonus:'Iron ×1.5'},{cost:{iron:300,crystal:30,emp:600},bonus:'Iron ×2.0'}],
+  workshop:[{cost:{wood:200,iron:50,emp:300},bonus:'ALLES ×1.3'},{cost:{iron:200,mana:20,emp:1200},bonus:'ALLES ×1.6'}],
+  academy:[{cost:{crystal:50,emp:400},bonus:'Crystal ×1.5'},{cost:{crystal:150,mana:30,emp:1500},bonus:'Crystal ×2.0'}],
+  temple:[{cost:{gold:200,crystal:50,emp:600},bonus:'$EMP +30/u'},{cost:{crystal:100,mana:50,emp:2000},bonus:'$EMP +80/u'}],
+  treasury:[{cost:{gold:400,crystal:80,emp:800},bonus:'$EMP ×1.5'},{cost:{crystal:200,mana:100,emp:3000},bonus:'$EMP ×2.5'}],
 };
 
 const RARE_DROPS={
@@ -952,11 +963,13 @@ function startPassive(){
   G.passiveIv=setInterval(()=>{
     _passTickAt=Date.now()+10000;
     const ph=passPerHour(),f=1/360;
+    const _boostM=getProdBoostMult();
     for(const k of Object.keys(ph)){
       if(ph[k]<=0)continue;
       const amt=Math.max(1,Math.round(ph[k]*f));
-      if(k==='emp') eEarn(amt,'Passive income'); // track for airdrop!
-      else addRes(k,amt);
+      const _boostedAmt=Math.round(amt*_boostM);
+      if(k==='emp') eEarn(_boostedAmt,'Passive income'); // track for airdrop!
+      else addRes(k,_boostedAmt);
     }
     updateHUD();checkAchievements();
   },10000);
@@ -1022,7 +1035,7 @@ function buildTextures(){
 
 function buildTerrain(){
   // Higher res mesh for smoother hills
-  const geo=new THREE.PlaneGeometry(90,90,72,72);geo.rotateX(-Math.PI/2);
+  const geo=new THREE.PlaneGeometry(90,90,_perf==='low'?24:_perf==='mid'?40:72,_perf==='low'?24:_perf==='mid'?40:72);geo.rotateX(-Math.PI/2);
   const pos=geo.attributes.position;
   for(let i=0;i<pos.count;i++)pos.setY(i,sampleH(pos.getX(i),pos.getZ(i)));
   geo.computeVertexNormals();
@@ -1739,7 +1752,7 @@ function initThree(){
   buildTextures();
   const canvas=document.getElementById('three-canvas');
   renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-  renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(_perf==='low'?1:_perf==='mid'?Math.min(window.devicePixelRatio,1.5):Math.min(window.devicePixelRatio,2));
   renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.shadowMap.autoUpdate=false; // manual update for performance
   renderer.setClearColor(0x7ab8d8);
@@ -1749,7 +1762,7 @@ function initThree(){
   // Edge fog: terrain boundary is at ±35 units
   initCamera();
   scene.add(new THREE.AmbientLight(0xc0d8e8,.40));
-  const sun=new THREE.DirectionalLight(0xfff0d0,1.15);sun.position.set(40,60,25);sun.castShadow=true;sun.shadow.mapSize.width=sun.shadow.mapSize.height=2048;sun.shadow.camera.left=sun.shadow.camera.bottom=-55;sun.shadow.camera.right=sun.shadow.camera.top=55;sun.shadow.camera.far=200;sun.shadow.bias=-.0003;scene.add(sun);
+  const sun=new THREE.DirectionalLight(0xfff0d0,1.15);sun.position.set(40,60,25);sun.castShadow=true;sun.shadow.mapSize.width=sun.shadow.mapSize.height=_perf==='high'?1024:512;sun.shadow.camera.left=sun.shadow.camera.bottom=-55;sun.shadow.camera.right=sun.shadow.camera.top=55;sun.shadow.camera.far=200;sun.shadow.bias=-.0003;scene.add(sun);
   const fill=new THREE.DirectionalLight(0x8ab8e8,.3);fill.position.set(-30,20,-20);scene.add(fill);
   scene.add(new THREE.HemisphereLight(0x88c0d8,0x183a0c,.65));
   buildTerrain();buildDecorations();buildResourceNodes();buildPlayer();
@@ -2196,32 +2209,40 @@ function updateWorldLife(){
 }
 // ──────────────────────────────────────────────────────────────────────────
 
-function animate(){requestAnimationFrame(animate);if(document.hidden||!document.hasFocus?.())return;
+function animate(){
+  requestAnimationFrame(animate);
+  if(document.hidden||!document.hasFocus?.())return;
+  // Throttle to 30fps on low-end devices
+  if(_perf==='low'){
+    if(!window._lastFrame) window._lastFrame=0;
+    const now=performance.now();
+    if(now-window._lastFrame<33)return; // 30fps
+    window._lastFrame=now;
+  }
   animT+=.016;
   // Skip heavy updates when panel is fully open and not visible
   const panelOpen=document.getElementById('city-panel')?.classList.contains('open');
   processMove();updateCam();updateHints();
-  if(!panelOpen||animT%3<1) animateWorkers(); // reduce worker updates when panel open
-  resourceNodes.forEach(n=>{
-    n.traverse(cv=>{
-      if(cv.userData&&cv.userData.isGoldCrystal) cv.rotation.y+=.025;
+  if((!panelOpen||animT%3<1)&&(_perf!=='low'||Math.floor(animT*60)%2===0)) animateWorkers();
+  // Resource node animations — skip on low-end every other frame
+  if(_perf!=='low'||Math.floor(animT*60)%2===0){
+    resourceNodes.forEach(n=>{
+      n.rotation.y+=_perf==='low'?.002:.004;
+      // Only pulse/traverse nearest 3 nodes
+      const dx=n.position.x-pPos.x, dz=n.position.z-pPos.z;
+      const dist=dx*dx+dz*dz; // skip sqrt
+      if(dist<64&&_perf!=='low'){
+        const pulse=.85+Math.sin(animT*4)*.15;
+        n.traverse(cv=>{if(cv.isMesh&&cv.material)cv.material.emissiveIntensity=pulse*.4;});
+      }
     });
-    // Very slow idle rotation on all nodes
-    n.rotation.y+=.004;
-    // Pulse nearest node
-    const dx=n.position.x-pPos.x, dz=n.position.z-pPos.z;
-    const dist=Math.sqrt(dx*dx+dz*dz);
-    if(dist<8){
-      const pulse=.85+Math.sin(animT*4)*.15;
-      n.traverse(cv=>{if(cv.isMesh&&cv.material)cv.material.emissiveIntensity=pulse*.4;});
-    }
-  });
+  }
   // Animate water
   if(window._waterMesh){
     window._waterMesh.position.y=-1.75+Math.sin(animT*.4)*.04;
     if(window._waterMat){const pulse=.75+Math.sin(animT*.3)*.06;window._waterMat.opacity=pulse;}
   }
-  renderMinimap();
+  if(Math.floor(animT*60)%(_perf==='low'?6:3)===0) renderMinimap(); // 10fps low, 20fps high
   renderer.render(scene,camera);}
 
 function onWorldTap(e){
@@ -3647,6 +3668,7 @@ function launch(){
           checkDailyLogin();
           checkRefBonus();
           setTimeout(calcOfflineIncome,2000);
+  setTimeout(checkWeeklyPrize,5000);
   // Definitive EMP sync 2s after launch — catches any remaining desync
   setTimeout(()=>{
     const canonical=Math.max(G.res.emp||0, G.res.emp||0);
@@ -4757,6 +4779,121 @@ function fmtNum(n){
   if(n>=1000)    return (n/1000).toFixed(1).replace('.0','')+'k';
   return String(Math.floor(n));
 }
+
+// Resource import market — buy with EMP
+const IMPORT_MARKET=[
+  {id:'crystal_s', name:'Crystal',     res:'crystal', qty:5,   cost:50,  ico:'💎'},
+  {id:'crystal_l', name:'Crystal ×20', res:'crystal', qty:20,  cost:180, ico:'💎'},
+  {id:'iron_s',    name:'Iron',        res:'iron',    qty:200, cost:30,  ico:'⚙️'},
+  {id:'mana_s',    name:'Mana',        res:'mana',    qty:10,  cost:80,  ico:'🔮'},
+  {id:'mana_l',    name:'Mana ×50',    res:'mana',    qty:50,  cost:350, ico:'🔮'},
+  {id:'gold_s',    name:'Gold',        res:'gold',    qty:100, cost:25,  ico:'🥇'},
+  {id:'starstone', name:'Starstone',   res:'starstone',qty:3,  cost:200, ico:'⭐'},
+  {id:'darkore',   name:'Dark Ore',    res:'darkore', qty:2,   cost:300, ico:'🌑'},
+];
+function renderImportMarket(){
+  const el=document.getElementById('cp-market');if(!el)return;
+  const emp=G.res.emp||0;
+  let html='<div style="padding:4px 0 10px;font-size:10px;color:var(--txt-d)">Spend $EMP to import scarce resources</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+  IMPORT_MARKET.forEach(item=>{
+    const can=emp>=item.cost;
+    html+=`<div onclick="${can?'buyImport(\''+item.id+'\')':''}" style="background:${can?'rgba(240,184,64,.06)':'rgba(255,255,255,.03)'};border:1px solid ${can?'rgba(240,184,64,.2)':'rgba(255,255,255,.07)'};border-radius:10px;padding:10px 8px;text-align:center;cursor:${can?'pointer':'default'};opacity:${can?1:.5};transition:all .15s" ${can?'onpointerdown="this.style.transform=\'scale(.95)\'" onpointerup="this.style.transform=\'\'"':''}>
+      <div style="font-size:18px">${item.ico}</div>
+      <div style="font-size:10px;font-weight:700;color:var(--txt);margin:2px 0">+${item.qty} ${item.name}</div>
+      <div style="font-size:11px;color:${can?'var(--emp)':'var(--txt-d)'};font-weight:700">${item.cost} $EMP</div>
+    </div>`;
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+function buyImport(id){
+  const item=IMPORT_MARKET.find(i=>i.id===id);if(!item)return;
+  if((G.res.emp||0)<item.cost){toast('Need '+item.cost+' $EMP!');return;}
+  G.res.emp=Math.max(0,G.res.emp-item.cost);
+  E.res.emp=G.res.emp;
+  E.empSpent=(E.empSpent||0)+item.cost;
+  addRes(item.res,item.qty);
+  saveGame();eSave();updateHUD();renderImportMarket();
+  toast('+'+item.qty+' '+item.name+' imported!',2500);
+  window.haptic?.('medium');
+}
+
+let _prodBoostUntil=0;
+function buyProdBoost(){
+  const cost=50;
+  if((G.res.emp||0)<cost){toast('Need '+cost+' $EMP for a 1hr boost!');return;}
+  if(Date.now()<_prodBoostUntil){toast('Boost already active!');return;}
+  G.res.emp=Math.max(0,G.res.emp-cost);
+  E.res.emp=G.res.emp;
+  E.empSpent=(E.empSpent||0)+cost;
+  _prodBoostUntil=Date.now()+3600000; // 1 hour
+  saveGame();eSave();updateHUD();
+  toast('⚡ ×2 Production boost active for 1 hour!',4000);
+  window.haptic?.('success');
+}
+function getProdBoostMult(){
+  return Date.now()<_prodBoostUntil?2.0:1.0;
+}
+
+async function checkWeeklyPrize(){
+  if(!db||!tgUser?.id)return;
+  const weekKey='week_'+Math.floor(Date.now()/604800000);
+  const lastWeekKey='empyria_week_claimed';
+  if(localStorage.getItem(lastWeekKey)===weekKey)return;
+  try{
+    const {data}=await db.from('players').select('telegram_id,emp_balance').order('emp_balance',{ascending:false}).limit(3);
+    if(!data)return;
+    const rank=data.findIndex(p=>String(p.telegram_id)===String(tgUser.id));
+    if(rank>=0&&rank<3){
+      const prizes=[10,6,3];
+      addRes('crystal',prizes[rank]);
+      saveGame();
+      localStorage.setItem(lastWeekKey,weekKey);
+      setTimeout(()=>toast('🏆 Top '+(rank+1)+' this week! +'+prizes[rank]+' 💎 Crystal bonus!',5000),2000);
+    }
+  }catch(e){}
+}
+
+// Crystal uses — premium boosts
+const CRYSTAL_SHOP=[
+  {id:'crys_speedup', name:'Skip cooldown',    ico:'💎', cost:1,  desc:'Skip any mini-game cooldown'},
+  {id:'crys_nodedbl', name:'Double next mine', ico:'💎', cost:2,  desc:'Next resource node gives 2× resources'},
+  {id:'crys_radar',   name:'Resource radar',   ico:'💎', cost:3,  desc:'Reveal all resources on minimap for 5min'},
+  {id:'crys_box',     name:'Mystery box',      ico:'💎', cost:5,  desc:'Receive 1 free mystery box'},
+  {id:'crys_emp2x',   name:'EMP sprint',       ico:'💎', cost:8,  desc:'30min: all EMP earnings ×1.5'},
+];
+let _crystalBoosts={nodeDouble:false,empSprint:0,radar:0};
+function buyCrystalItem(id){
+  const item=CRYSTAL_SHOP.find(i=>i.id===id);if(!item)return;
+  if((G.res.crystal||0)<item.cost){toast('Need '+item.cost+' 💎 Crystal!');return;}
+  G.res.crystal=Math.max(0,(G.res.crystal||0)-item.cost);
+  switch(id){
+    case 'crys_speedup': Object.keys(G.cd).forEach(k=>{G.cd[k]=0;}); toast('⏰ All cooldowns reset!',2500); break;
+    case 'crys_nodedbl': _crystalBoosts.nodeDouble=true; toast('⛏️ Next mine gives 2× resources!',3000); break;
+    case 'crys_radar':   _crystalBoosts.radar=Date.now()+300000; toast('🗺️ Resources visible on map for 5min',3000); break;
+    case 'crys_box':     G.mysteryBoxes++; toast('📦 +1 Mystery box!',2500); break;
+    case 'crys_emp2x':   _crystalBoosts.empSprint=Date.now()+1800000; toast('⚡ EMP ×1.5 for 30 minutes!',3500); break;
+  }
+  saveGame();updateHUD();window.haptic?.('success');
+}
+function renderCrystalShop(){
+  const el=document.getElementById('crystal-shop');if(!el)return;
+  const crys=G.res.crystal||0;
+  let html='<div style="font-size:10px;color:var(--txt-d);margin-bottom:8px">You have <span style="color:#a080ff;font-weight:700">'+crys+' 💎</span> crystal</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+  CRYSTAL_SHOP.forEach(item=>{
+    const can=crys>=item.cost;
+    html+=`<div onclick="${can?'buyCrystalItem(\''+item.id+'\')':''}" style="background:${can?'rgba(160,128,255,.08)':'rgba(255,255,255,.03)'};border:1px solid ${can?'rgba(160,128,255,.3)':'rgba(255,255,255,.07)'};border-radius:10px;padding:8px;text-align:center;cursor:${can?'pointer':'default'};opacity:${can?1:.5}">
+      <div style="font-size:14px">${item.ico}</div>
+      <div style="font-size:9px;font-weight:700;color:var(--txt)">${item.name}</div>
+      <div style="font-size:8px;color:var(--txt-d);margin:2px 0">${item.desc}</div>
+      <div style="font-size:10px;color:${can?'#a080ff':'var(--txt-d)'};font-weight:700">${item.cost} 💎</div>
+    </div>`;
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
@@ -5254,7 +5391,14 @@ function renderEconEMP(){
       </div>
     </div>`;
   }
-  return walletBanner + countdownHtml + progressHtml + presaleHtml + shareHtml + upgHtml;
+  // Production boost button
+  const boostActive=Date.now()<_prodBoostUntil;
+  const boostMinsLeft=Math.ceil((_prodBoostUntil-Date.now())/60000);
+  const boostHtml=`<div onclick="${boostActive?'':'buyProdBoost()'}" style="background:${boostActive?'rgba(255,140,0,.12)':'rgba(255,255,255,.04)'};border:1.5px solid ${boostActive?'rgba(255,140,0,.4)':'rgba(255,255,255,.1)'};border-radius:12px;padding:12px;margin-bottom:10px;cursor:${boostActive?'default':'pointer'};text-align:center">
+    <div style="font-size:12px;font-weight:700;color:${boostActive?'#ff8020':'var(--txt)'}">⚡ ${boostActive?'BOOST ACTIVE — '+boostMinsLeft+'min left':'×2 Production Boost'}</div>
+    <div style="font-size:10px;color:var(--txt-d);margin-top:3px">${boostActive?'All passive income doubled':'50 $EMP · 1 hour · all buildings'}</div>
+  </div>`;
+  return walletBanner + countdownHtml + progressHtml + boostHtml + presaleHtml + shareHtml + upgHtml;
 }
 
 
