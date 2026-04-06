@@ -2523,6 +2523,13 @@ function rollRareDrop(type){const drops=RARE_DROPS[type];if(!drops)return null;f
 
 function doMine(){
   const _now=Date.now();if(_now-(window._ml||0)<150)return;window._ml=_now;
+  // Update mine tap counter in button
+  window._mineTaps=(window._mineTaps||0)+1;
+  const mineBtn=document.querySelector('.ab-mine');
+  if(mineBtn){
+    mineBtn.style.transform='scale(.92)';
+    setTimeout(()=>mineBtn.style.transform='',80);
+  }
   const mb=document.querySelector('.ab-mine');
   if(mb){
     mb.style.transform='scale(.88)';
@@ -2599,7 +2606,11 @@ function doSell(){
   Object.entries(rates).forEach(([k,v])=>{const qty=G.res[k]||0;if(qty>0){t+=qty*v;sold.push(RES_ICO[k]+'×'+qty);G.res[k]=0;}});
   Object.entries(erates).forEach(([k,v])=>{const qty=E.res[k]||0;if(qty>0){t+=qty*v;sold.push(RES_ICO[k]+'×'+qty);E.res[k]=0;}});
   if(!t){toast('Nothing to sell — mine some resources first!');return;}
-  const mult=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
+  const mult=1+
+    (typeof G.bld.marketplace==='object'?.10:0)+
+    (typeof G.bld.tradepost==='object'?.15:0)+
+    (typeof G.bld.guildhall==='object'?.10:0);
+  if(mult>1) setTimeout(()=>toast('Market bonus: ×'+mult.toFixed(2)+' sell rate',2000),100);
   const e=Math.floor(t*mult);
   eEarn(e,'Sell resources');
   window.haptic?.('medium'); // use eEarn so airdrop score is tracked!
@@ -2633,6 +2644,10 @@ function processMove(){
       pPos.x+=dx/dist*spd; pPos.z+=dz/dist*spd;
       const gy=sampleH(pPos.x,pPos.z);
       playerGroup.position.set(pPos.x,gy+.20,pPos.z);
+  // Update shadow
+  if(window._playerShadow){
+    window._playerShadow.position.set(pPos.x,sampleH(pPos.x,pPos.z)+.02,pPos.z);
+  }
       playerGroup.rotation.y=Math.atan2(-dx,-dz);
       walkT+=.14; // slower leg animation to match speed
       if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.6;
@@ -2657,12 +2672,23 @@ function processMove(){
     pPos.z=Math.max(-35,Math.min(35,pPos.z+dz));
     const gy=sampleH(pPos.x,pPos.z);
     playerGroup.position.set(pPos.x,gy+.20,pPos.z);
+  // Update shadow
+  if(window._playerShadow){
+    window._playerShadow.position.set(pPos.x,sampleH(pPos.x,pPos.z)+.02,pPos.z);
+  }
     // Smooth rotation - lerp toward target angle
     const targetAngle=Math.atan2(-dx,-dz);
     let da=targetAngle-playerGroup.rotation.y;
     while(da>Math.PI)da-=Math.PI*2; while(da<-Math.PI)da+=Math.PI*2;
     playerGroup.rotation.y+=da*.18;
     walkT+=.14;
+    // Footstep dust every ~10 frames when moving
+    if(scene&&Math.floor(walkT*7)%10===0){
+      const dust=new THREE.Mesh(new THREE.SphereGeometry(.05,4,3),new THREE.MeshBasicMaterial({color:0xc0b090,transparent:true,opacity:.4}));
+      dust.position.set(pPos.x+(Math.random()-.5)*.3,sampleH(pPos.x,pPos.z)+.05,pPos.z+(Math.random()-.5)*.3);
+      scene.add(dust);
+      let dt=0;const di=setInterval(()=>{dt+=.08;dust.material.opacity=.4*(1-dt);dust.position.y+=.01;if(dt>=1){clearInterval(di);scene.remove(dust);}},16);
+    }
     // Leg swing
     if(playerGroup.children[1])playerGroup.children[1].rotation.x=Math.sin(walkT)*.55;
     if(playerGroup.children[2])playerGroup.children[2].rotation.x=-Math.sin(walkT)*.55;
@@ -2715,6 +2741,8 @@ function confirmPlace(wx,wz){
   // Handle world building placement
   const id=placingBld;if(!id)return;cancelPlacing();
   const snap={x:Math.round(wx/2)*2,z:Math.round(wz/2)*2};
+  // Flash snap indicator
+  if(confirmRing){confirmRing.position.set(snap.x,.05,snap.z);confirmRing.visible=true;}
   if(isPlacementBlocked(snap.x,snap.z)){
     toast('⛔ Too close! Choose another spot.');
     const def2=BLD_DEF[id];if(def2)for(const[r,v]of Object.entries(def2.cost))G.res[r]=(G.res[r]||0)+v;updateHUD();return;
@@ -3035,6 +3063,16 @@ function openCity(){
 }
 function closeCity(){document.getElementById('city-panel').classList.remove('open');window.Telegram?.WebApp?.BackButton?.hide?.();}
 function cityBgClick(e){if(e.target===document.getElementById('city-panel'))closeCity();}
+// Swipe down to close city panel
+(()=>{
+  let _sy=0;
+  document.addEventListener('touchstart',e=>{if(document.getElementById('city-panel')?.classList.contains('open'))_sy=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!document.getElementById('city-panel')?.classList.contains('open'))return;
+    const dy=e.changedTouches[0].clientY-_sy;
+    if(dy>80)closeCity();
+  },{passive:true});
+})();
 
 function cpTab(name){
   localStorage.setItem('empyria_last_tab',name);
@@ -3199,7 +3237,15 @@ function renderPassiveSection(){
 function renderLogSection(){
   let html='<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin-bottom:8px">📜 ACTIVITY LOG</div>';
   if(!G.log.length)return html+'<div style="font-size:9px;color:var(--txt-d);text-align:center;padding:12px">No activity yet</div>';
-  G.log.slice(0,40).forEach(e=>{html+=`<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:9px;display:flex;gap:6px;align-items:baseline"><span style="color:var(--txt-d);font-size:7px;flex-shrink:0">${e.time||''}</span><span style="color:${e.type==='good'?'var(--grn2)':e.type==='bad'?'var(--red)':'var(--txt2)'}">${e.msg}</span></div>`;});
+  G.log.slice(0,40).forEach(e=>{
+    const col=e.type==='good'?'#60ee80':e.type==='bad'?'#ff7070':e.type==='emp'?'var(--emp)':'var(--txt2)';
+    const icon=e.type==='good'?'▲':e.type==='bad'?'▼':e.type==='emp'?'💰':'·';
+    html+=`<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:10px;display:flex;gap:8px;align-items:baseline">
+      <span style="color:${col};flex-shrink:0">${icon}</span>
+      <span style="flex:1;color:${col}">${e.msg}</span>
+      <span style="color:var(--txt-d);font-size:8px;flex-shrink:0">${e.time||''}</span>
+    </div>`;
+  });
   return html;
 }
 
@@ -3396,7 +3442,9 @@ function initTap(){_tap={stone:0,wood:0,gold:0,iron:0,crystal:0,emp:0,combo:0,co
 const ORE_TYPES=[{emoji:'🪨',res:'stone',val:1,color:'#a09080',size:52},{emoji:'🪵',res:'wood',val:1,color:'#8B5E3C',size:48},{emoji:'🥇',res:'gold',val:1,color:'#f5c830',size:44},{emoji:'⚙️',res:'iron',val:1,color:'#8aa4b8',size:44},{emoji:'💎',res:'crystal',val:1,color:'#8855ff',size:40},{emoji:'🪙',res:'emp',val:3,color:'var(--gold-b)',size:44},{emoji:'💣',res:null,val:0,color:'#cc2200',size:46}];
 function startMineDash(){const arena=document.getElementById('tap-arena');arena.innerHTML='';_tap.active=true;_tap.timeLeft=30;_tapT=setInterval(()=>{_tap.timeLeft--;const el=document.getElementById('ts-timer');if(el){el.textContent=_tap.timeLeft+'s';el.style.color=_tap.timeLeft<=5?'#ff2222':'var(--red)';}if(_tap.timeLeft<=0){clearInterval(_tapT);clearInterval(_tapSpawnT);endTap();}},1000);_tapSpawnT=setInterval(spawnOre,600);spawnOre();spawnOre();}
 function spawnOre(){if(!_tap.active)return;const arena=document.getElementById('tap-arena'),W=arena.offsetWidth||300;const wts=[25,25,20,15,8,10,Math.max(2,15-_tap.combo*2)],total=wts.reduce((a,b)=>a+b,0);let roll=Math.random()*total,type=ORE_TYPES[0];for(let i=0;i<ORE_TYPES.length;i++){roll-=wts[i];if(roll<=0){type=ORE_TYPES[i];break;}}const el=document.createElement('div'),x=Math.random()*(W-type.size),dur=1.8+Math.random()*1.2;el.style.cssText=`position:absolute;left:${x}px;top:-60px;width:${type.size}px;height:${type.size}px;font-size:${type.size-8}px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;filter:drop-shadow(0 2px 6px ${type.color});animation:fall ${dur}s linear forwards`;el.textContent=type.emoji;el.dataset.t=JSON.stringify(type);el.addEventListener('pointerdown',e=>{e.stopPropagation();if(!_tap.active)return;const t=JSON.parse(el.dataset.t);el.style.transform='scale(1.4)';el.style.opacity='0';setTimeout(()=>el.remove(),150);clearTimeout(_tap.comboT);_tap.combo=Math.min(_tap.combo+1,10);_tap.comboT=setTimeout(()=>{_tap.combo=0;const tc=document.getElementById('ts-combo');if(tc)tc.textContent='×1';},1500);const m2=1+_tap.combo*.15;const tc2=document.getElementById('ts-combo');if(tc2)tc2.textContent='×'+_tap.combo.toFixed(1);if(t.res===null){_tap.combo=0;const tc3=document.getElementById('ts-combo');if(tc3){tc3.style.color='#ff4444';setTimeout(()=>tc3.style.color='var(--gold-b)',400);}}else if(t.res){const earned=Math.ceil(t.val*m2);_tap[t.res]=(_tap[t.res]||0)+earned;const sid=document.getElementById(t.res==='emp'?'ts-e':'ts-'+t.res[0]);if(sid)sid.textContent=_tap[t.res]||0;if(t.res==='crystal'){const rc=document.getElementById('ts-rare');if(rc)rc.textContent=_tap.crystal||0;}}_tap.taps++;checkMysteryBox();});arena.appendChild(el);setTimeout(()=>{if(el.parentNode)el.remove();},dur*1000+200);}
-function endTap(){_tap.active=false;clearInterval(_tapT);clearInterval(_tapSpawnT);const rws={};if(_tap.stone>0)rws.stone=_tap.stone;if(_tap.wood>0)rws.wood=_tap.wood;if(_tap.gold>0)rws.gold=_tap.gold;if(_tap.iron>0)rws.iron=_tap.iron;if(_tap.crystal>0)rws.crystal=_tap.crystal;rws.emp=Math.max(2,Math.floor((_tap.emp||0)*.25))+Math.floor(_tap.taps*.12);setCd('tap');showResult('⛏️ Mine Dash!',`${_tap.taps} ore tapped · max combo ×${_tap.combo.toFixed(1)}`,rws);}
+function endTap(){_tap.active=false;clearInterval(_tapT);clearInterval(_tapSpawnT);const rws={};if(_tap.stone>0)rws.stone=_tap.stone;if(_tap.wood>0)rws.wood=_tap.wood;if(_tap.gold>0)rws.gold=_tap.gold;if(_tap.iron>0)rws.iron=_tap.iron;if(_tap.crystal>0)rws.crystal=_tap.crystal;rws.emp=Math.max(2,Math.floor((_tap.emp||0)*.25))+Math.floor(_tap.taps*.12);setCd('tap');
+  const dashGrade=_tap.taps>=50?'S':_tap.taps>=30?'A':_tap.taps>=15?'B':'C';
+  showResult('⛏️ Mine Dash!',`${_tap.taps} taps · combo ×${_tap.combo.toFixed(1)} · Grade ${dashGrade}`,rws);}
 
 // GAME 2: TOWER DEFENSE
 let _aim={},_aimT=null,_aimST=null,_aimOn=false,_aimAF=null,_aimCtx=null;
@@ -3744,6 +3792,8 @@ async function showLeaderboard() {
   if(rankEl) rankEl.textContent='...';
   if (!modal) return;
   modal.style.display = 'flex';
+  const refreshBtn=modal.querySelector('.lb-refresh');
+  if(refreshBtn) refreshBtn.style.display='none';
   list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Loading...</div>';
 
   const rows = await dbGetLeaderboard();
@@ -3916,6 +3966,19 @@ function checkOrientation(){
 window.addEventListener('resize',checkOrientation);
 checkOrientation();
 function updateSplashCountdown(){
+  // Live countdown in presale strip
+  if(!window._cdTimer){
+    window._cdTimer=setInterval(()=>{
+      const presaleEnd=new Date('2026-06-15T00:00:00Z').getTime();
+      const ms=presaleEnd-Date.now();
+      if(ms<=0){clearInterval(window._cdTimer);return;}
+      const d=Math.floor(ms/86400000);
+      const h=Math.floor((ms%86400000)/3600000);
+      const m=Math.floor((ms%3600000)/60000);
+      const txt=d>0?d+'d '+h+'h '+m+'m':h+'h '+m+'m';
+      document.querySelectorAll('.presale-countdown').forEach(el=>el.textContent=txt);
+    },60000);
+  }
   const el=document.getElementById('splash-countdown');
   if(!el)return;
   const ms=new Date('2026-06-15T00:00:00Z')-Date.now();
@@ -4015,7 +4078,13 @@ function launch(){
         eSave(); saveGame();
         _lastSaveTime=Date.now();
         const sl=document.getElementById('save-lbl');
-        if(sl&&sl.textContent==='SAVE'){sl.textContent='✓AUTO';setTimeout(()=>sl.textContent='SAVE',1200);}
+        if(sl){
+          sl.textContent='✓';
+          setTimeout(()=>{
+            const mins=Math.floor((Date.now()-_lastSaveTime)/60000);
+            sl.textContent=mins<1?'SAVED':'SAVE';
+          },1500);
+        }
       }
       if(E.tick%75===0) dbSyncPlayer(); // sync every 10min (75 ticks × 8s)
       // Upgrade reminder
@@ -4863,7 +4932,7 @@ function spawnBuildParticles(wx,wz){
 
 function showSellScreen(){
   const existing=document.getElementById('sell-screen');
-  if(existing){existing.remove();return;}
+  if(existing){existing.style.opacity='0';setTimeout(()=>existing.remove(),150);return;}
   const rates={stone:.15,wood:.15,gold:.4,iron:.6,crystal:2.5,mana:5,starstone:15,darkore:40};
   const rateLabels={stone:'Common',wood:'Common',gold:'Uncommon',iron:'Uncommon',crystal:'Rare',mana:'Rare',starstone:'Epic',darkore:'Legendary'};
   const sellable=Object.entries(rates).filter(([k])=>(G.res[k]||0)>=1);
@@ -4873,7 +4942,11 @@ function showSellScreen(){
   panel.id='sell-screen';
   panel.style.cssText='position:fixed;bottom:78px;left:50%;transform:translateX(-50%);z-index:60;background:var(--bg2);border:1.5px solid rgba(64,200,112,.3);border-radius:16px;padding:12px;width:88vw;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.5)';
 
-  const mult=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
+  const mult=1+
+    (typeof G.bld.marketplace==='object'?.10:0)+
+    (typeof G.bld.tradepost==='object'?.15:0)+
+    (typeof G.bld.guildhall==='object'?.10:0);
+  if(mult>1) setTimeout(()=>toast('Market bonus: ×'+mult.toFixed(2)+' sell rate',2000),100);
   let rows='';
   sellable.forEach(([k,rate])=>{
     const qty=Math.floor(G.res[k]||0);
