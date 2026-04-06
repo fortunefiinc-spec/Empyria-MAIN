@@ -384,6 +384,36 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 </div>
 
 <!-- Onboarding overlay -->
+
+<!-- How To Play Modal -->
+<div id="htp-modal" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.92);overflow:hidden">
+  <div style="height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:max(16px,env(safe-area-inset-top)) 16px 12px;flex-shrink:0">
+      <div style="font-family:Cinzel,serif;font-size:18px;font-weight:900;background:linear-gradient(135deg,#f0c060,#ffd870);-webkit-background-clip:text;-webkit-text-fill-color:transparent">HOW TO PLAY</div>
+      <button onclick="closeHTP()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;width:32px;height:32px;color:var(--txt);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+
+    <!-- Tab bar -->
+    <div style="display:flex;gap:0;margin:0 12px 10px;background:rgba(255,255,255,.05);border-radius:10px;padding:3px;flex-shrink:0">
+      <button class="htp-tab active" onclick="htpTab('start')" id="htp-t-start" style="flex:1;padding:6px 2px;background:rgba(240,184,64,.2);border:1px solid rgba(240,184,64,.3);border-radius:7px;color:var(--gold-b);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.3px">START</button>
+      <button class="htp-tab" onclick="htpTab('build')" id="htp-t-build" style="flex:1;padding:6px 2px;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--txt-d);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.3px">BUILD</button>
+      <button class="htp-tab" onclick="htpTab('econ')" id="htp-t-econ" style="flex:1;padding:6px 2px;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--txt-d);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.3px">ECONOMY</button>
+      <button class="htp-tab" onclick="htpTab('presale')" id="htp-t-presale" style="flex:1;padding:6px 2px;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--txt-d);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.3px">PRESALE</button>
+      <button class="htp-tab" onclick="htpTab('tips')" id="htp-t-tips" style="flex:1;padding:6px 2px;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--txt-d);font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.3px">TIPS</button>
+    </div>
+
+    <!-- Content area -->
+    <div id="htp-content" style="flex:1;overflow-y:auto;padding:0 14px 80px;-webkit-overflow-scrolling:touch"></div>
+
+    <!-- Bottom button -->
+    <div style="flex-shrink:0;padding:12px 14px max(16px,env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.95))">
+      <button onclick="closeHTP()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1a4020,#2a6030);border:2px solid rgba(64,200,112,.5);border-radius:14px;color:#80ee90;font-family:Cinzel,serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px">▶ START PLAYING</button>
+    </div>
+  </div>
+</div>
+
 <div id="onboarding" style="display:none;position:fixed;inset:0;z-index:700;background:radial-gradient(ellipse at 50% 40%,#0e1e28 0%,#060c14 100%);overflow-y:auto;-webkit-overflow-scrolling:touch">
   <div style="max-width:420px;margin:0 auto;padding:32px 20px 80px">
     <div style="text-align:center;margin-bottom:28px">
@@ -469,6 +499,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div id="topbar-row1">
       <div id="logo" style="flex-shrink:0;font-family:Cinzel,serif;font-size:13px;font-weight:700;letter-spacing:1px">EMPYRIA<small id="era-label" style="font-size:7px;color:var(--txt-d);letter-spacing:1px;margin-left:4px">ERA I</small></div>
       <div style="flex:1;min-width:0"></div>
+      <!-- Help button -->
+      <div onclick="openHTP()" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50%;cursor:pointer;flex-shrink:0;pointer-events:all;font-size:13px;color:var(--txt-d);font-weight:700">?</div>
       <!-- Save -->
       <div id="save-btn" onclick="manualSave()" style="display:flex;align-items:center;gap:2px;background:rgba(20,30,40,.85);border:1px solid rgba(80,140,200,.3);border-radius:8px;padding:3px 7px;cursor:pointer;flex-shrink:0;pointer-events:all;transition:all .2s">
         <span id="save-ico" style="font-size:10px">☁️</span>
@@ -4894,6 +4926,195 @@ function renderCrystalShop(){
   html+='</div>';
   el.innerHTML=html;
 }
+
+const HTP_CONTENT = {
+  start: `
+    <div style="margin-bottom:14px">
+      <div style="background:rgba(240,184,64,.06);border:1px solid rgba(240,184,64,.15);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--gold-b);font-weight:700;margin-bottom:6px;font-family:Cinzel,serif">THE LOOP</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="font-size:22px;flex-shrink:0">⛏️</div>
+          <div><div style="font-size:11px;font-weight:700">1. Mine Resources</div><div style="font-size:10px;color:var(--txt-d)">Walk to glowing nodes. Tap or press SPACE to mine. Collect stone, wood, gold, iron, crystal.</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="font-size:22px;flex-shrink:0">💱</div>
+          <div><div style="font-size:11px;font-weight:700">2. Sell for $EMP</div><div style="font-size:10px;color:var(--txt-d)">Tap SELL in the bottom bar. Convert all resources to $EMP tokens instantly.</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="font-size:22px;flex-shrink:0">🏗️</div>
+          <div><div style="font-size:11px;font-weight:700">3. Build Your Empire</div><div style="font-size:10px;color:var(--txt-d)">Tap CITY → BUILD. Place buildings that generate passive $EMP every 8 seconds.</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:22px;flex-shrink:0">🚀</div>
+          <div><div style="font-size:11px;font-weight:700">4. Join the Presale</div><div style="font-size:10px;color:var(--txt-d)">Tap $EMP tab. Connect wallet and buy multipliers. Your $EMP earned = airdrop score.</div></div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">CONTROLS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px">
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:7px"><span style="color:var(--gold-b)">Walk</span><br>D-pad or drag world</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:7px"><span style="color:var(--gold-b)">Mine</span><br>Tap node or MINE button</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:7px"><span style="color:var(--gold-b)">Walk-to</span><br>Tap anywhere on ground</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:7px"><span style="color:var(--gold-b)">Sprint</span><br>Double-tap world</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:7px"><span style="color:var(--gold-b)">Camera</span><br>+ / − buttons</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:7px"><span style="color:var(--gold-b)">Rotate</span><br>↺ ↻ buttons</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(64,200,112,.06);border:1px solid rgba(64,200,112,.15);border-radius:12px;padding:12px">
+        <div style="font-size:11px;color:var(--grn2);font-weight:700;margin-bottom:6px;font-family:Cinzel,serif">YOUR FIRST 10 MINUTES</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.8">
+          1. Walk to gold or stone nodes and mine until you have 150+ resources<br>
+          2. Tap SELL — you should get ~20-30 $EMP<br>
+          3. Mine more until you have enough for a Mine Shaft (15 $EMP)<br>
+          4. Place buildings near the path to start passive income<br>
+          5. Keep selling resources and save up for EMP Altar (80 $EMP)
+        </div>
+      </div>
+    </div>
+  `,
+
+  build: `
+    <div style="margin-bottom:14px">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">ERA SYSTEM</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7;margin-bottom:8px">The world has 5 ERAs. Higher ERAs unlock more powerful buildings. You need specific buildings AND $EMP to advance.</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          ${[['ERA 1','Stone Age','Mine, Farm, Lumber, EMP Altar','Free','#8ab4d4'],['ERA 2','Iron Age','Smelter, Forge, Coin Master, Trade Post','500 $EMP','#c0a060'],['ERA 3','Arcane Age','Workshop, Academy, Royal Mint, Harbour','2,000 $EMP','#a080d0'],['ERA 4','Stellar Age','Observatory, EMP Temple, Guild Hall','8,000 $EMP','#60c0a0'],['ERA 5','Shadow Empire','EMP Nexus, Empire Bank, Void Portal','25,000 $EMP','#d06080']].map(([era,name,blds,fee,col])=>`
+          <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:8px;border-left:3px solid ${col}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+              <div style="font-size:10px;font-weight:700;color:${col}">${era} — ${name}</div>
+              <div style="font-size:9px;color:var(--emp)">${fee}</div>
+            </div>
+            <div style="font-size:9px;color:var(--txt-d)">${blds}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">PLACING BUILDINGS</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7">
+          1. Tap CITY → BUILD → select a building<br>
+          2. Walk to where you want to place it<br>
+          3. Ghost preview turns <span style="color:#40c060">green</span> when valid, <span style="color:#ff4040">red</span> when blocked<br>
+          4. Tap CONFIRM or the check button to place<br>
+          5. Use the ↔️ button to move a building later
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">UPGRADES</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7">Tap a building in the world to see its upgrade options. Each upgrade level boosts production significantly but costs both resources and $EMP. Max 2 upgrade levels per building.</div>
+      </div>
+    </div>
+  `,
+
+  econ: `
+    <div style="margin-bottom:14px">
+      <div style="background:rgba(240,184,64,.06);border:1px solid rgba(240,184,64,.15);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--gold-b);font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">$EMP SOURCES</div>
+        <div style="display:flex;flex-direction:column;gap:5px;font-size:10px">
+          <div style="display:flex;justify-content:space-between"><span>Sell stone/wood</span><span style="color:var(--emp)">0.15 $EMP/unit</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Sell gold/iron</span><span style="color:var(--emp)">0.4–0.6 $EMP/unit</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Sell crystal/mana</span><span style="color:var(--emp)">2.5–5 $EMP/unit</span></div>
+          <div style="display:flex;justify-content:space-between"><span>EMP Altar (passive)</span><span style="color:var(--emp)">4.5/hr</span></div>
+          <div style="display:flex;justify-content:space-between"><span>EMP Nexus (passive)</span><span style="color:var(--emp)">315/hr</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Daily login streak</span><span style="color:var(--emp)">up to 5/day</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Daily quests</span><span style="color:var(--emp)">1–3/day</span></div>
+        </div>
+      </div>
+
+      <div style="background:rgba(224,88,88,.06);border:1px solid rgba(224,88,88,.15);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:#ff9090;font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">$EMP COSTS (SINKS)</div>
+        <div style="display:flex;flex-direction:column;gap:5px;font-size:10px">
+          <div style="display:flex;justify-content:space-between"><span>Early buildings</span><span style="color:#ff9090">15–80 $EMP</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Mid-game buildings</span><span style="color:#ff9090">150–600 $EMP</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Late-game buildings</span><span style="color:#ff9090">1,200–10,000 $EMP</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Building upgrades</span><span style="color:#ff9090">150–3,000 $EMP</span></div>
+          <div style="display:flex;justify-content:space-between"><span>ERA unlock fee</span><span style="color:#ff9090">500–25,000 $EMP</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Production boost (1hr)</span><span style="color:#ff9090">50 $EMP</span></div>
+          <div style="display:flex;justify-content:space-between"><span>Resource import</span><span style="color:#ff9090">25–300 $EMP</span></div>
+        </div>
+      </div>
+
+      <div style="background:rgba(160,128,255,.06);border:1px solid rgba(160,128,255,.15);border-radius:12px;padding:12px">
+        <div style="font-size:11px;color:#a080ff;font-weight:700;margin-bottom:6px;font-family:Cinzel,serif">💎 CRYSTAL (PREMIUM)</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7">Crystal drops rarely from mining and comes from referrals. Use it in the SHOP tab to buy special boosts: reset cooldowns, double your next mine, or get a 30-minute ×1.5 EMP sprint.</div>
+      </div>
+    </div>
+  `,
+
+  presale: `
+    <div style="margin-bottom:14px">
+      <div style="background:rgba(64,200,112,.06);border:1px solid rgba(64,200,112,.2);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--grn2);font-weight:700;margin-bottom:6px;font-family:Cinzel,serif">WHAT IS THE PRESALE?</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7">The presale ends June 15, 2026. Every $EMP you earn in the game is permanently recorded as your airdrop allocation. You can never lose your score — it only goes up.<br><br>10 $EMP earned = 1 $EMP token at launch. The earlier you participate, the more tokens you accumulate.</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">PRESALE TIERS</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          ${[['Early Investor I','200','×1.5','2-3 days'],['Early Investor II','1,000','×2.0','1-2 weeks'],['Early Investor III','5,000','×2.5','3-4 weeks'],['Founding Merchant','20,000','×2.5','6-7 weeks'],['Empire Architect','60,000','×3.0','months'],['Token Whale','200,000','×3.0','dedicated']].map(([n,cost,mult,time])=>`
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border-radius:8px;padding:7px 9px">
+            <div style="flex:1;font-size:10px;font-weight:700">${n}</div>
+            <div style="font-size:9px;color:var(--emp);white-space:nowrap">${cost} $EMP</div>
+            <div style="font-size:9px;color:var(--grn2);white-space:nowrap">${mult}</div>
+          </div>`).join('')}
+        </div>
+        <div style="font-size:9px;color:var(--txt-d);margin-top:8px">Multipliers stack. All 6 tiers = ×67.5 cumulative boost to your passive income.</div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:6px;font-family:Cinzel,serif">HOW TO CONNECT WALLET</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7">Tap $EMP tab → tap the wallet button at the top → connect your TON wallet (Tonkeeper or similar). Once connected, your airdrop score is linked to your wallet address. No funds required.</div>
+      </div>
+    </div>
+  `,
+
+  tips: `
+    <div style="margin-bottom:14px">
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:8px;font-family:Cinzel,serif">⚡ POWER TIPS</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:10px;color:var(--txt-d);line-height:1.6">
+          <div style="background:rgba(240,184,64,.04);border-radius:7px;padding:7px"><span style="color:var(--gold-b)">Focus on crystal early.</span> Even 1 crystal sells for 2.5 $EMP — 16× more than stone.</div>
+          <div style="background:rgba(240,184,64,.04);border-radius:7px;padding:7px"><span style="color:var(--gold-b)">Build EMP Altar first.</span> It starts your passive income. Without it you only earn from selling.</div>
+          <div style="background:rgba(240,184,64,.04);border-radius:7px;padding:7px"><span style="color:var(--gold-b)">Daily login = streak bonus.</span> Log in every day even for 1 minute to keep your streak alive.</div>
+          <div style="background:rgba(240,184,64,.04);border-radius:7px;padding:7px"><span style="color:var(--gold-b)">Production boost timing.</span> Buy the 50 $EMP boost right before sleeping — it runs for 1 hour of passive income.</div>
+          <div style="background:rgba(240,184,64,.04);border-radius:7px;padding:7px"><span style="color:var(--gold-b)">Don't upgrade too early.</span> Save EMP for better buildings first. Upgrades are expensive.</div>
+          <div style="background:rgba(240,184,64,.04);border-radius:7px;padding:7px"><span style="color:var(--gold-b)">SELL ALL often.</span> Resources cap at 50,000. Sell before you hit the cap.</div>
+          <div style="background:rgba(240,184,64,.04);border-radius:7px;padding:7px"><span style="color:var(--gold-b)">Invite friends.</span> Referrals give you crystal and help the community — bigger airdrop pool for everyone.</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px">
+        <div style="font-size:11px;color:var(--txt);font-weight:700;margin-bottom:6px;font-family:Cinzel,serif">SAVE & PROGRESS</div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7">Your progress saves automatically every few minutes and when you close the app. It's backed up to the cloud so you won't lose progress if you clear your cache. Tap the SAVE button to sync immediately.<br><br>Your airdrop score (<em>Total $EMP Earned</em>) is permanently stored and can never go down.</div>
+      </div>
+    </div>
+  `
+};
+
+function openHTP(tab){
+  const modal=document.getElementById('htp-modal');
+  if(modal){ modal.style.display='block'; htpTab(tab||'start'); }
+}
+function closeHTP(){
+  const modal=document.getElementById('htp-modal');
+  if(modal){ modal.style.opacity='0'; modal.style.transition='opacity .2s'; setTimeout(()=>{ modal.style.display='none'; modal.style.opacity='1'; },200); }
+  localStorage.setItem('empyria_tutorial_done','1');
+}
+function htpTab(id){
+  document.querySelectorAll('.htp-tab').forEach(t=>{
+    const active=t.id==='htp-t-'+id;
+    t.style.background=active?'rgba(240,184,64,.2)':'transparent';
+    t.style.borderColor=active?'rgba(240,184,64,.3)':'transparent';
+    t.style.color=active?'var(--gold-b)':'var(--txt-d)';
+  });
+  const el=document.getElementById('htp-content');
+  if(el) el.innerHTML=HTP_CONTENT[id]||'';
+}
+
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
