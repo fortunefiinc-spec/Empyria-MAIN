@@ -2446,9 +2446,9 @@ function confirmPlace(wx,wz){
   const _empMsg=_bdef?.empOut>0?' · +'+(_bdef.empOut*(E.empMult||1)).toFixed(2)+'💰/tick':'';
   toast('✅ '+_bdef?.name+' built!'+_empMsg,3000);
   addLog(_bdef?.ico+' '+_bdef?.name+' built','good');
+  saveGame(); eSave(); // save immediately after building placement
   setTimeout(()=>{
     updateWorkerNPCs();
-    // Burst particles at build site
     if(typeof spawnBuildParticles==='function') spawnBuildParticles(snap.x,snap.z);
   },200);
 }
@@ -3157,12 +3157,16 @@ function loadGame(){try{const raw=localStorage.getItem('empyria_v2');
   G.prestige=sv.prestige||0;G.prestigeBonus=sv.prestigeBonus||0;
   G.mysteryBoxes=sv.mysteryBoxes||0;G.totalTaps=sv.totalTaps||0;G.nextBoxAt=sv.nextBoxAt||0;G.log=sv.log||[];// Re-place buildings — defer to ensure scene is ready
   setTimeout(()=>{
+    let sp=0;
     Object.entries(G.bld).forEach(([id,built])=>{
-      if(built===true&&BLD_DEF[id]&&!buildingMeshes[id]){
-        const spacing=Object.keys(buildingMeshes).length;
-        const bx=((spacing*4.5)%36)-18, bz=Math.floor(spacing/8)*5-10;
+      if(!BLD_DEF[id]||buildingMeshes[id])return;
+      if(typeof built==='object'&&built.x!==undefined){
+        buildBldMesh(id,built.x,built.z);
+      } else if(built===true){
+        const bx=((sp*4.5)%36)-18,bz=Math.floor(sp/8)*5-10;
         buildBldMesh(id,bx,bz);
       }
+      sp++;
     });
     updateHUD();
   },200);
@@ -4904,7 +4908,8 @@ function eSave(){
 }
 function eLoad(){try{const raw=localStorage.getItem('empyria_eco');if(!raw)return;const s=JSON.parse(raw);
   // Don't restore E.res from eco — G.res is canonical (loaded by loadGame)
-  // Only restore economy-specific fields:if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=(typeof s.empMult==='number'&&!isNaN(s.empMult)&&s.empMult>=1)?s.empMult:1.0;
+  // Only restore economy-specific fields:
+  if(s.pop)Object.assign(E.pop,s.pop);E.happiness=s.happiness??70;E.stability=s.stability??80;E.defense=s.defense??0;E.year=s.year??1;E.day=s.day??0;E.tick=s.tick??0;E.season=s.season??0;E.buildings=s.buildings||[];E.nextId=s.nextId??1;if(s.prices)Object.assign(E.prices,s.prices);E.log=s.log||[];E.upgradesDone=s.upgradesDone||[];E.priceBonus=s.priceBonus??1;E.logBonusExtra=s.logBonusExtra??0;E.raidResist=s.raidResist??false;E.prestigeBonus=s.prestigeBonus??0;E.empRate=s.empRate??0;E.empMult=(typeof s.empMult==='number'&&!isNaN(s.empMult)&&s.empMult>=1)?s.empMult:1.0;
     E.totalEmpEarned=(typeof s.totalEmpEarned==='number'&&!isNaN(s.totalEmpEarned))?s.totalEmpEarned:0;
     E.empSpent=(typeof s.empSpent==='number')?s.empSpent:0;
   // Rebuild 3D meshes for saved economy buildings
