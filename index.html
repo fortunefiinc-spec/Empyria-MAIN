@@ -37,9 +37,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   font-family:Rajdhani,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
 
 /* ── Splash screen ─────────────────────────────────────────────────────── */
-#splash{position:fixed;inset:0;z-index:500;
-  background:radial-gradient(ellipse at 50% 35%,#0e1e28 0%,#081018 55%,#050c14 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+#splash{position:fixed;inset:0;z-index:500;background:radial-gradient(ellipse at 50% 35%,#0e1e28 0%,#081018 55%,#050c14 100%);overflow:hidden}
 .sp-logo{font-family:Cinzel,serif;font-size:46px;font-weight:900;
   background:linear-gradient(135deg,#f0c060,#ffeaa0,#c89030);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
@@ -490,15 +488,204 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 </div>
 
 <div id="splash">
-  <div class="sp-logo">EMPYRIA</div>
-  <div class="sp-tag">BUILD YOUR EMPORIUM &nbsp;<span style="font-size:10px;color:var(--gold)">v1.0.1</span></div>
-  <div class="sp-story">Year <strong>1347</strong>. The great trade routes are open. Kingdoms rise and fall on commerce.<br><br>Explore the <strong>3D medieval world</strong>. Mine resources. Build your empire. Earn <strong>$EMP tokens</strong>.</div>
-  <button class="sp-btn" onclick="startLaunch()">▶ ENTER EMPYRIA</button>
-  <div class="sp-chips">
-    <div class="sp-chip">⛏ Mine Resources</div>
-    <div class="sp-chip">🏰 Build Empire</div>
-    <div class="sp-chip">⚖ Trade Goods</div>
-    <div class="sp-chip">💰 Earn $EMP</div>
+  <div style="height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:100px">
+
+    <!-- Hero -->
+    <div style="text-align:center;padding:max(32px,env(safe-area-inset-top)) 20px 24px">
+      <div class="sp-logo">EMPYRIA</div>
+      <div class="sp-tag">MEDIEVAL PLAY-TO-EARN · v1.2</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:20px;line-height:1.6">Year <strong style="color:var(--txt2)">1347</strong>. The great trade routes are open.<br>Kingdoms rise and fall on commerce.</div>
+
+      <!-- Feature chips -->
+      <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:24px">
+        <div class="sp-chip">⛏ Mine Resources</div>
+        <div class="sp-chip">🏰 Build Empire</div>
+        <div class="sp-chip">💱 Sell for $EMP</div>
+        <div class="sp-chip">🚀 Presale Boosts</div>
+        <div class="sp-chip">💎 Crystal Rewards</div>
+        <div class="sp-chip">🏆 Leaderboard</div>
+      </div>
+
+      <div id="splash-countdown" style="font-size:10px;color:rgba(240,128,40,.7);margin-top:4px;letter-spacing:1px"></div>
+    </div>
+
+    <div style="max-width:440px;margin:0 auto;padding:0 14px">
+
+      <!-- HOW TO PLAY -->
+      <div style="background:rgba(240,184,64,.06);border:1.5px solid rgba(240,184,64,.2);border-radius:16px;padding:16px;margin-bottom:12px">
+        <div style="font-family:Cinzel,serif;font-size:13px;color:var(--gold-b);font-weight:700;margin-bottom:12px;letter-spacing:1px">HOW TO PLAY</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="font-size:24px;flex-shrink:0;margin-top:2px">⛏️</div>
+            <div><div style="font-size:11px;font-weight:700;color:var(--txt);margin-bottom:2px">1. Mine Resources</div><div style="font-size:10px;color:var(--txt-d);line-height:1.6">Walk to glowing resource nodes in the 3D world. Tap to collect stone, wood, gold, iron and crystal.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="font-size:24px;flex-shrink:0;margin-top:2px">💱</div>
+            <div><div style="font-size:11px;font-weight:700;color:var(--txt);margin-bottom:2px">2. Sell for $EMP</div><div style="font-size:10px;color:var(--txt-d);line-height:1.6">Sell your resources for $EMP tokens. This is your main currency — every $EMP you earn is permanently recorded as your airdrop score.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="font-size:24px;flex-shrink:0;margin-top:2px">🏗️</div>
+            <div><div style="font-size:11px;font-weight:700;color:var(--txt);margin-bottom:2px">3. Build Your Empire</div><div style="font-size:10px;color:var(--txt-d);line-height:1.6">Spend resources + $EMP to place buildings. EMP buildings generate passive income every 8 seconds, even while you're offline.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="font-size:24px;flex-shrink:0;margin-top:2px">🚀</div>
+            <div><div style="font-size:11px;font-weight:700;color:var(--txt);margin-bottom:2px">4. Buy Presale Boosts</div><div style="font-size:10px;color:var(--txt-d);line-height:1.6">Connect your TON wallet and spend $EMP on production multipliers. Stack all 6 tiers for a ×67.5 combined boost to your passive income.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRESALE TIERS -->
+      <div style="background:rgba(64,200,112,.05);border:1.5px solid rgba(64,200,112,.2);border-radius:16px;overflow:hidden;margin-bottom:12px">
+        <div onclick="spToggle('htp-tiers')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer">
+          <div style="font-family:Cinzel,serif;font-size:13px;color:var(--grn2);font-weight:700;letter-spacing:1px">PRESALE TIERS</div>
+          <span id="htp-tiers-ico" style="color:var(--grn2);font-size:14px;transition:transform .2s">▾</span>
+        </div>
+        <div id="htp-tiers" style="padding:0 16px 16px;display:none">
+        <div style="font-size:10px;color:var(--txt-d);margin-bottom:12px">Tiers stack — unlock all 6 for ×67.5 total multiplier.</div>
+        <div style="font-size:10px;color:var(--txt-d);margin-bottom:12px">Tiers stack. Unlock all 6 for ×67.5 total multiplier on all passive income.</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;font-size:9px;color:var(--txt-d);padding:0 4px;letter-spacing:.5px">
+            <div>TIER</div><div style="text-align:right">COST</div><div style="text-align:right">BOOST</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:9px;padding:8px 10px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+            <div><div style="font-size:10px;font-weight:700">Early Investor I</div><div style="font-size:8px;color:var(--txt-d)">~2-3 days</div></div>
+            <div style="font-size:10px;color:var(--emp);text-align:right;white-space:nowrap">200 $EMP</div>
+            <div style="font-size:10px;color:var(--grn2);font-weight:700;text-align:right">×1.5</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:9px;padding:8px 10px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+            <div><div style="font-size:10px;font-weight:700">Early Investor II</div><div style="font-size:8px;color:var(--txt-d)">~1-2 weeks</div></div>
+            <div style="font-size:10px;color:var(--emp);text-align:right;white-space:nowrap">1,000 $EMP</div>
+            <div style="font-size:10px;color:var(--grn2);font-weight:700;text-align:right">×2.0</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:9px;padding:8px 10px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+            <div><div style="font-size:10px;font-weight:700">Early Investor III</div><div style="font-size:8px;color:var(--txt-d)">~3-4 weeks</div></div>
+            <div style="font-size:10px;color:var(--emp);text-align:right;white-space:nowrap">5,000 $EMP</div>
+            <div style="font-size:10px;color:var(--grn2);font-weight:700;text-align:right">×2.5</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:9px;padding:8px 10px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+            <div><div style="font-size:10px;font-weight:700">Founding Merchant</div><div style="font-size:8px;color:var(--txt-d)">~6-7 weeks</div></div>
+            <div style="font-size:10px;color:var(--emp);text-align:right;white-space:nowrap">20,000 $EMP</div>
+            <div style="font-size:10px;color:var(--grn2);font-weight:700;text-align:right">×2.5</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:9px;padding:8px 10px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+            <div><div style="font-size:10px;font-weight:700">Empire Architect</div><div style="font-size:8px;color:var(--txt-d)">~2-3 months</div></div>
+            <div style="font-size:10px;color:var(--emp);text-align:right;white-space:nowrap">60,000 $EMP</div>
+            <div style="font-size:10px;color:var(--grn2);font-weight:700;text-align:right">×3.0</div>
+          </div>
+          <div style="background:rgba(240,184,64,.06);border:1px solid rgba(240,184,64,.2);border-radius:9px;padding:8px 10px;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center">
+            <div><div style="font-size:10px;font-weight:700;color:var(--gold-b)">Token Whale</div><div style="font-size:8px;color:var(--txt-d)">Dedicated players</div></div>
+            <div style="font-size:10px;color:var(--emp);text-align:right;white-space:nowrap">200,000 $EMP</div>
+            <div style="font-size:11px;color:var(--gold-b);font-weight:900;text-align:right">×3.0</div>
+          </div>
+          <div style="text-align:center;padding:6px;background:rgba(64,200,112,.06);border-radius:8px;margin-top:2px">
+            <span style="font-size:10px;color:var(--txt-d)">All 6 tiers combined: </span>
+            <span style="font-size:13px;font-weight:900;color:var(--grn2)">×67.5</span>
+            <span style="font-size:10px;color:var(--txt-d)"> total boost</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- ERA SYSTEM -->
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;margin-bottom:12px">
+        <div onclick="spToggle('htp-era')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer">
+          <div style="font-family:Cinzel,serif;font-size:13px;color:var(--txt);font-weight:700;letter-spacing:1px">ERA SYSTEM</div>
+          <span id="htp-era-ico" style="color:var(--txt-d);font-size:14px;transition:transform .2s">▾</span>
+        </div>
+        <div id="htp-era" style="padding:0 16px 16px;display:none"><div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:10px;align-items:center;background:rgba(138,180,212,.08);border-radius:8px;padding:8px 10px;border-left:3px solid #8ab4d4">
+            <div style="font-size:10px;font-weight:700;color:#8ab4d4;min-width:50px">ERA 1</div>
+            <div style="flex:1;font-size:10px;color:var(--txt-d)">Stone Age · Mine, Farm, Lumber, EMP Altar</div>
+            <div style="font-size:9px;color:var(--grn2)">Free</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;background:rgba(192,160,96,.06);border-radius:8px;padding:8px 10px;border-left:3px solid #c0a060">
+            <div style="font-size:10px;font-weight:700;color:#c0a060;min-width:50px">ERA 2</div>
+            <div style="flex:1;font-size:10px;color:var(--txt-d)">Iron Age · Smelter, Forge, Coin Master</div>
+            <div style="font-size:9px;color:var(--emp);white-space:nowrap">500 $EMP</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;background:rgba(160,128,208,.06);border-radius:8px;padding:8px 10px;border-left:3px solid #a080d0">
+            <div style="font-size:10px;font-weight:700;color:#a080d0;min-width:50px">ERA 3</div>
+            <div style="flex:1;font-size:10px;color:var(--txt-d)">Arcane Age · Academy, Royal Mint, Harbour</div>
+            <div style="font-size:9px;color:var(--emp);white-space:nowrap">2,000 $EMP</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;background:rgba(96,192,160,.06);border-radius:8px;padding:8px 10px;border-left:3px solid #60c0a0">
+            <div style="font-size:10px;font-weight:700;color:#60c0a0;min-width:50px">ERA 4</div>
+            <div style="flex:1;font-size:10px;color:var(--txt-d)">Stellar Age · Observatory, EMP Temple</div>
+            <div style="font-size:9px;color:var(--emp);white-space:nowrap">8,000 $EMP</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;background:rgba(208,96,128,.06);border-radius:8px;padding:8px 10px;border-left:3px solid #d06080">
+            <div style="font-size:10px;font-weight:700;color:#d06080;min-width:50px">ERA 5</div>
+            <div style="flex:1;font-size:10px;color:var(--txt-d)">Shadow Empire · EMP Nexus, Empire Bank</div>
+            <div style="font-size:9px;color:var(--emp);white-space:nowrap">25,000 $EMP</div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- $EMP TOKEN INFO -->
+      <div style="background:rgba(240,184,64,.05);border:1px solid rgba(240,184,64,.15);border-radius:16px;overflow:hidden;margin-bottom:12px">
+        <div onclick="spToggle('htp-token')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer">
+          <div style="font-family:Cinzel,serif;font-size:13px;color:var(--gold-b);font-weight:700;letter-spacing:1px">$EMP TOKEN</div>
+          <span id="htp-token-ico" style="color:var(--gold-b);font-size:14px;transition:transform .2s">▾</span>
+        </div>
+        <div id="htp-token" style="padding:0 16px 16px;display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:16px;font-weight:900;color:var(--emp)">10:1</div>
+            <div style="font-size:9px;color:var(--txt-d);margin-top:2px">$EMP earned → tokens at launch</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:16px;font-weight:900;color:var(--grn2)">Jun 15</div>
+            <div style="font-size:9px;color:var(--txt-d);margin-top:2px">Presale closes 2026</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:16px;font-weight:900;color:var(--txt)">10M</div>
+            <div style="font-size:9px;color:var(--txt-d);margin-top:2px">Total token supply</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:10px;text-align:center">
+            <div style="font-size:16px;font-weight:900;color:#a080ff">TON</div>
+            <div style="font-size:9px;color:var(--txt-d);margin-top:2px">Blockchain network</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7;background:rgba(255,255,255,.03);border-radius:8px;padding:8px">Your airdrop score = total $EMP earned in game. It <strong style="color:var(--txt)">never decreases</strong>. Every session adds to it. Connect your TON wallet to lock in your allocation.</div>
+      </div></div>
+
+      <!-- CRYSTAL -->
+      <div style="background:rgba(160,128,255,.05);border:1px solid rgba(160,128,255,.2);border-radius:16px;overflow:hidden;margin-bottom:12px">
+        <div onclick="spToggle('htp-crystal')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer">
+          <div style="font-family:Cinzel,serif;font-size:13px;color:#a080ff;font-weight:700;letter-spacing:1px">💎 CRYSTAL</div>
+          <span id="htp-crystal-ico" style="color:#a080ff;font-size:14px;transition:transform .2s">▾</span>
+        </div>
+        <div id="htp-crystal" style="padding:0 16px 16px;display:none">
+        <div style="font-size:10px;color:var(--txt-d);line-height:1.7;margin-bottom:8px">Crystal is rare — it drops from mining and comes from referrals. Use it in the SHOP to buy special boosts that $EMP can't buy.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px">
+          <div style="background:rgba(160,128,255,.06);border-radius:7px;padding:6px 8px"><span style="color:#a080ff">1💎</span> Reset all cooldowns</div>
+          <div style="background:rgba(160,128,255,.06);border-radius:7px;padding:6px 8px"><span style="color:#a080ff">2💎</span> Next node ×2</div>
+          <div style="background:rgba(160,128,255,.06);border-radius:7px;padding:6px 8px"><span style="color:#a080ff">5💎</span> Free mystery box</div>
+          <div style="background:rgba(160,128,255,.06);border-radius:7px;padding:6px 8px"><span style="color:#a080ff">8💎</span> EMP ×1.5 / 30min</div>
+        </div>
+      </div></div>
+
+      <!-- TIPS -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;margin-bottom:20px">
+        <div onclick="spToggle('htp-tips')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer">
+          <div style="font-family:Cinzel,serif;font-size:13px;color:var(--txt);font-weight:700;letter-spacing:1px">⚡ TIPS</div>
+          <span id="htp-tips-ico" style="color:var(--txt-d);font-size:14px;transition:transform .2s">▾</span>
+        </div>
+        <div id="htp-tips" style="padding:0 16px 16px;display:none">
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:10px;color:var(--txt-d)">
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:7px 9px"><span style="color:var(--gold-b)">Focus on crystal.</span> 1 crystal = 2.5 $EMP when sold. 16× more valuable than stone.</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:7px 9px"><span style="color:var(--gold-b)">Build EMP Altar first.</span> Costs 80 $EMP. Starts your passive income engine.</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:7px 9px"><span style="color:var(--gold-b)">Log in daily.</span> Streak bonus gives up to 5 $EMP/day. Compounds over time.</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:7px 9px"><span style="color:var(--gold-b)">Early = best rates.</span> Presale ends June 15. The earlier you buy, the more you accumulate.</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:7px 9px"><span style="color:var(--gold-b)">Invite friends.</span> Referrals give crystal and grow the airdrop pool for everyone.</div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Fixed bottom CTA -->
+  <div style="position:fixed;bottom:0;left:0;right:0;padding:10px 16px max(12px,env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(5,10,16,.98));z-index:501">
+    <button class="sp-btn" onclick="startLaunch()" style="width:100%;margin:0;padding:14px">▶ ENTER EMPYRIA</button>
   </div>
 </div>
 
@@ -955,6 +1142,11 @@ function addRes(k,v){
   if(!v||v<=0)return;
   G.res[k]=Math.min(CAP,(G.res[k]||0)+v);
   G.stats[k]=(G.stats[k]||0)+v;
+  // Pop animation on resource pill
+  if(v>0) requestAnimationFrame(()=>{
+    const pills=document.querySelectorAll('.rv');
+    pills.forEach(p=>{if(p.parentElement?.querySelector('span')?.textContent===RES_ICO[k]){p.style.transform='scale(1.25)';p.style.color='var(--grn2)';setTimeout(()=>{p.style.transform='';p.style.color='';},200);}});
+  });
   if(E.res[k]!==undefined) E.res[k]=Math.min(E.cap[k]||CAP,(E.res[k]||0)+v);
   // Track total resources mined for quest progress
   G.totalMined=(G.totalMined||0)+v;
@@ -2368,6 +2560,9 @@ function doMine(){
   const comboMult=getMineComboMult();
   const amt=Math.ceil((Math.random()*2+bonus)*comboMult);const earned=applyMult(amt,type);
   if(_mineCombo>=2){
+    // Scale player slightly on combo
+    if(playerGroup) playerGroup.scale.set(1+_mineCombo*.03,1+_mineCombo*.03,1+_mineCombo*.03);
+    setTimeout(()=>{if(playerGroup)playerGroup.scale.set(1,1,1);},150);
     const cb=document.getElementById('action-hint');
     if(cb){
       const comboColors=['','','var(--grn2)','var(--gold-b)','#ff8820','#ff4422'];
@@ -2543,6 +2738,8 @@ function confirmPlace(wx,wz){
   toast('✅ '+_bdef?.name+' built!'+_empMsg,3000);
   addLog(_bdef?.ico+' '+_bdef?.name+' built','good');
   saveGame(); eSave(); // save immediately after building placement
+  // Spawn particle burst
+  if(typeof spawnBuildParticles==='function') spawnBuildParticles(snap.x, snap.z);
   setTimeout(()=>{
     updateWorkerNPCs();
     if(typeof spawnBuildParticles==='function') spawnBuildParticles(snap.x,snap.z);
@@ -4326,6 +4523,10 @@ function updateTelegramMainBtn(){
 }
 function updateTabBadges(){
   const bldCount=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
+  // Quest badge: show number of claimable quests
+  const doneQuests=(G.quests||[]).filter(q=>q.done&&!q.claimed).length;
+  const qBadge=document.getElementById('quest-badge');
+  if(qBadge){qBadge.textContent=doneQuests>0?doneQuests:'';qBadge.style.display=doneQuests>0?'flex':'none';}
   const cityBtn=document.querySelector('.ab-city-count');
   if(cityBtn) cityBtn.textContent=bldCount>0?bldCount:'';
   // Quest badge — incomplete quests
@@ -4583,6 +4784,20 @@ function animateWeather(){
 // ──────────────────────────────────────────────────────────────────────────────
 
 function spawnBuildParticles(wx,wz){
+  if(!scene)return;
+  // Expanding ring
+  const ringGeo=new THREE.RingGeometry(.1,1.5,24);
+  const ringMat=new THREE.MeshBasicMaterial({color:0x40e080,transparent:true,opacity:.8,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(ringGeo,ringMat);
+  ring.rotation.x=-Math.PI/2;
+  ring.position.set(wx,0.1,wz);
+  scene.add(ring);
+  let t=0;
+  const anim=setInterval(()=>{
+    t+=.08;ring.scale.set(1+t*3,1+t*3,1);ringMat.opacity=.8*(1-t);
+    if(t>=1){clearInterval(anim);scene.remove(ring);ringGeo.dispose();ringMat.dispose();}
+  },16);
+  // Original particle logic continues below...
   if(!scene)return;
   const cols=[0xf5d840,0x80ee90,0xffffff,0xf0b840];
   for(let i=0;i<12;i++){
@@ -5167,6 +5382,15 @@ function htpTab(id){
   if(el) el.innerHTML=HTP_CONTENT[id]||'';
 }
 
+
+function spToggle(id){
+  const el=document.getElementById(id);
+  const ico=document.getElementById(id+'-ico');
+  if(!el)return;
+  const open=el.style.display!=='none';
+  el.style.display=open?'none':'block';
+  if(ico)ico.style.transform=open?'':'rotate(180deg)';
+}
 function showEmpFloat(amount){
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
@@ -5241,6 +5465,16 @@ function eTick(){
   // Only sync E.res.emp → G.res.emp, never reverse
   if(E.res.emp!==G.res.emp) G.res.emp=G.res.emp;
   updateEconomyDisplay();
+  // Animate presale counter
+  const scoreEl=document.getElementById('presale-score');
+  if(scoreEl){
+    const target=parseInt(scoreEl.dataset.target||0);
+    const start=parseInt(scoreEl.textContent.replace(/,/g,'')||0);
+    if(target>start){
+      let cur=start;const step=Math.max(1,Math.floor((target-start)/20));
+      const iv=setInterval(()=>{cur=Math.min(target,cur+step);scoreEl.textContent=cur.toLocaleString();if(cur>=target)clearInterval(iv);},40);
+    }
+  }
 }
 
 function eUpdatePop(){
