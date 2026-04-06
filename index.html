@@ -2350,7 +2350,8 @@ function doSell(){
   if(!t){toast('Nothing to sell — mine some resources first!');return;}
   const mult=1+(G.bld.marketplace?.1:0)+(G.bld.tradepost?.15:0)+(G.bld.guildhall?.1:0);
   const e=Math.floor(t*mult);
-  eEarn(e,'Sell resources'); // use eEarn so airdrop score is tracked!
+  eEarn(e,'Sell resources');
+  window.haptic?.('medium'); // use eEarn so airdrop score is tracked!
   showEmpFloat(e);sfxCoin?.();
   window.haptic?.('medium');
   const breakdown=sold.slice(0,3).join('  ');
@@ -3417,6 +3418,7 @@ async function showLeaderboard() {
   const modal = document.getElementById('leaderboard-modal');
   const list  = document.getElementById('leaderboard-list');
   const rankEl= document.getElementById('lb-your-rank');
+  if(rankEl) rankEl.textContent='...';
   if (!modal) return;
   modal.style.display = 'flex';
   list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--txt-d);font-size:11px">Loading...</div>';
@@ -3871,6 +3873,20 @@ function shareTelegram(){
 
 const EMP_MILESTONES=[10,50,100,500,1000,5000,10000,50000];
 function checkEmpMilestones(){
+  const total=E.totalEmpEarned||0;
+  const milestones=[10,50,100,500,1000,5000,10000,50000,100000,200000];
+  for(const m of milestones){
+    if(total>=m&&!(G.stats['milestone_'+m])){
+      G.stats['milestone_'+m]=1;
+      setTimeout(()=>{
+        toast('🏆 '+fmtNum(m)+' $EMP earned — airdrop score updated!',4000);
+        window.haptic?.('success');
+      },300);
+      break;
+    }
+  }
+}
+function _checkEmpMilestones_orig(){
   const earned=Math.floor(E.totalEmpEarned||0);
   const key='empyria_milestone_'+earned;
   for(const m of EMP_MILESTONES){
@@ -4100,6 +4116,17 @@ const ACHIEVEMENTS=[
   {id:'share',        ico:'📣', name:'Ambassador',        desc:'Share Empyria with a friend',        check:()=>localStorage.getItem('empyria_shared')==='1'},
 ];
 
+function checkAutoSell(){
+  if(!G.autoSell)return;
+  const rates={stone:.15,wood:.15,gold:.4,iron:.6,crystal:2.5,mana:5,starstone:15,darkore:40};
+  const threshold=G.autoSellThreshold||5000;
+  let earned=0;
+  Object.entries(rates).forEach(([k,r])=>{
+    const qty=G.res[k]||0;
+    if(qty>=threshold){earned+=Math.floor(qty*r);G.res[k]=0;}
+  });
+  if(earned>0){eEarn(earned,'Auto-sell');updateHUD();saveGame();}
+}
 function checkAchievements(){
   if(!G||!E)return;
   const done=JSON.parse(localStorage.getItem('empyria_achievements')||'[]');
@@ -4508,6 +4535,7 @@ function showSellScreen(){
   });
 
   const totalAll=sellable.reduce((s,[k,rate])=>s+Math.floor((G.res[k]||0)*rate*mult),0);
+  const rateInfo=sellable.length>0?sellable.slice(0,2).map(([k,r])=>rateLabels[k]+': '+r+'/unit').join(' · '):'';
   // Quick sell-all button at top
   const _quickTotal=Object.entries(rates).reduce((s,[k,r])=>s+Math.floor((G.res[k]||0)*r),0);
   panel.innerHTML=`
