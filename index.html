@@ -3248,6 +3248,7 @@ function updateEra(){
       updateHUD();
     }
     G.era=era;
+    hardenedSave(); eSave(); // Save immediately after ERA unlock
     // ERA unlock celebration
     window.haptic?.('success');
     sfxQuest?.();
@@ -3741,7 +3742,11 @@ function reactTap(){if(_react.on){const ms=Date.now()-_react.st;_react.on=false;
 function endReact(){const rws={emp:Math.ceil(_react.emp/4)};if(_react.emp>=40)rws.crystal=1;else if(_react.emp>=24)rws.gold=1;setCd('react');showResult('⚡ Lightning Forge!',`${_react.emp}🪙 earned · score ${_react.score}`,rws);}
 
 // ═══ SAVE / LOAD ═══
-function saveGame(){try{
+function saveGame(){
+  hardenedSave(); // belt+braces — always write to all 3 locations
+  return; // hardenedSave handles everything
+  // legacy below:
+try{
   const _saveData={version:3,savedAt:Date.now(),res:G.res,bld:G.bld,cd:G.cd,stats:G.stats,upgrades:G.upgrades,era:G.era,streak:G.streak,lastLogin:G.lastLogin,streakClaimed:G.streakClaimed,quests:G.quests,questsDate:G.questsDate,prestige:G.prestige,prestigeBonus:G.prestigeBonus,mysteryBoxes:G.mysteryBoxes,totalTaps:G.totalTaps,nextBoxAt:G.nextBoxAt,log:G.log.slice(0,20)};
   const _saveStr=JSON.stringify(_saveData);
   localStorage.setItem('empyria_v2',_saveStr);
@@ -3777,7 +3782,7 @@ function loadGame(){try{
     }catch(fe){}
     showSaveDebug?.();return;
   }const sv=JSON.parse(raw);// Version check: only wipe saves that are explicitly version 1 (very old format)
-  if(sv.version===1){localStorage.removeItem('empyria_v2');toast('🔄 Updating save…',2000);return;}
+  if(sv.version===1){console.warn('[loadGame] Old v1 save detected — ignoring but NOT deleting');}
   // v2+ safe to load
   if(sv.res)Object.assign(G.res,sv.res);
   if(sv.bld)Object.assign(G.bld,sv.bld);
@@ -3866,6 +3871,8 @@ async function dbSyncPlayer() {
 // Load game state from DB (overrides localStorage if DB is newer)
 async function dbLoadPlayer() {
   if (!db || !tgUser?.id) return;
+  if (window._dbLoadDone) { console.log('[Cloud] Already loaded this session — skipping'); return; }
+  window._dbLoadDone = true;
   try {
     const { data, error } = await db
       .from('players')
@@ -4002,7 +4009,7 @@ function restoreSaveState(s) {
     E.happiness=s.eHappiness??70;E.stability=s.eStability??80;E.defense=s.eDefense??0;
     E.year=s.eYear??1;E.day=s.eDay??0;E.tick=s.eTick??0;E.season=s.eSeason??0;
     E.upgradesDone=s.eUpgradesDone||[];E.priceBonus=s.ePriceBonus??1;
-    E.prestigeBonus=s.ePrestigeBonus??0;E.empRate=s.eEmpRate??0;E.empMult=s.eEmpMult??1.0;E.totalEmpEarned=s.eTotalEarned??0;E.empSpent=s.eEmpSpent??0;
+    E.prestigeBonus=s.prestigeBonus??s.ePrestigeBonus??0;E.empRate=s.empRate??s.eEmpRate??0;E.empMult=(typeof(s.empMult??s.eEmpMult)==="number"&&(s.empMult??s.eEmpMult)>=1)?s.empMult??s.eEmpMult:1.0;E.totalEmpEarned=s.totalEmpEarned??s.eTotalEarned??0;E.empSpent=s.empSpent??s.eEmpSpent??0;
     updateHUD();
   } catch(e) { console.warn('restoreSaveState error:', e); }
 }
@@ -5451,7 +5458,31 @@ function getMineComboMult(){
 }
 
 let _lastSaveTime=0;
-async function manualSave(){
+async function emergencyRecover(){
+  // Try to reconstruct from ALL available sources
+  const sources=[
+    localStorage.getItem('empyria_v2'),
+    sessionStorage.getItem('empyria_v2_bak'),
+    sessionStorage.getItem('empyria_v2_bak2'),
+  ].filter(Boolean).map(s=>{try{return JSON.parse(s);}catch(e){return null;}}).filter(Boolean);
+  
+  if(!sources.length){toast('No backup found to recover from',3000);return;}
+  
+  // Pick best source
+  const best=sources.reduce((a,b)=>{
+    const ab=Object.values(a.bld||{}).filter(v=>v===true||typeof v==='object').length;
+    const bb=Object.values(b.bld||{}).filter(v=>v===true||typeof v==='object').length;
+    return bb>ab||(bb===ab&&(b.savedAt||0)>(a.savedAt||0))?b:a;
+  });
+  
+  const blds=Object.values(best.bld||{}).filter(v=>v===true||typeof v==='object').length;
+  if(confirm('Recover from backup? Found: '+blds+' buildings, '+Math.round(best.res?.emp||0)+' EMP')){
+    loadGame();
+    toast('✅ Recovered from backup!',3000);
+    setTimeout(()=>location.reload(),500);
+  }
+}
+function manualSave(){
   const ok=hardenedSave();
   eSave();
   dbSyncPlayer?.();
@@ -5874,6 +5905,19 @@ function checkDailySpendChallenge(){
 
 // ══ HARDENED SAVE — writes to 3 places atomically ══════════════════
 function hardenedSave(){
+  // Guard: never overwrite a good save with an empty state
+  try{
+    const existing=localStorage.getItem('empyria_v2');
+    if(existing){
+      const ex=JSON.parse(existing);
+      const exBlds=Object.values(ex.bld||{}).filter(v=>v===true||typeof v==='object').length;
+      const curBlds=Object.values(G.bld||{}).filter(v=>v===true||typeof v==='object').length;
+      if(exBlds>0&&curBlds===0&&(G.res.emp||0)<10&&exBlds>curBlds){
+        console.warn('[hardenedSave] BLOCKED — would overwrite '+exBlds+' buildings with 0');
+        return false;
+      }
+    }
+  }catch(e){}
   try{
     const payload={
       version:3,
@@ -6355,13 +6399,13 @@ function renderEconEMP(){
       <div style="background:rgba(240,184,64,.07);border:1px solid rgba(240,184,64,.2);border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
         <div>
           <div style="font-size:8px;color:var(--txt-d);margin-bottom:2px">EST. TOKEN ALLOCATION</div>
-          <div style="font-size:15px;font-weight:900;color:var(--gold-b)">${Math.floor(totalEarned/10).toLocaleString()} $EMP</div>
-          <div style="font-size:7px;color:var(--txt-d)">1 token per 10 earned $EMP</div>
+          <div style="font-size:15px;font-weight:900;color:var(--gold-b)">${Math.floor(totalEarned/10).toLocaleString()}</div>
+          <div style="font-size:7px;color:var(--txt-d)">tokens (1 per 10 $EMP)</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:8px;color:var(--txt-d)">Pool share</div>
-          <div style="font-size:12px;font-weight:700;color:var(--gold)">${totalEarned>0?(totalEarned/10000*100).toFixed(3):'0.000'}%</div>
-          <div style="font-size:7px;color:var(--txt-d)">of 10M pool</div>
+          <div style="font-size:11px;font-weight:700;color:var(--gold)">${totalEarned>0?(totalEarned/10).toFixed(1):0}</div>
+          <div style="font-size:7px;color:var(--txt-d)">tokens est.</div>
         </div>
       </div>
       <div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;position:relative">
