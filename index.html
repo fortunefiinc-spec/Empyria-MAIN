@@ -94,7 +94,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .rv{font-weight:700;color:var(--txt)}
 
 /* Action hint */
-#action-hint{position:fixed;top:calc(max(6px,env(safe-area-inset-top)) + 74px);left:16px;right:16px;max-width:320px;margin:0 auto;background:rgba(10,14,20,.92);border:1px solid rgba(100,180,120,.3);border-radius:20px;padding:6px 16px;font-size:11px;color:#a8d8b0;opacity:0;transition:opacity .2s;z-index:25;pointer-events:none;text-align:center;backdrop-filter:blur(6px)}
+#action-hint{position:fixed;bottom:230px;left:50%;transform:translateX(-50%);background:rgba(10,14,20,.92);border:1px solid rgba(100,180,120,.3);border-radius:20px;padding:5px 14px;font-size:11px;color:#a8d8b0;opacity:0;transition:opacity .2s;z-index:25;pointer-events:none;text-align:center;backdrop-filter:blur(6px);white-space:nowrap;max-width:70vw}
 
 /* ── Controls ──────────────────────────────────────────────────────────── */
 #mode-toggle{display:none}
@@ -319,13 +319,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   font-family:Rajdhani,sans-serif}
 
 /* ── Toast ─────────────────────────────────────────────────────────────── */
-#toast{position:fixed;bottom:78px;left:16px;right:16px;margin:0 auto;max-width:360px;
-  background:rgba(14,20,26,.96);
-  border:1px solid rgba(100,180,120,.3);
-  border-radius:22px;padding:8px 18px;font-size:12px;color:var(--txt);
-  opacity:0;transition:opacity .2s;z-index:999;
-  pointer-events:none;text-align:center;
-  backdrop-filter:blur(8px)}
+#notif-stack .notif{background:rgba(8,14,22,.94);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:5px 10px;font-size:11px;color:var(--txt2);display:flex;align-items:center;gap:7px;white-space:nowrap;max-width:220px;overflow:hidden;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.5);animation:notifIn .2s ease-out}
+#notif-stack .notif .n-ico{font-size:14px;flex-shrink:0}
+#notif-stack .notif .n-txt{font-size:10px;overflow:hidden;text-overflow:ellipsis}
+
+#notif-log .nl-item{
+  background:rgba(8,14,22,.88);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;
+  padding:4px 8px;
+  font-size:10px;
+  color:var(--txt2);
+  display:flex;
+  align-items:center;
+  gap:5px;
+  animation:nlIn .15s ease-out;
+  width:130px;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+#notif-log .nl-ico{font-size:12px;flex-shrink:0}
+#notif-log .nl-txt{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+@keyframes nlIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes notifIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 
 /* ── Mystery box ───────────────────────────────────────────────────────── */
 #mystery-box{position:fixed;inset:0;z-index:300;
@@ -351,6 +367,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(240,192,96,.2)}50%{box-shadow:0 0 20px rgba(240,192,96,.5)}}
 @keyframes notifPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
 #emp-notif{animation:notifPulse 1.2s ease-in-out infinite;}
+@keyframes coinFall{0%{top:-20px;opacity:1;transform:rotate(0)}100%{top:110%;opacity:0;transform:rotate(360deg)}}
 @keyframes mineGlow{0%,100%{box-shadow:0 0 0 1px rgba(80,220,40,.3)}50%{box-shadow:0 0 12px rgba(80,220,40,.5)),inset 0 1px 0 rgba(255,255,255,.1)}}
 .mine-btn.nearResource{animation:mineGlow 1s ease-in-out infinite;}
 
@@ -499,6 +516,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
       </div>
 
       <div id="splash-countdown" style="font-size:10px;color:rgba(240,128,40,.7);margin-top:4px;letter-spacing:1px"></div>
+      <div id="splash-players" style="font-size:10px;color:rgba(255,255,255,.3);margin-top:4px"></div>
     </div>
 
     <div style="max-width:440px;margin:0 auto;padding:0 14px">
@@ -682,6 +700,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 </div>
 
 <div id="world-view"><canvas id="three-canvas"></canvas></div>
+<div id="weather-tint" style="position:fixed;inset:0;z-index:5;pointer-events:none;transition:background 2s"></div>
 
 <div id="world-hud">
   <div id="topbar">
@@ -749,8 +768,46 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
 
 <!-- Minimap -->
+<div id="minimap" style="position:fixed;bottom:74px;left:8px;z-index:28;pointer-events:all">
+  <!-- Notification log above minimap -->
+  <div id="notif-log" style="width:130px;margin-bottom:4px;display:flex;flex-direction:column;gap:2px"></div>
+  <!-- Minimap -->
+  <canvas id="minimap-canvas" width="80" height="80" style="width:80px;height:80px;border-radius:10px;border:1px solid rgba(255,255,255,.15);display:block;box-shadow:0 3px 12px rgba(0,0,0,.6);cursor:pointer;pointer-events:all;image-rendering:pixelated">
+  </canvas>
+  <div id="minimap-label" style="text-align:center;font-size:7px;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.5px">MAP</div>
+</div>
+<div id="action-hint"></div>
+
+
+
+<div id="dpad">
+  <div class="dp-grid">
+    <div class="dp empty"></div>
+    <div class="dp" id="dpW" onpointerdown="mvStart(event,'w')" onpointerup="mvStop(event,'w')" onpointercancel="mvStop(event,'w')" onpointerleave="mvStop(event,'w')">&#x25B2;</div>
+    <div class="dp empty"></div>
+    <div class="dp" id="dpA" onpointerdown="mvStart(event,'a')" onpointerup="mvStop(event,'a')" onpointercancel="mvStop(event,'a')" onpointerleave="mvStop(event,'a')">&#x25C4;</div>
+    <div class="dp" onclick="resetCam()">&#x2299;</div>
+    <div class="dp" id="dpD" onpointerdown="mvStart(event,'d')" onpointerup="mvStop(event,'d')" onpointercancel="mvStop(event,'d')" onpointerleave="mvStop(event,'d')">&#x25BA;</div>
+    <div class="dp empty"></div>
+    <div class="dp" id="dpS" onpointerdown="mvStart(event,'s')" onpointerup="mvStop(event,'s')" onpointercancel="mvStop(event,'s')" onpointerleave="mvStop(event,'s')">&#x25BC;</div>
+    <div class="dp empty"></div>
+  </div>
+</div>
+
+<div id="cam-ctrl">
+  <div class="cc" onclick="toggleFP()" id="fp-btn" title="First Person">👁️</div>
+  <div id="tp-controls">
+    <div class="cc" onclick="camZ(-2)">+</div>
+    <div class="cc" onclick="camZ(2)">&minus;</div>
+    <div class="cc" onclick="camR(-0.35)">&#x21BA;</div>
+    <div class="cc" onclick="camR(0.35)">&#x21BB;</div>
+  </div>
+</div>
+
+
+<!-- Minimap -->
 <div id="minimap" style="position:fixed;bottom:78px;left:10px;z-index:28;pointer-events:none;opacity:.9">
-  <canvas id="minimap-canvas" width="100" height="100" style="width:100px;height:100px;border-radius:12px;border:1px solid rgba(255,255,255,.15);display:block;box-shadow:0 3px 16px rgba(0,0,0,.6);cursor:pointer;pointer-events:all;image-rendering:pixelated">
+  <canvas id="minimap-canvas" width="80" height="80" style="width:80px;height:80px;border-radius:10px;border:1px solid rgba(255,255,255,.15);display:block;box-shadow:0 3px 12px rgba(0,0,0,.6);cursor:pointer;pointer-events:all;image-rendering:pixelated">
   </canvas>
   <div id="minimap-label" style="text-align:center;font-size:7px;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.5px">MAP</div>
 </div>
@@ -959,7 +1016,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
     <div style="display:flex;gap:4px;margin-top:12px" id="tut-dots"></div>
   </div>
 </div>
-<div id="toast"></div>
+
 
 <!-- ═══ THREE.JS ═══ -->
 
@@ -1004,8 +1061,8 @@ const BLD_DEF={
   farm:       {ico:'🌾', name:'Farm',          era:1, cost:{emp:15,  wood:10,stone:8},    req:[],                    passive:'+2🍖/tick',       empOut:0.0,    workers:2, desc:'Grows food for workers'},
   watchtower: {ico:'🗼', name:'Watchtower',    era:1, cost:{emp:25,  stone:30},           req:['mine'],              passive:'🛡️ Defense +10',     empOut:0.0,    workers:2, defense:10, desc:'Guards your settlement'},
   // 💰 EMP buildings (heavy EMP, small resources)
-  empaltar:   {ico:'🏮', name:'EMP Altar',     era:1, cost:{emp:80},                     req:['farm'],              passive:'+0.05💰/tick',    empOut:0.01,  workers:1, desc:'💰 First $EMP source — pure EMP cost'},
-  marketplace:{ico:'⚖️', name:'Marketplace',  era:1, cost:{emp:150, gold:8},             req:['mine','lumber'],     passive:'+0.09💰/tick',    empOut:0.018,  workers:2, desc:'💰 Generates $EMP from local trade'},
+  empaltar:   {ico:'🏮', name:'EMP Altar',     era:1, cost:{emp:80},                     req:['farm'],              passive:'+0.06💰/tick',    empOut:0.014, workers:1, desc:'💰 First $EMP source — pure EMP cost'},
+  marketplace:{ico:'⚖️', name:'Marketplace',  era:1, cost:{emp:150, gold:8},             req:['mine','lumber'],     passive:'+0.10💰/tick',    empOut:0.022,  workers:2, desc:'💰 Generates $EMP from local trade'},
 
   // ═══ ERA II — IRON AGE ════════════════════════════════════════════════════
   smelter:    {ico:'⚙️', name:'Smelter',       era:2, cost:{emp:40, stone:22,iron:5},    req:['mine'],              passive:'+1⚙️/tick',       empOut:0.0,    workers:2, desc:'Smelts iron ore into ingots'},
@@ -1060,24 +1117,24 @@ const UPG_DEF={
   mine:[{cost:{stone:200,emp:150},bonus:'Stone ×1.5'},{cost:{stone:500,iron:50,emp:400},bonus:'Stone ×2.0'}],
   lumber:[{cost:{wood:200,emp:150},bonus:'Wood ×1.5'},{cost:{wood:500,iron:50,emp:400},bonus:'Wood ×2.0'}],
   forge:[{cost:{stone:200,iron:30,emp:250},bonus:'ALLES ×1.25'},{cost:{iron:200,crystal:20,emp:800},bonus:'ALLES ×1.50'}],
-  market:[{cost:{gold:100,emp:300},bonus:'Gold ×1.5'},{cost:{gold:300,crystal:30,emp:1000},bonus:'Gold ×2.0'}],
-  hq:[{cost:{stone:400,gold:200,emp:500},bonus:'$EMP ×1.5'},{cost:{gold:500,crystal:100,emp:2000},bonus:'$EMP ×2.0'}],
+  marketplace:[{cost:{gold:100,emp:300},bonus:'Gold ×1.5'},{cost:{gold:300,crystal:30,emp:1000},bonus:'Gold ×2.0'}],
+  townhall:[{cost:{stone:400,gold:200,emp:500},bonus:'$EMP ×1.5'},{cost:{gold:500,crystal:100,emp:2000},bonus:'$EMP ×2.0'}],
   smelter:[{cost:{iron:100,emp:200},bonus:'Iron ×1.5'},{cost:{iron:300,crystal:30,emp:600},bonus:'Iron ×2.0'}],
   workshop:[{cost:{wood:200,iron:50,emp:300},bonus:'ALLES ×1.3'},{cost:{iron:200,mana:20,emp:1200},bonus:'ALLES ×1.6'}],
   academy:[{cost:{crystal:50,emp:400},bonus:'Crystal ×1.5'},{cost:{crystal:150,mana:30,emp:1500},bonus:'Crystal ×2.0'}],
-  temple:[{cost:{gold:200,crystal:50,emp:600},bonus:'$EMP +30/u'},{cost:{crystal:100,mana:50,emp:2000},bonus:'$EMP +80/u'}],
-  treasury:[{cost:{gold:400,crystal:80,emp:800},bonus:'$EMP ×1.5'},{cost:{crystal:200,mana:100,emp:3000},bonus:'$EMP ×2.5'}],
+  emptemple:[{cost:{gold:200,crystal:50,emp:600},bonus:'$EMP +30/u'},{cost:{crystal:100,mana:50,emp:2000},bonus:'$EMP +80/u'}],
+  mint:[{cost:{gold:400,crystal:80,emp:800},bonus:'$EMP ×1.5'},{cost:{crystal:200,mana:100,emp:3000},bonus:'$EMP ×2.5'}],
 };
 
 const RARE_DROPS={
-  stone:[{res:'crystal',amt:1,chance:.04,msg:'💎 Crystal found in stone!'},{res:'iron',amt:3,chance:.12,msg:'⚙️ Iron vein found!'}],
-  wood:[{res:'crystal',amt:1,chance:.03,msg:'💎 Crystal in the wood!'},{res:'gold',amt:2,chance:.10,msg:'🥇 Gold!'}],
-  gold:[{res:'emp',amt:1,chance:.12,msg:'🪙 $EMP found!'},{res:'crystal',amt:2,chance:.06,msg:'💎 Cluster!'}],
-  iron:[{res:'emp',amt:1,chance:.10,msg:'🪙 Iron → $EMP!'},{res:'crystal',amt:1,chance:.05,msg:'💎 Crystal!'}],
-  crystal:[{res:'emp',amt:2,chance:.18,msg:'🪙 Crystal → $EMP!'},{res:'mana',amt:2,chance:.10,msg:'🔮 Mana!'}],
-  mana:[{res:'emp',amt:2,chance:.15,msg:'🪙 Mana condensed!'},{res:'starstone',amt:1,chance:.05,msg:'⭐ Starstone!'}],
-  starstone:[{res:'emp',amt:5,chance:.20,msg:'🪙 Stellar energy!'},{res:'darkore',amt:1,chance:.04,msg:'🌑 Dark ore!'}],
-  darkore:[{res:'emp',amt:8,chance:.22,msg:'🪙 Dark energy!'},{res:'starstone',amt:2,chance:.08,msg:'⭐ Reversed!'}],
+  stone:[{res:'crystal',amt:1,chance:.05,msg:'💎 Crystal found!'},{res:'iron',amt:3,chance:.15,msg:'⚙️ Iron vein!'}],
+  wood:[{res:'crystal',amt:1,chance:.04,msg:'💎 Crystal found!'},{res:'gold',amt:3,chance:.12,msg:'🥇 Gold!'}],
+  gold:[{res:'emp',amt:2,chance:.15,msg:'💰 $EMP found!'},{res:'crystal',amt:1,chance:.08,msg:'💎 Crystal!'}],
+  iron:[{res:'emp',amt:1,chance:.10,msg:'💰 Iron → $EMP!'},{res:'crystal',amt:1,chance:.05,msg:'💎 Crystal!'}],
+  crystal:[{res:'emp',amt:2,chance:.18,msg:'💰 Crystal → $EMP!'},{res:'mana',amt:2,chance:.10,msg:'🔮 Mana!'}],
+  mana:[{res:'emp',amt:2,chance:.15,msg:'💰 Mana condensed!'},{res:'starstone',amt:1,chance:.05,msg:'⭐ Starstone!'}],
+  starstone:[{res:'emp',amt:5,chance:.20,msg:'💰 Stellar energy!'},{res:'darkore',amt:1,chance:.04,msg:'🌑 Dark ore!'}],
+  darkore:[{res:'emp',amt:8,chance:.22,msg:'💰 Dark energy!'},{res:'starstone',amt:2,chance:.08,msg:'⭐ Reversed!'}],
 };
 
 const MYSTERY_REWARDS=[
@@ -1185,8 +1242,14 @@ function startPassive(){
       if(ph[k]<=0)continue;
       const amt=Math.max(1,Math.round(ph[k]*f));
       const _boostedAmt=Math.round(amt*_boostM);
-      if(k==='emp') eEarn(_boostedAmt,'Passive income'); // track for airdrop!
-      else addRes(k,_boostedAmt);
+      if(k==='emp'){
+        eEarn(_boostedAmt,'Passive income');
+        // Flash EMP pill on passive earn
+        if(_boostedAmt>.01){
+          const ep=document.getElementById('emp-pill');
+          if(ep){ep.style.transform='scale(1.04)';setTimeout(()=>ep.style.transform='',100);}
+        }
+      } else addRes(k,_boostedAmt);
     }
     updateHUD();checkAchievements();
   },10000);
@@ -1551,31 +1614,50 @@ function buildBldMesh(id,wx,wz){
 
     // ── ERA I ──────────────────────────────────────────────────────────────
     case 'mine':{
-      // Low stone entrance arch + shaft opening
-      addWall(g,1.4,.7,1.0,STONE); // main wall
-      addWall(g,1.6,.25,1.2,DARK_STONE,0,.7,0); // crenellation top
-      // Arch opening (dark hole)
-      addWall(g,.5,.55,.12,0x181410,0,.1,.42); // doorway dark
-      // Two support posts
-      addCyl(g,.06,.85,DARK_WOOD,-.35,.0,.42,6);
-      addCyl(g,.06,.85,DARK_WOOD, .35,.0,.42,6);
-      // Lantern on top
-      const ml=new THREE.PointLight(0xffaa22,.8,6);ml.position.set(0,1,0);g.add(ml);
+      // Foundation
+      addWall(g,1.6,.08,1.2,DARK_STONE,0,0,0);
+      // Main stone wall with crenellations
+      addWall(g,1.4,.75,1.0,STONE);
+      addWall(g,.4,.2,.25,STONE,-.5,.75,0);
+      addWall(g,.4,.2,.25,STONE, .5,.75,0);
+      // Mine entrance (dark hole)
+      addWall(g,.55,.65,.15,0x181410,0,.05,.44);
+      // Timber frame supports
+      addCyl(g,.07,.9,DARK_WOOD,-.32,.0,.44,6);
+      addCyl(g,.07,.9,DARK_WOOD, .32,.0,.44,6);
+      // Crossbeam
+      addWall(g,.75,.1,.1,DARK_WOOD,0,.82,.44);
+      // Rock pile beside entrance
+      for(let i=0;i<4;i++){const r=mk(new THREE.DodecahedronGeometry(.08+Math.random()*.06,0),lm(STONE));r.position.set(.55+Math.random()*.1,.05+i*.04,(Math.random()-.5)*.3);g.add(r);}
+      // Lantern with warm glow
+      const ml=new THREE.PointLight(0xffaa22,.9,7);ml.position.set(0,1.1,.3);g.add(ml);
+      const lb=mk(bx(.12,.14,.12),lm(0xffcc44));lb.position.set(0,1.0,.44);g.add(lb);
       break;
     }
     case 'lumber':{
-      // Wooden cabin with slanted roof
-      addWall(g,1.3,.8,1.0,WOOD);
-      addWall(g,.3,.9,.3,DARK_WOOD,-.5,.0,-.3); // side stack
-      // Slanted plank roof
-      const rf=mk(bx(1.5,.1,1.2),DARK_WOOD);rf.position.set(0,.85,0);rf.rotation.z=.15;g.add(rf);
-      addCone(g,.75,.5,THATCH,0,.9,0,4);
-      // Log pile
-      for(let i=0;i<3;i++){const l=mk(cyl(.07,.6,6),DARK_WOOD);l.position.set(.45+i*.0,.15,.3);l.rotation.z=Math.PI/2;g.add(l);}
+      // Foundation
+      addWall(g,1.5,.08,1.2,DARK_STONE);
+      // Wooden cabin walls
+      addWall(g,1.3,.85,1.0,WOOD);
+      // Window holes (dark squares)
+      addWall(g,.22,.22,.12,0x1a1008,-.3,.35,.5);
+      addWall(g,.22,.22,.12,0x1a1008, .3,.35,.5);
+      // Roof (hip style)
+      const rf=mk(bx(1.55,.1,1.25),DARK_WOOD);rf.position.set(0,.9,0);g.add(rf);
+      addCone(g,.85,.55,THATCH,0,.95,0,4);
+      // Chimney
+      addCyl(g,.1,.5,DARK_STONE,.4,1.1,-.2,6);
+      addWall(g,.18,.08,.18,0x1a1008,.4,1.55,-.2);
+      // Log pile (stacked)
+      for(let i=0;i<5;i++){const l=mk(cyl(.07,.7,7),DARK_WOOD);l.position.set(.55,.12+i*.0,(i%2)*.05-.02);l.rotation.z=Math.PI/2;g.add(l);}
+      for(let i=0;i<3;i++){const l=mk(cyl(.07,.7,7),DARK_WOOD);l.position.set(.55,.27,(i%2)*.05);l.rotation.z=Math.PI/2;g.add(l);}
+      // Sawdust pile
+      const sd=mk(new THREE.ConeGeometry(.3,.08,8),lm(0xd4b060));sd.position.set(-.5,.04,.3);g.add(sd);
       break;
     }
     case 'farm':{
-      // Wide low barn with big roof
+      // Stone foundation
+      addWall(g,2.0,.1,1.4,DARK_STONE,0,0,0); // Wide low barn with big roof
       addWall(g,1.8,.65,1.1,0x8a5028); // barn walls
       addCone(g,1.0,.7,THATCH,0,.65,0,4); // hay roof
       // Small fence post
@@ -1603,10 +1685,15 @@ function buildBldMesh(id,wx,wz){
       break;
     }
     case 'marketplace':{
-      // Open market stall with canopy
-      addWall(g,1.6,.7,1.0,PLASTER);
-      // Canopy (two-tone awning)
-      const aw=mk(bx(1.8,.08,1.3),0x8a2010);aw.position.set(0,.75,0);aw.rotation.x=-.1;g.add(aw);
+      // Stone base
+      addWall(g,1.8,.1,1.3,DARK_STONE,0,0,0);
+      // Main building plaster walls
+      addWall(g,1.5,.75,1.0,PLASTER);
+      // Window pair
+      addWall(g,.2,.25,.1,0x1a1008,-.4,.28,.5);
+      addWall(g,.2,.25,.1,0x1a1008, .4,.28,.5);
+      // Striped awning
+      const aw=mk(bx(1.9,.07,1.4),lm(0x9a2810));aw.position.set(0,.8,0);aw.rotation.x=-.1;g.add(aw);
       // 4 canopy posts
       [[-.75,.5],[.75,.5],[-.75,-.5],[.75,-.5]].forEach(([px,pz])=>addCyl(g,.05,.8,DARK_WOOD,px,0,pz,6));
       // Counter
@@ -1616,14 +1703,33 @@ function buildBldMesh(id,wx,wz){
 
     // ── ERA II ─────────────────────────────────────────────────────────────
     case 'smelter':{
+      addWall(g,1.6,.12,1.3,DARK_STONE,0,0,0);
+      // Thick stone walls
+      addWall(g,1.4,.9,1.1,0x706858);
+      // Small windows (glowing)
+      const swm=new THREE.MeshStandardMaterial({color:0xff6600,emissive:0xff4400,emissiveIntensity:1.5});
+      const sw1=mk(bx(.18,.22,.1),swm);sw1.position.set(-.4,.45,.55);g.add(sw1);
+      const sw2=mk(bx(.18,.22,.1),swm);sw2.position.set( .4,.45,.55);g.add(sw2);
+      // Two smoking chimneys
+      addCyl(g,.12,.8,DARK_STONE,-.35,1.0,-.2,6);
+      addCyl(g,.12,.65,DARK_STONE, .35,1.0,-.2,6);
+      addWall(g,.22,.1,.22,0x1a1410,-.35,1.75,-.2); // chimney cap
+      addWall(g,.22,.1,.22,0x1a1410, .35,1.6,-.2);
+      // Bellows/gear on side
+      addCyl(g,.18,.22,IRON,.6,.35,0,8);
+      // Glow from furnace
+      const sfl=new THREE.PointLight(0xff5500,1.2,6);sfl.position.set(0,.5,.3);g.add(sfl);
+      break;
+    }
+    case 'smelter_old':{// unused
       // Squat building + tall chimney
       addWall(g,1.2,.75,1.0,DARK_STONE);
       addCone(g,.7,.4,SLATE,0,.75,0,4);
       // Big chimney
       addCyl(g,.22,1.6,DARK_STONE,.35,0,-.2,8);
       // Smoke puff (small sphere)
-      const sm=mk(new THREE.SphereGeometry(.14,6,5),0x444444);sm.position.set(.35,1.65,-.2);sm.material.transparent=true;sm.material.opacity=.5;g.add(sm);
-      const fl=new THREE.PointLight(0xff4400,.8,5);fl.position.set(0,.4,0);g.add(fl);
+      const smk2=mk(new THREE.SphereGeometry(.14,6,5),0x444444);smk2.position.set(.35,1.65,-.2);smk2.material.transparent=true;sm.material.opacity=.5;g.add(sm);
+      const sfl2=new THREE.PointLight(0xff4400,.8,5);sfl2.position.set(0,.4,0);g.add(sfl2);
       break;
     }
     case 'forge':{
@@ -1662,10 +1768,19 @@ function buildBldMesh(id,wx,wz){
       break;
     }
     case 'coinmaster':{
-      // Small bank — columns and steps
-      addWall(g,1.2,.9,.9,PLASTER);
-      addCone(g,.7,.3,SLATE,0,.9,0,4);
-      // Two front columns
+      addWall(g,1.4,.12,1.1,DARK_STONE,0,0,0); // base
+      // Three front steps
+      addWall(g,1.2,.08,.4,0x8a8070,0,.12,.45);
+      addWall(g,1.0,.08,.3,0x8a8070,0,.2,.38);
+      // Plaster bank building
+      addWall(g,1.2,.95,.9,PLASTER);
+      // Triangular pediment
+      const tri=mk(bx(1.35,.04,.7),DARK_STONE);tri.position.set(0,.97,0);g.add(tri);
+      const ped=mk(new THREE.CylinderGeometry(0,.7,.35,3),lm(PLASTER));ped.position.set(0,1.15,0);g.add(ped);
+      // Four front columns
+      [-0.42,-0.14,.14,.42].forEach(x=>addCyl(g,.075,.97,STONE,x,0,.42,6));
+      // Gold coin symbol on wall
+      const coin=mk(new THREE.CylinderGeometry(.18,.18,.04,16),lm(0xc8920a));coin.position.set(0,.55,-.43);coin.rotation.x=Math.PI/2;g.add(coin);
       addCyl(g,.08,.95,STONE,-.35,0,.47,8);
       addCyl(g,.08,.95,STONE, .35,0,.47,8);
       // Steps
@@ -1720,7 +1835,21 @@ function buildBldMesh(id,wx,wz){
       break;
     }
     case 'inn':{
-      // Cozy tavern — warm wood, chimney, sign
+      addWall(g,1.6,.1,1.3,DARK_STONE,0,0,0);
+      addWall(g,1.45,.95,1.1,0xe8ddc0);
+      for(let i=0;i<3;i++){const tf=mk(bx(.06,.95,.06),lm(DARK_WOOD));tf.position.set(-.55+i*.55,.48,-.55);g.add(tf);}
+      addWall(g,1.5,.07,1.2,DARK_WOOD,0,.65,0);
+      addWall(g,1.6,.55,1.2,0xe0d4b8,0,.95,0);
+      addWall(g,1.65,.08,1.25,DARK_WOOD,0,1.5,0);
+      addCone(g,.9,.6,RED_TILE,0,1.62,0,4);
+      addCyl(g,.12,.7,DARK_STONE,-.4,1.7,.3,6);addWall(g,.2,.07,.2,0x1a1410,-.4,2.35,.3);
+      addCyl(g,.12,.55,DARK_STONE,.4,1.7,.3,6);addWall(g,.2,.07,.2,0x1a1410,.4,2.2,.3);
+      addCyl(g,.02,.5,DARK_WOOD,.7,.95,.55,4);
+      const innsign=mk(bx(.4,.25,.06),lm(DARK_WOOD));innsign.position.set(.5,.75,.55);g.add(innsign);
+      const wm2=new THREE.MeshStandardMaterial({color:0xffcc66,emissive:0xff9900,emissiveIntensity:.4,transparent:true,opacity:.7});
+      const iw1=mk(bx(.28,.32,.06),wm2);iw1.position.set(-.35,.45,.56);g.add(iw1);
+      const iw2=mk(bx(.28,.32,.06),wm2);iw2.position.set(.35,.45,.56);g.add(iw2);
+      const iwl=new THREE.PointLight(0xffaa44,.9,8);iwl.position.set(0,.6,.5);g.add(iwl);
       addWall(g,1.5,.85,1.1,0x8a5028);
       addCone(g,.85,.55,THATCH,0,.85,0,4);
       // Chimney with warm light
@@ -1744,7 +1873,17 @@ function buildBldMesh(id,wx,wz){
       break;
     }
     case 'harbour':{
-      // Dock building + pier posts
+      addWall(g,1.6,.1,1.4,DARK_STONE,0,0,0);
+      addWall(g,1.5,.85,1.2,DARK_WOOD);
+      const hr=mk(bx(1.65,.08,1.35),lm(0x3a2810));hr.rotation.x=.15;hr.position.set(0,1.05,-.1);g.add(hr);
+      addCyl(g,.06,2.0,DARK_WOOD,.55,0,.4,4);
+      addWall(g,.06,.06,1.0,DARK_WOOD,.55,2.0,.0);
+      addCyl(g,.02,.6,IRON,.55,2.0,.45,4);
+      const hhook=mk(bx(.1,.12,.06),lm(IRON));hhook.position.set(.55,1.4,.45);g.add(hhook);
+      for(let i=0;i<4;i++) addCyl(g,.09,.7,DARK_WOOD,-.5+i*.33,0,.65,6);
+      addWall(g,1.4,.08,.1,DARK_WOOD,0,.68,.65);
+      for(let i=0;i<3;i++){const hcb=mk(bx(.28,.28,.28),lm(DARK_WOOD));hcb.position.set(-.5+i*.3,.14,-.45);g.add(hcb);}
+      const hanc=mk(bx(.06,.5,.06),lm(IRON));hanc.position.set(.45,.25,-.45);hanc.rotation.z=.3;g.add(hanc);
       addWall(g,1.4,.7,1.0,DARK_WOOD);
       addCone(g,.8,.5,DARK_WOOD,0,.7,0,4);
       // Dock posts in water direction
@@ -1757,7 +1896,16 @@ function buildBldMesh(id,wx,wz){
 
     // ── ERA IV ─────────────────────────────────────────────────────────────
     case 'observatory':{
-      // Dome on cylindrical tower
+      addCyl(g,.65,.12,DARK_STONE,0,0,0,8);
+      addCyl(g,.52,1.6,0x9a9890,0,.12,0,8);
+      addCyl(g,.62,.15,DARK_STONE,0,1.72,0,8);
+      const obsMat=new THREE.MeshStandardMaterial({color:0x4060a8,metalness:.5,roughness:.3});
+      const obsDome=mk(new THREE.SphereGeometry(.6,12,8,0,Math.PI*2,0,Math.PI/2),obsMat);obsDome.position.set(0,1.87,0);g.add(obsDome);
+      addWall(g,.5,.15,.05,0x080c18,0,2.1,.58);
+      addCyl(g,.07,.65,IRON,0,2.25,.45,8);
+      addCyl(g,.1,.08,0x2a2a2a,0,2.25,.78,8);
+      const obsL=new THREE.PointLight(0x4488ff,.6,10);obsL.position.set(0,2.5,0);g.add(obsL);
+      for(let i=0;i<5;i++){const a=i*Math.PI*2/5;const osd=mk(bx(.06,.06,.04),lm(0xf0e840));osd.position.set(Math.cos(a)*.5,.8+Math.sin(i)*.2,Math.sin(a)*.5);g.add(osd);}
       addCyl(g,.55,1.4,STONE,0,0,0,10);
       const dome2=mk(new THREE.SphereGeometry(.65,10,7),0x203850);dome2.position.set(0,1.75,0);dome2.scale.set(1,.7,1);dome2.castShadow=true;g.add(dome2);
       // Telescope stub
@@ -1800,7 +1948,17 @@ function buildBldMesh(id,wx,wz){
       break;
     }
     case 'emptemple':{
-      // Golden EMP shrine — tall ornate
+      addCyl(g,.8,.12,DARK_STONE,0,0,0,8);
+      addCyl(g,.75,.2,0x6a5a30,0,.12,0,6);
+      addCyl(g,.6,.2,0x8a7840,0,.32,0,6);
+      addCyl(g,.5,1.8,0xb09040,0,.52,0,8);
+      for(let i=0;i<4;i++){const a=i*Math.PI/2+Math.PI/4;addCyl(g,.08,2.0,0xc8a820,Math.cos(a)*.55,.12,Math.sin(a)*.55,6);}
+      addCone(g,.7,.3,0xd4aa30,0,2.35,0,8);
+      addCone(g,.5,.25,0xd4aa30,0,2.65,0,8);
+      addCone(g,.3,.2,0xd4aa30,0,2.9,0,8);
+      const etMat=new THREE.MeshStandardMaterial({color:0xf0d040,emissive:0xf0a000,emissiveIntensity:2,metalness:.9});
+      const etCr=mk(new THREE.OctahedronGeometry(.12,0),etMat);etCr.position.set(0,3.15,0);g.add(etCr);
+      const etL=new THREE.PointLight(0xffcc00,2.0,14);etL.position.set(0,2,0);g.add(etL);
       addCyl(g,.65,1.0,SAND,0,0,0,8);
       // Gold ring
       const tr=mk(new THREE.TorusGeometry(.7,.08,8,16),GOLD);tr.position.y=1.05;tr.rotation.x=Math.PI/2;g.add(tr);
@@ -1812,7 +1970,17 @@ function buildBldMesh(id,wx,wz){
       break;
     }
     case 'guildhall':{
-      // Grand hall — wide, tall, imposing
+      addWall(g,2.4,.12,1.6,DARK_STONE,0,0,0);
+      addWall(g,2.2,1.2,1.4,0x9a9080);
+      addWall(g,2.3,.1,1.5,DARK_STONE,0,1.2,0);
+      addWall(g,2.0,.7,1.2,0x8a8070,0,1.3,0);
+      addCone(g,1.2,.6,RED_TILE,0,2.0,0,4);
+      for(let i=0;i<3;i++){const a=-.6+i*.6;addCyl(g,.08,1.25,0xc8c0a0,a,0,.72,6);}
+      addWall(g,1.5,.08,.8,DARK_STONE,0,1.28,0);
+      const gped=mk(new THREE.CylinderGeometry(0,.82,.4,3),lm(0x9a9080));gped.position.set(0,1.45,0);g.add(gped);
+      const gbanner=mk(bx(.1,.9,.5),lm(0x8a1010));gbanner.position.set(-1.08,.8,0);g.add(gbanner);
+      const gbanner2=mk(bx(.1,.9,.5),lm(0x8a1010));gbanner2.position.set(1.08,.8,0);g.add(gbanner2);
+      const ghL=new THREE.PointLight(0xffdd88,1.0,12);ghL.position.set(0,1.5,0);g.add(ghL);
       addWall(g,2.0,1.1,1.2,PLASTER);
       addCone(g,1.1,.6,RED_TILE,0,1.1,0,4);
       // Two towers flanking
@@ -1858,7 +2026,24 @@ function buildBldMesh(id,wx,wz){
       break;
     }
     case 'empnexus':{
-      // Floating crystal cluster
+      // Massive dark spire with floating crystals
+      addCyl(g,.7,.15,0x080c18,0,0,0,8);
+      addCyl(g,.55,2.5,0x101828,0,.15,0,8);
+      addCyl(g,.65,.2,0x1a2038,0,2.65,0,8);
+      // Central spire
+      addCyl(g,.2,2.0,0x1a2848,0,2.85,0,6);
+      addCone(g,.25,1.2,0x2040a0,0,4.85,0,6);
+      // Orbiting crystals
+      for(let i=0;i<6;i++){
+        const a=i*Math.PI/3;const cr=mk(new THREE.OctahedronGeometry(.18+i*.02,0),new THREE.MeshStandardMaterial({color:0x4080ff,emissive:0x2060dd,emissiveIntensity:1.5,metalness:.9}));
+        cr.position.set(Math.cos(a)*.75,2.0+Math.sin(i)*.3,Math.sin(a)*.75);
+        cr.userData.orbitAngle=a;cr.userData.orbitSpeed=.5+i*.1;
+        g.add(cr);
+      }
+      // Pulsing core light
+      const nxL=new THREE.PointLight(0x4080ff,2.5,16);nxL.position.set(0,2.5,0);g.add(nxL);
+      // Energy rings
+      for(let i=0;i<3;i++){const rg=mk(new THREE.RingGeometry(.5+i*.25,.55+i*.25,24),new THREE.MeshBasicMaterial({color:0x2050cc,transparent:true,opacity:.3,side:THREE.DoubleSide}));rg.position.set(0,1.5+i*.4,0);rg.rotation.x=.3+i*.2;g.add(rg);}
       addCyl(g,.5,.9,0x101828,0,0,0,8);
       for(let i=0;i<5;i++){const a=i*Math.PI*2/5,r=.45;const ocr=mk(new THREE.OctahedronGeometry(.2+i*.04,0),0x4080ff);ocr.position.set(Math.cos(a)*r,.8+Math.sin(i)*0.2,Math.sin(a)*r);ocr.rotation.y=a;g.add(ocr);}
       const nl=new THREE.PointLight(0x4080ff,1.8,10);nl.position.y=.8;g.add(nl);
@@ -2390,8 +2575,8 @@ function updateDayNight(){
       }
       // Gold EMP lights — glow at night
       if(col.r>0.9&&col.g>0.8&&col.b<0.3){
-        // Subtle pulse on EMP building lights
-        const pulse=isNight?(0.8+Math.sin(animT*2+obj._baseI)*0.2):0;
+        const dayMult=isNight?1.0:.4;
+        const pulse=dayMult*(0.7+Math.sin(animT*2.5+obj._baseI)*0.3);
         obj.intensity=pulse*(obj._baseI||0.5);
       }
       // Blue lights = EMP buildings — brighter at night too
@@ -2606,14 +2791,33 @@ function doSell(){
   Object.entries(rates).forEach(([k,v])=>{const qty=G.res[k]||0;if(qty>0){t+=qty*v;sold.push(RES_ICO[k]+'×'+qty);G.res[k]=0;}});
   Object.entries(erates).forEach(([k,v])=>{const qty=E.res[k]||0;if(qty>0){t+=qty*v;sold.push(RES_ICO[k]+'×'+qty);E.res[k]=0;}});
   if(!t){toast('Nothing to sell — mine some resources first!');return;}
-  const mult=1+
-    (typeof G.bld.marketplace==='object'?.10:0)+
-    (typeof G.bld.tradepost==='object'?.15:0)+
-    (typeof G.bld.guildhall==='object'?.10:0);
-  if(mult>1) setTimeout(()=>toast('Market bonus: ×'+mult.toFixed(2)+' sell rate',2000),100);
+  const multParts={
+    base:1,
+    marketplace:typeof G.bld.marketplace==='object'?.10:0,
+    tradepost:typeof G.bld.tradepost==='object'?.15:0,
+    guildhall:typeof G.bld.guildhall==='object'?.10:0
+  };
+  const mult=Object.values(multParts).reduce((a,b)=>a+b,0);
+  const multBonus=mult-1;
+  if(multBonus>0) setTimeout(()=>toast('Market bonus: +'+Math.round(multBonus*100)+'% sell rate',2000),100);
   const e=Math.floor(t*mult);
+  _lastSellSnapshot={res:{...G.res},emp:G.res.emp,e};
+  window._lastSellTime=Date.now();
+  // HARDENED immediate write after sell to prevent any restore overwriting
+  try{
+    const _snap=JSON.parse(localStorage.getItem('empyria_v2')||'{}');
+    _snap.res=JSON.parse(JSON.stringify(G.res));
+    _snap.savedAt=Date.now();
+    const _snapStr=JSON.stringify(_snap);
+    localStorage.setItem('empyria_v2',_snapStr);
+    sessionStorage.setItem('empyria_v2_bak',_snapStr);
+  }catch(e){}
   eEarn(e,'Sell resources');
-  window.haptic?.('medium'); // use eEarn so airdrop score is tracked!
+  window.haptic?.('medium');
+  // Show airdrop score update notification occasionally
+  if(e>=50&&Math.random()<.3){
+    setTimeout(()=>toast('📈 Airdrop score: +'+e+' $EMP earned!',2500),500);
+  } // use eEarn so airdrop score is tracked!
   showEmpFloat(e);sfxCoin?.();
   window.haptic?.('medium');
   const breakdown=sold.slice(0,3).join('  ');
@@ -2709,12 +2913,21 @@ function updateHints(){
   const wasNear=mb?.classList.contains('nearResource');
   if(mb) mb.classList.toggle('nearResource',!!n&&!placingBld);
   // Subtle haptic when first entering range
-  if(n&&!wasNear&&!placingBld) window.haptic?.('light');
+  if(n&&!wasNear&&!placingBld){
+    window.haptic?.('light');
+    // Show resource type briefly on first approach
+    if(n!==window._lastNearNode){
+      window._lastNearNode=n;
+      const rval={stone:.15,wood:.15,gold:.4,iron:.6,crystal:2.5,mana:5,starstone:15,darkore:40}[n.userData.type]||0;
+      if(rval>0) toast(RES_ICO[n.userData.type]+' '+n.userData.type+' · '+rval+' $EMP/unit',1500);
+    }
+  }
   if(!hint)return;
-  // Hide hint when toast is visible or placement is active
-  const toastEl=document.getElementById('toast');
-  const toastVisible=toastEl&&parseFloat(toastEl.style.opacity||0)>0;
-  if(placingBld||document.getElementById('placement-bar')||toastVisible){
+  // Hide hint when panel open, toast visible, or placing
+  const toastEl=document.getElementById('notif-stack');
+  const toastVisible=toastEl&&toastEl.children.length>0;
+  const panelOpen4=document.getElementById('city-panel')?.classList.contains('open');
+  if(placingBld||document.getElementById('placement-bar')||toastVisible||panelOpen4){
     hint.style.opacity='0';return;
   }
   if(n){hint.textContent='⛏️ Mine '+n.userData.type+' · tap or SPACE';hint.style.opacity='1';}else hint.style.opacity='0';}
@@ -2757,7 +2970,7 @@ function confirmPlace(wx,wz){
   const _empMsg=_bdef?.empOut>0?' · +'+(_bdef.empOut*(E.empMult||1)).toFixed(2)+'💰/tick':'';
   toast('✅ '+_bdef?.name+' built!'+_empMsg,3000);
   addLog(_bdef?.ico+' '+_bdef?.name+' built','good');
-  saveGame(); eSave(); // save immediately after building placement
+  hardenedSave(); eSave(); // HARDENED save after placement
   // Spawn particle burst
   if(typeof spawnBuildParticles==='function') spawnBuildParticles(snap.x, snap.z);
   setTimeout(()=>{
@@ -3019,9 +3232,21 @@ function doPrestige(){
 
 // ═══ ERA ═══
 function updateEra(){
-  const eraReqs=[[1,[]],[2,['mine','lumber','forge','market','smelter']],[3,['workshop','academy','hq','treasury']],[4,['citadel','vault','observatory']],[5,['portal','nexus']]];
+  const eraReqs=[[1,[]],[2,['mine','lumber','forge','marketplace','smelter']],[3,['workshop','academy','townhall','mint']],[4,['guildhall','harbour','observatory']],[5,['emptemple','empnexus']]];
   let era=1;for(const[n,req]of eraReqs)if(req.every(r=>G.bld[r]))era=n;
   if(era!==G.era){
+    const eraFees={2:400,3:1500,4:6000,5:20000};
+    const fee=eraFees[era]||0;
+    if(era>G.era&&fee>0){
+      if((G.res.emp||0)<fee){
+        toast('Need '+fee.toLocaleString()+' $EMP to unlock ERA '+era+'!',3000);
+        return;
+      }
+      G.res.emp=Math.max(0,(G.res.emp||0)-fee);
+      E.res.emp=G.res.emp;
+      E.empSpent=(E.empSpent||0)+fee;
+      updateHUD();
+    }
     G.era=era;
     // ERA unlock celebration
     window.haptic?.('success');
@@ -3174,6 +3399,14 @@ function renderPassiveSection(){
   const ph=passPerHour();
   const empMult=E.empMult||1;
   // Total EMP/hr from world buildings
+  // Total assets display
+  const rates={stone:.15,wood:.15,gold:.4,iron:.6,crystal:2.5,mana:5,starstone:15,darkore:40};
+  const resValue=Object.entries(rates).reduce((s,[k,r])=>s+Math.floor((G.res[k]||0)*r),0);
+  const totalAssets=Math.floor(G.res.emp||0)+resValue;
+  if(totalAssets>0) content+=`<div style="background:rgba(240,184,64,.05);border:1px solid rgba(240,184,64,.15);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:9px;color:var(--txt-d)">Total assets (incl. resources)</div>
+    <div style="font-size:14px;font-weight:900;color:var(--emp)">${totalAssets.toLocaleString()} $EMP</div>
+  </div>`;
   const empSources=Object.entries(G.bld)
     .filter(([id,v])=>v===true&&BLD_DEF[id]?.empOut)
     .map(([id])=>({id,def:BLD_DEF[id],rate:BLD_DEF[id].empOut*empMult*450}))
@@ -3407,6 +3640,17 @@ function renderPrestigeTab(){
 function buyShop(id){if(!walletAddr){toast('Connect your wallet first!');toggleWallet();return;}toast('📱 TON payment coming soon — wallet: '+walletAddr.slice(0,8)+'…');}
 
 // ═══ MYSTERY BOX ═══
+function openMysteryBox(){
+  const boxCost=25;
+  if((G.mysteryBoxes||0)<=0){toast('No mystery boxes available!');return;}
+  if((G.res.emp||0)<boxCost){toast('Need '+boxCost+' $EMP to open!');return;}
+  G.res.emp=Math.max(0,(G.res.emp||0)-boxCost);
+  E.res.emp=G.res.emp;
+  E.empSpent=(E.empSpent||0)+boxCost;
+  G.mysteryBoxes--;
+  showMysteryBox();
+  updateHUD();saveGame();
+}
 function checkMysteryBox(){G.totalTaps++;if(G.nextBoxAt<=0)G.nextBoxAt=G.totalTaps+20+Math.floor(Math.random()*31);if(G.totalTaps>=G.nextBoxAt){G.mysteryBoxes++;G.nextBoxAt=G.totalTaps+20+Math.floor(Math.random()*31);showMysteryBox();}}
 function pickMysteryReward(){const total=MYSTERY_REWARDS.reduce((s,r)=>s+r.weight,0);let roll=Math.random()*total;for(const r of MYSTERY_REWARDS){roll-=r.weight;if(roll<=0)return r;}return MYSTERY_REWARDS[0];}
 function showMysteryBox(){const r=pickMysteryReward(),box=document.getElementById('mystery-box'),lbl=document.getElementById('mystery-label'),btn=document.getElementById('mystery-open');if(!box)return;box.style.display='flex';lbl.textContent='📦 Mystery Box!';btn.onclick=()=>{box.style.display='none';
@@ -3444,7 +3688,10 @@ function startMineDash(){const arena=document.getElementById('tap-arena');arena.
 function spawnOre(){if(!_tap.active)return;const arena=document.getElementById('tap-arena'),W=arena.offsetWidth||300;const wts=[25,25,20,15,8,10,Math.max(2,15-_tap.combo*2)],total=wts.reduce((a,b)=>a+b,0);let roll=Math.random()*total,type=ORE_TYPES[0];for(let i=0;i<ORE_TYPES.length;i++){roll-=wts[i];if(roll<=0){type=ORE_TYPES[i];break;}}const el=document.createElement('div'),x=Math.random()*(W-type.size),dur=1.8+Math.random()*1.2;el.style.cssText=`position:absolute;left:${x}px;top:-60px;width:${type.size}px;height:${type.size}px;font-size:${type.size-8}px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;filter:drop-shadow(0 2px 6px ${type.color});animation:fall ${dur}s linear forwards`;el.textContent=type.emoji;el.dataset.t=JSON.stringify(type);el.addEventListener('pointerdown',e=>{e.stopPropagation();if(!_tap.active)return;const t=JSON.parse(el.dataset.t);el.style.transform='scale(1.4)';el.style.opacity='0';setTimeout(()=>el.remove(),150);clearTimeout(_tap.comboT);_tap.combo=Math.min(_tap.combo+1,10);_tap.comboT=setTimeout(()=>{_tap.combo=0;const tc=document.getElementById('ts-combo');if(tc)tc.textContent='×1';},1500);const m2=1+_tap.combo*.15;const tc2=document.getElementById('ts-combo');if(tc2)tc2.textContent='×'+_tap.combo.toFixed(1);if(t.res===null){_tap.combo=0;const tc3=document.getElementById('ts-combo');if(tc3){tc3.style.color='#ff4444';setTimeout(()=>tc3.style.color='var(--gold-b)',400);}}else if(t.res){const earned=Math.ceil(t.val*m2);_tap[t.res]=(_tap[t.res]||0)+earned;const sid=document.getElementById(t.res==='emp'?'ts-e':'ts-'+t.res[0]);if(sid)sid.textContent=_tap[t.res]||0;if(t.res==='crystal'){const rc=document.getElementById('ts-rare');if(rc)rc.textContent=_tap.crystal||0;}}_tap.taps++;checkMysteryBox();});arena.appendChild(el);setTimeout(()=>{if(el.parentNode)el.remove();},dur*1000+200);}
 function endTap(){_tap.active=false;clearInterval(_tapT);clearInterval(_tapSpawnT);const rws={};if(_tap.stone>0)rws.stone=_tap.stone;if(_tap.wood>0)rws.wood=_tap.wood;if(_tap.gold>0)rws.gold=_tap.gold;if(_tap.iron>0)rws.iron=_tap.iron;if(_tap.crystal>0)rws.crystal=_tap.crystal;rws.emp=Math.max(2,Math.floor((_tap.emp||0)*.25))+Math.floor(_tap.taps*.12);setCd('tap');
   const dashGrade=_tap.taps>=50?'S':_tap.taps>=30?'A':_tap.taps>=15?'B':'C';
-  showResult('⛏️ Mine Dash!',`${_tap.taps} taps · combo ×${_tap.combo.toFixed(1)} · Grade ${dashGrade}`,rws);}
+  const prevBest=G.stats.dashBest||0;
+  const isNewBest=_tap.taps>prevBest;
+  if(isNewBest) G.stats.dashBest=_tap.taps;
+  showResult('⛏️ Mine Dash!',`${_tap.taps} taps · Grade ${dashGrade}${isNewBest?' · 🏆 NEW BEST!':''}`,rws);}
 
 // GAME 2: TOWER DEFENSE
 let _aim={},_aimT=null,_aimST=null,_aimOn=false,_aimAF=null,_aimCtx=null;
@@ -3502,15 +3749,26 @@ function saveGame(){try{
   try{sessionStorage.setItem('empyria_v2_bak',_saveStr);}catch(e){}
   }catch(e){}}
 function loadGame(){try{
-  let raw=localStorage.getItem('empyria_v2');
-  // Fallback: try sessionStorage backup
-  if(!raw){
-    raw=sessionStorage.getItem('empyria_v2_bak')||null;
-    if(raw){
-      localStorage.setItem('empyria_v2',raw); // restore to localStorage
-      console.log('[loadGame] Restored from sessionStorage backup');
-    }
+  // Try all storage locations, pick the one with most buildings
+  const sources=[
+    {key:'empyria_v2',     src:()=>localStorage.getItem('empyria_v2')},
+    {key:'empyria_v2_bak', src:()=>sessionStorage.getItem('empyria_v2_bak')},
+    {key:'empyria_v2_bak2',src:()=>sessionStorage.getItem('empyria_v2_bak2')},
+  ];
+  let raw=null, bestBlds=0;
+  for(const {key,src} of sources){
+    try{
+      const candidate=src();
+      if(!candidate)continue;
+      const parsed=JSON.parse(candidate);
+      const blds=parsed.bldCount||Object.values(parsed.bld||{}).filter(v=>v===true||typeof v==='object').length;
+      console.log('[loadGame]',key,': blds='+blds+' savedAt='+new Date(parsed.savedAt||0).toLocaleTimeString());
+      if(blds>bestBlds||(blds===bestBlds&&(parsed.savedAt||0)>(JSON.parse(raw||'{}').savedAt||0))){
+        bestBlds=blds; raw=candidate;
+      }
+    }catch(e){}
   }
+  if(raw) localStorage.setItem('empyria_v2',raw); // ensure primary is best
   if(!raw){
     // Try to restore G.res from eco save as fallback
     try{
@@ -3543,9 +3801,10 @@ function loadGame(){try{
       sp++;
     });
     updateHUD();
-  },200);
+    console.log('[loadGame] placed '+sp+' buildings');
+  },800);  // 800ms — ensure Three.js scene is fully ready
   console.log('[loadGame] restored: stone='+G.res.stone+' wood='+G.res.wood+' emp='+G.res.emp+' blds='+Object.keys(G.bld).length);
-  toast('💾 Progress restored!',2000); showSaveDebug?.(); }catch(e){ console.warn('Load error:',e); showSaveDebug?.(); }}
+  toast('💾 Progress restored!',2000); }catch(e){ console.warn('Load error:',e); }}
 setInterval(saveGame,30000);
 
 // ═══ TOAST ═══
@@ -3555,35 +3814,13 @@ function toast(msg,dur=2500){
   _toastQ.push({msg,dur});
   if(!_toastBusy) _nextToast();
 }
-function _nextToast(){
-  if(!_toastQ.length){_toastBusy=false;return;}
-  _toastBusy=true;
-  const {msg,dur}=_toastQ.shift();
-  const el=document.getElementById('toast');
-  if(!el){_toastBusy=false;return;}
-  el.textContent=msg;
-  el.style.transition='none';el.style.opacity='1';el.style.transform='translateY(0)';
-  setTimeout(()=>{
-    el.style.transition='opacity .3s,transform .3s';
-    el.style.opacity='0';el.style.transform='translateY(-10px)';
-    setTimeout(_nextToast,320);
-  },dur);
-}
 
-// ═══ LAUNCH ═══
-
-// ─── Supabase Database ────────────────────────────────────────────────────────
-const SUPABASE_URL  = 'https://giwdqbikgxwrwgebmmtd.supabase.co';   // e.g. https://xyz.supabase.co
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdpd2RxYmlrZ3h3cndnZWJtbXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTU1NTQsImV4cCI6MjA5MDc5MTU1NH0.ooWzy7RIS4JdMmjVbeQICcgrqHmXGstMivPnA22M2as';
-
-let db = null;
-let dbPlayer = null; // current player row from DB
-let dbSyncing = false;
-
-function initDB() {
-  try {
-    if (typeof supabase === 'undefined') { console.warn('Supabase not loaded'); return; }
-    db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const SUPABASE_URL='https://giwdqbikgxwrwgebmmtd.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdpd2RxYmlrZ3h3cndnZWJtbXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTU1NTQsImV4cCI6MjA5MDc5MTU1NH0.ooWzy7RIS4JdMmjVbeQICcgrqHmXGstMivPnA22M2as';
+function initDB(){
+  try{
+    if(typeof supabase==='undefined'){console.warn('Supabase not loaded');return;}
+    db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
     console.log('✅ Supabase connected');
   } catch(e) { console.warn('DB init failed:', e); }
 }
@@ -3644,34 +3881,41 @@ async function dbLoadPlayer() {
 
     if (!data.game_state) return;
 
+    // Load local state for comparison
     const localRaw = localStorage.getItem('empyria_v2');
-    const localSavedAt = localRaw ? (JSON.parse(localRaw).savedAt || 0) : 0;
-    const cloudSavedAt = data.game_state.savedAt || 0;
+    const localParsed = localRaw ? JSON.parse(localRaw) : null;
+    const localBlds = localParsed ? Object.values(localParsed.bld||{}).filter(v=>v===true||typeof v==='object').length : 0;
+    const cloudBlds = Object.values(data.game_state.bld||{}).filter(v=>v===true||typeof v==='object').length;
+    const localEmp = localParsed?.res?.emp || 0;
+    const cloudEmp = data.game_state.res?.emp || 0;
 
-    console.log('[Cloud] Local savedAt:', localSavedAt ? new Date(localSavedAt).toLocaleTimeString() : 'NONE');
-    console.log('[Cloud] Cloud savedAt:', cloudSavedAt ? new Date(cloudSavedAt).toLocaleTimeString() : 'NONE');
+    console.log('[Cloud] Local: '+localBlds+' blds, '+localEmp+' EMP | Cloud: '+cloudBlds+' blds, '+cloudEmp+' EMP');
 
-    if (cloudSavedAt > localSavedAt) {
-      // Cloud is newer — this is the authoritative state
-      console.log('[Cloud] Cloud is newer — restoring from cloud');
+    // Restore eco airdrop score (always take highest — can never go down)
+    const eco = data.game_state.eco;
+    if (eco) {
+      if(typeof eco.empMult==='number'&&eco.empMult>=1) E.empMult=eco.empMult;
+      if(typeof eco.totalEmpEarned==='number'&&eco.totalEmpEarned>(E.totalEmpEarned||0)) E.totalEmpEarned=eco.totalEmpEarned;
+      if(typeof eco.empSpent==='number') E.empSpent=eco.empSpent;
+      if(Array.isArray(eco.upgradesDone)&&eco.upgradesDone.length>(E.upgradesDone||[]).length) E.upgradesDone=eco.upgradesDone;
+    }
+
+    if (!localRaw && cloudBlds > 0) {
+      // Fresh install — cloud is the only state
       restoreSaveState(data.game_state);
-      // Restore eco state (multiplier, airdrop score, boost tiers)
-      const eco = data.game_state.eco;
-      if (eco) {
-        if(typeof eco.empMult==='number'&&eco.empMult>=1) E.empMult=eco.empMult;
-        if(typeof eco.totalEmpEarned==='number'&&eco.totalEmpEarned>E.totalEmpEarned) E.totalEmpEarned=eco.totalEmpEarned;
-        if(typeof eco.empSpent==='number') E.empSpent=eco.empSpent;
-        if(Array.isArray(eco.upgradesDone)) E.upgradesDone=eco.upgradesDone;
-      }
-      // Update localStorage with this fresh cloud data
       localStorage.setItem('empyria_v2', JSON.stringify(data.game_state));
-      if (localSavedAt === 0) {
-        toast('☁️ Progress restored from cloud!', 3000);
-      }
-    } else if (localSavedAt > 0) {
-      console.log('[Cloud] Local is newer or equal — keeping local state');
-      // Local is newer — upload it to cloud to keep in sync
-      setTimeout(dbSyncPlayer, 2000);
+      toast('☁️ Progress restored from cloud! ('+cloudBlds+' buildings)', 3000);
+      console.log('[Cloud] Fresh install — restoring from cloud');
+    } else if (cloudBlds > localBlds) {
+      // Cloud has more buildings — player likely switched devices
+      restoreSaveState(data.game_state);
+      localStorage.setItem('empyria_v2', JSON.stringify(data.game_state));
+      toast('☁️ Cloud sync: '+cloudBlds+' buildings restored', 2500);
+      console.log('[Cloud] Cloud has more buildings — restoring');
+    } else {
+      // Local has equal or more buildings — never downgrade
+      console.log('[Cloud] Local is better or equal — keeping local. Uploading local to cloud.');
+      setTimeout(dbSyncPlayer, 3000);
     }
   } catch(e) {
     console.warn('[Cloud] Load failed:', e.message);
@@ -3732,6 +3976,8 @@ function restoreSaveState(s) {
     if(s.bld)Object.assign(G.bld,s.bld);
     // Rebuild world meshes at saved positions
     setTimeout(()=>{
+      // Clear existing meshes first to avoid duplicates
+      Object.keys(buildingMeshes).forEach(id=>{const m=buildingMeshes[id];if(m){m.traverse(x=>{x.geometry?.dispose();x.material?.dispose();});scene?.remove(m);delete buildingMeshes[id];}});
       let sp=0;
       Object.entries(G.bld).forEach(([id,built])=>{
         if(!window.BLD_DEF?.[id]||window.buildingMeshes?.[id])return;
@@ -3989,6 +4235,16 @@ function updateSplashCountdown(){
 setInterval(updateSplashCountdown,60000);
 updateSplashCountdown();
 
+async function fetchSplashStats(){
+  try{
+    const {count}=await fetch('https://giwdqbikgxwrwgebmmtd.supabase.co/rest/v1/players?select=count',{
+      headers:{'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdpd2RxYmlrZ3h3cndnZWJtbXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMTU1NTQsImV4cCI6MjA5MDc5MTU1NH0.ooWzy7RIS4JdMmjVbeQICcgrqHmXGstMivPnA22M2as','Prefer':'count=exact'}
+    }).then(r=>({count:r.headers.get('content-range')?.split('/')[1]||'?'}));
+    const el=document.getElementById('splash-players');
+    if(el&&count!='?') el.textContent=parseInt(count).toLocaleString()+' players building their empire';
+  }catch(e){}
+}
+fetchSplashStats();
 function startLaunch(){
   // Hide splash, show loading screen, then launch
   const sp=document.getElementById('splash');
@@ -4074,7 +4330,7 @@ function launch(){
     window._eTick = setInterval(()=>{
       eTick();
       updateWeather();
-      if(E.tick%20===0){
+      if(E.tick%15===0){
         eSave(); saveGame();
         _lastSaveTime=Date.now();
         const sl=document.getElementById('save-lbl');
@@ -4099,6 +4355,8 @@ function launch(){
             G.quests=generateDailyQuests();
             saveGame();
             toast('📋 New quests ready!',2500);
+            window.haptic?.('light');
+            updateTabBadges?.();
             renderQuestsTab?.();updateTabBadges?.();
           },2000);
         }
@@ -4131,7 +4389,7 @@ function launch(){
     const hasProgress = (E.totalEmpEarned||0)>0 || (G.res.emp||0)>15;
     const isNew = !hasSave && !hasBuildings && !hasProgress;
     if(isNew){
-      addRes('stone',200); addRes('wood',150); addRes('gold',20); addRes('emp',5);
+      addRes('stone',300); addRes('wood',200); addRes('gold',30); addRes('iron',10); addRes('emp',5);
       E.res.gold+=150; E.res.wood+=80; E.res.stone+=60;
       updateHUD();
       toast('🏰 Welcome to Empyria! Mine · Build · Earn $EMP!', 4000);
@@ -4268,6 +4526,26 @@ function shareTelegram(){
 }
 
 const EMP_MILESTONES=[10,50,100,500,1000,5000,10000,50000];
+function checkPresaleCTA(){
+  if(!E.upgradesDone) return;
+  const nextTier=EMP_UPGRADES.find(u=>u.tier&&!E.upgradesDone.includes(u.id));
+  if(!nextTier) return;
+  const emp=G.res.emp||0;
+  if(emp>=nextTier.cost){
+    // Show notification dot on $EMP button
+    const notif=document.getElementById('emp-notif');
+    if(notif) notif.style.display='block';
+    // Show strip with CTA
+    const key='presale_notif_'+nextTier.id;
+    if(!sessionStorage.getItem(key)){
+      sessionStorage.setItem(key,'1');
+      setTimeout(()=>{
+        toast('💰 You can unlock '+nextTier.n+' — tap $EMP!',4000);
+        window.haptic?.('medium');
+      },1500);
+    }
+  }
+}
 function checkEmpMilestones(){
   const total=E.totalEmpEarned||0;
   const milestones=[10,50,100,500,1000,5000,10000,50000,100000,200000];
@@ -4336,6 +4614,20 @@ function showReferral(){
   eEarn(10,'Referral share bonus');toast('🔗 +10 $EMP share bonus!',2000);
 }
 
+function processReferral(refId){
+  if(!refId||!db||!tgUser?.id)return;
+  // Save referrer to DB
+  db.from('players').update({referrer_id:String(refId)}).eq('telegram_id',String(tgUser.id)).then(()=>{
+    console.log('[Referral] linked to',refId);
+  });
+  // Give crystal reward
+  if(!localStorage.getItem('empyria_ref_claimed')){
+    localStorage.setItem('empyria_ref_claimed','1');
+    addRes('crystal',3);
+    saveGame();
+    setTimeout(()=>toast('💎 +3 Crystal! Welcome via referral!',4000),2000);
+  }
+}
 function checkRefBonus(){
   const startParam=window.Telegram?.WebApp?.initDataUnsafe?.start_param||
                    new URLSearchParams(window.location.search).get('startapp')||'';
@@ -4460,15 +4752,26 @@ function showOfflineNotif(mins, earned){
   panel.style.cssText='position:fixed;top:70px;left:8px;right:8px;z-index:200;background:rgba(10,20,10,.95);border:1px solid rgba(64,200,112,.4);border-radius:12px;padding:12px 14px;pointer-events:all';
   // Quick sell-all button at top
   const _quickTotal=Object.entries(rates).reduce((s,[k,r])=>s+Math.floor((G.res[k]||0)*r),0);
-  const sellableBreakdown=Object.entries(rates).filter(([k])=>(G.res[k]||0)>0).map(([k,r])=>`
-    <button onclick="sellOne('${k}');renderSellScreen()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;width:100%">
-      <span style="font-size:12px">${RES_ICO[k]||k} ${Math.floor(G.res[k]||0).toLocaleString()}</span>
-      <span style="font-size:11px;color:var(--emp)">+${Math.floor((G.res[k]||0)*r).toLocaleString()} $EMP</span>
-    </button>`).join('');
+  const _minsAgo=window._lastSellTime?Math.floor((Date.now()-window._lastSellTime)/60000):null;
+  const _sinceText=_minsAgo?(_minsAgo<2?'just now':_minsAgo<60?_minsAgo+'min ago':Math.floor(_minsAgo/60)+'h ago'):'';
+  const sellableBreakdown=Object.entries(rates).filter(([k])=>(G.res[k]||0)>0).map(([k,r])=>{
+    const qty=Math.floor(G.res[k]||0);
+    const earn=Math.floor(qty*r);
+    return`<div onclick="sellOne('${k}');showSellScreen()" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;active:scale(.97);transition:transform .1s" onpointerdown="this.style.transform='scale(.97)'" onpointerup="this.style.transform=''">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">${RES_ICO[k]||k}</span>
+        <span style="font-size:11px;color:var(--txt)">${qty.toLocaleString()}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--grn2);font-weight:700">+${earn.toLocaleString()}</span>
+        <span style="font-size:9px;color:var(--txt-d)">$EMP</span>
+        <span style="font-size:9px;color:var(--txt-d);background:rgba(255,255,255,.06);border-radius:5px;padding:1px 5px">SELL</span>
+      </div>
+    </div>`;}).join('');
 
   panel.innerHTML=`
     <button onclick="doSell();document.getElementById('sell-screen')?.remove()" style="width:100%;padding:12px;margin-bottom:10px;background:linear-gradient(135deg,#1a3a10,#2a5020);border:1.5px solid rgba(64,200,112,.4);border-radius:12px;color:var(--grn2);font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
-      SELL ALL — +${_quickTotal.toLocaleString()} $EMP
+      SELL ALL — +${_quickTotal.toLocaleString()} $EMP${_sinceText?' · '+_sinceText:''}
     </button>
     <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">${sellableBreakdown}</div>`+`<div style="font-size:10px;color:var(--grn2);font-weight:700;margin-bottom:4px">Away for ${mins} min — earned:</div><div style="font-size:12px;color:#fff">${lines}</div>`;
   const btn=document.createElement('button');
@@ -4507,6 +4810,14 @@ function calcOfflineIncome(){
 }
 
 const ACHIEVEMENTS=[
+  {id:'first_sell',      ico:'💱', name:'First Sale',        cond:s=>s.totalSells>=1},
+  {id:'sell_100',        ico:'💰', name:'Merchant',          cond:s=>(s.totalEmpEarned||0)>=100},
+  {id:'buildings_5',     ico:'🏘️', name:'Hamlet',            cond:()=>Object.values(G.bld).filter(v=>v===true||typeof v==='object').length>=5},
+  {id:'era2',            ico:'⚙️', name:'Iron Age',          cond:()=>G.era>=2},
+  {id:'era3',            ico:'🔮', name:'Arcane Age',        cond:()=>G.era>=3},
+  {id:'presale_t1',      ico:'🚀', name:'Early Investor',    cond:()=>(E.upgradesDone||[]).includes('boost1')},
+  {id:'combo_5',         ico:'⚡', name:'Chain Reaction',    cond:s=>s.maxCombo>=5},
+  {id:'offline_2h',      ico:'😴', name:'Sleeping Empire',   cond:()=>false}, // triggered manually
   {id:'first_mine',   ico:'⛏️', name:'First Strike',      desc:'Mine your first resource',           check:()=>(G.stats?.stone||0)+(G.stats?.wood||0)>0},
   {id:'first_build',  ico:'🏗️', name:'Builder',           desc:'Place your first building',           check:()=>Object.values(G.bld).some(v=>v===true||typeof v==='object')},
   {id:'emp_100',      ico:'💰', name:'Token Collector',   desc:'Earn 100 $EMP total',                check:()=>(E.totalEmpEarned||0)>=100},
@@ -4633,9 +4944,20 @@ function updateTelegramMainBtn(){
 function updateTabBadges(){
   const bldCount=Object.values(G.bld).filter(v=>v===true||typeof v==='object').length;
   // Quest badge: show number of claimable quests
+  // Quest badge
   const doneQuests=(G.quests||[]).filter(q=>q.done&&!q.claimed).length;
   const qBadge=document.getElementById('quest-badge');
   if(qBadge){qBadge.textContent=doneQuests>0?doneQuests:'';qBadge.style.display=doneQuests>0?'flex':'none';}
+  // Upgrade available badge
+  const canUpgradeSome=Object.keys(UPG_DEF).some(id=>{
+    if(!G.bld[id])return false;
+    const lvl=G.upgrades[id]||0;const defs=UPG_DEF[id];
+    if(!defs||lvl>=defs.length)return false;
+    const cost=defs[lvl].cost;
+    return Object.entries(cost).every(([r,a])=>(G.res[r]||0)>=a);
+  });
+  const upgBadge=document.querySelector('.upgr-badge');
+  if(upgBadge){upgBadge.style.display=canUpgradeSome?'flex':'none';}
   const cityBtn=document.querySelector('.ab-city-count');
   if(cityBtn) cityBtn.textContent=bldCount>0?bldCount:'';
   // Quest badge — incomplete quests
@@ -4942,11 +5264,15 @@ function showSellScreen(){
   panel.id='sell-screen';
   panel.style.cssText='position:fixed;bottom:78px;left:50%;transform:translateX(-50%);z-index:60;background:var(--bg2);border:1.5px solid rgba(64,200,112,.3);border-radius:16px;padding:12px;width:88vw;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.5)';
 
-  const mult=1+
-    (typeof G.bld.marketplace==='object'?.10:0)+
-    (typeof G.bld.tradepost==='object'?.15:0)+
-    (typeof G.bld.guildhall==='object'?.10:0);
-  if(mult>1) setTimeout(()=>toast('Market bonus: ×'+mult.toFixed(2)+' sell rate',2000),100);
+  const multParts={
+    base:1,
+    marketplace:typeof G.bld.marketplace==='object'?.10:0,
+    tradepost:typeof G.bld.tradepost==='object'?.15:0,
+    guildhall:typeof G.bld.guildhall==='object'?.10:0
+  };
+  const mult=Object.values(multParts).reduce((a,b)=>a+b,0);
+  const multBonus=mult-1;
+  if(multBonus>0) setTimeout(()=>toast('Market bonus: +'+Math.round(multBonus*100)+'% sell rate',2000),100);
   let rows='';
   sellable.forEach(([k,rate])=>{
     const qty=Math.floor(G.res[k]||0);
@@ -4965,15 +5291,26 @@ function showSellScreen(){
   const rateInfo=sellable.length>0?sellable.slice(0,2).map(([k,r])=>rateLabels[k]+': '+r+'/unit').join(' · '):'';
   // Quick sell-all button at top
   const _quickTotal=Object.entries(rates).reduce((s,[k,r])=>s+Math.floor((G.res[k]||0)*r),0);
-  const sellableBreakdown=Object.entries(rates).filter(([k])=>(G.res[k]||0)>0).map(([k,r])=>`
-    <button onclick="sellOne('${k}');renderSellScreen()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;width:100%">
-      <span style="font-size:12px">${RES_ICO[k]||k} ${Math.floor(G.res[k]||0).toLocaleString()}</span>
-      <span style="font-size:11px;color:var(--emp)">+${Math.floor((G.res[k]||0)*r).toLocaleString()} $EMP</span>
-    </button>`).join('');
+  const _minsAgo=window._lastSellTime?Math.floor((Date.now()-window._lastSellTime)/60000):null;
+  const _sinceText=_minsAgo?(_minsAgo<2?'just now':_minsAgo<60?_minsAgo+'min ago':Math.floor(_minsAgo/60)+'h ago'):'';
+  const sellableBreakdown=Object.entries(rates).filter(([k])=>(G.res[k]||0)>0).map(([k,r])=>{
+    const qty=Math.floor(G.res[k]||0);
+    const earn=Math.floor(qty*r);
+    return`<div onclick="sellOne('${k}');showSellScreen()" style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;active:scale(.97);transition:transform .1s" onpointerdown="this.style.transform='scale(.97)'" onpointerup="this.style.transform=''">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">${RES_ICO[k]||k}</span>
+        <span style="font-size:11px;color:var(--txt)">${qty.toLocaleString()}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--grn2);font-weight:700">+${earn.toLocaleString()}</span>
+        <span style="font-size:9px;color:var(--txt-d)">$EMP</span>
+        <span style="font-size:9px;color:var(--txt-d);background:rgba(255,255,255,.06);border-radius:5px;padding:1px 5px">SELL</span>
+      </div>
+    </div>`;}).join('');
 
   panel.innerHTML=`
     <button onclick="doSell();document.getElementById('sell-screen')?.remove()" style="width:100%;padding:12px;margin-bottom:10px;background:linear-gradient(135deg,#1a3a10,#2a5020);border:1.5px solid rgba(64,200,112,.4);border-radius:12px;color:var(--grn2);font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;cursor:pointer">
-      SELL ALL — +${_quickTotal.toLocaleString()} $EMP
+      SELL ALL — +${_quickTotal.toLocaleString()} $EMP${_sinceText?' · '+_sinceText:''}
     </button>
     <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">${sellableBreakdown}</div>`+`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -5115,6 +5452,14 @@ function getMineComboMult(){
 
 let _lastSaveTime=0;
 async function manualSave(){
+  const ok=hardenedSave();
+  eSave();
+  dbSyncPlayer?.();
+  const sl=document.getElementById('save-lbl');
+  if(sl){sl.textContent=ok?'✓ SAVED':'✗ ERR';setTimeout(()=>sl.textContent='SAVE',2000);}
+  if(ok) toast('Progress saved!',1500);
+  return;
+  // original below:
   const btn=document.getElementById('save-btn');
   const ico=document.getElementById('save-ico');
   const lbl=document.getElementById('save-lbl');
@@ -5504,7 +5849,60 @@ function spToggle(id){
   el.style.display=open?'none':'block';
   if(ico)ico.style.transform=open?'':'rotate(180deg)';
 }
+
+function checkDailySpendChallenge(){
+  const today=new Date().toDateString();
+  const key='empyria_spend_challenge_'+today;
+  if(localStorage.getItem(key)) return;
+  // Show challenge after 5 min of play
+  if((G.stats.totalTaps||0)<20) return;
+  const spent=E.empSpent||0;
+  if(spent>0) return; // already spent today
+  // Offer: spend any EMP today, get bonus crystal
+  setTimeout(()=>{
+    const el=document.createElement('div');
+    el.style.cssText='position:fixed;top:70px;left:8px;right:8px;z-index:300;background:rgba(20,16,4,.97);border:1.5px solid rgba(240,184,64,.4);border-radius:12px;padding:12px;pointer-events:all';
+    el.innerHTML=`<div style="display:flex;align-items:center;gap:10px">
+      <div style="font-size:22px">⚡</div>
+      <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--gold-b)">Daily Challenge</div><div style="font-size:10px;color:var(--txt-d);margin-top:2px">Spend any $EMP today → get +3 💎 Crystal bonus</div></div>
+      <button onclick="this.closest('[style]').remove();localStorage.setItem('${key}','seen')" style="font-size:10px;background:none;border:none;color:var(--txt-d);cursor:pointer">✕</button>
+    </div>`;
+    document.body.appendChild(el);
+    setTimeout(()=>{el.style.transition='opacity .4s';el.style.opacity='0';setTimeout(()=>el.remove(),400);},8000);
+  },300000); // 5 min
+}
+
+// ══ HARDENED SAVE — writes to 3 places atomically ══════════════════
+function hardenedSave(){
+  try{
+    const payload={
+      version:3,
+      savedAt:Date.now(),
+      res:JSON.parse(JSON.stringify(G.res)),
+      bld:JSON.parse(JSON.stringify(G.bld)),
+      cd:JSON.parse(JSON.stringify(G.cd||{})),
+      stats:JSON.parse(JSON.stringify(G.stats||{})),
+      upgrades:JSON.parse(JSON.stringify(G.upgrades||{})),
+      era:G.era||1,streak:G.streak||0,lastLogin:G.lastLogin||'',
+      streakClaimed:G.streakClaimed||false,
+      quests:G.quests||[],questsDate:G.questsDate||'',
+      prestige:G.prestige||0,prestigeBonus:G.prestigeBonus||0,
+      mysteryBoxes:G.mysteryBoxes||0,totalTaps:G.totalTaps||0,
+      nextBoxAt:G.nextBoxAt||0,log:(G.log||[]).slice(0,20),
+      emp:G.res.emp||0,
+      bldCount:Object.values(G.bld).filter(v=>v===true||typeof v==='object').length
+    };
+    const str=JSON.stringify(payload);
+    localStorage.setItem('empyria_v2',str);
+    sessionStorage.setItem('empyria_v2_bak',str);
+    sessionStorage.setItem('empyria_v2_bak2',str); // second backup
+    return true;
+  }catch(e){console.error('[Save] FAILED:',e);return false;}
+}
 function showEmpFloat(amount){
+  if(amount<=0)return;
+  if(amount>=1) toast('+'+Math.floor(amount)+' 💰 $EMP',1500);
+  return; // rest is legacy
   if(!amount||amount<=0) return;
   const el=document.createElement('div');
   el.textContent='+'+Math.floor(amount)+'💰';
@@ -5769,9 +6167,18 @@ document.addEventListener('visibilitychange',()=>{
     calcOfflineIncome();
   }
 });
-window.addEventListener('pagehide',()=>{ saveGame(); eSave(); dbSyncPlayer?.(); });
+window.addEventListener('pagehide',()=>{ hardenedSave(); eSave(); dbSyncPlayer?.(); });
 
 // Economy display in Empire panel
+function spawnCoins(n=8){
+  for(let i=0;i<n;i++){
+    const coin=document.createElement('div');
+    coin.style.cssText=`position:fixed;z-index:500;pointer-events:none;font-size:${12+Math.random()*10}px;left:${10+Math.random()*80}%;top:-20px;animation:coinFall ${1+Math.random()*1}s linear forwards`;
+    coin.textContent='💰';
+    document.body.appendChild(coin);
+    setTimeout(()=>coin.remove(),2500);
+  }
+}
 function openEconomy(){
   // TRADE opens to $EMP presale/upgrades tab — distinct from CITY→BUILD
   const panel=document.getElementById('city-panel');
@@ -5977,19 +6384,34 @@ function renderEconEMP(){
       const has=E.upgradesDone.includes(u.id),can=(G.res.emp||0)>=u.cost;
       const tierCols=['#40ee80','#60c8ff','#f0c060','#f08040','#c080ff','#ff80b0'];
       const tc=tierCols[(u.tier||1)-1]||'var(--emp)';
-      return`<div style="background:${has?'rgba(32,80,40,.3)':'rgba(255,255,255,.03)'};border:1.5px solid ${has?'rgba(64,200,112,.35)':can?'rgba(240,184,64,.25)':'rgba(255,255,255,.07)'};border-radius:12px;padding:11px;margin-bottom:7px;display:flex;align-items:center;gap:10px">
-        <div style="font-size:26px;flex-shrink:0">${u.ico}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:700;color:${has?'var(--grn2)':tc}">${u.n}</div>
-          <div style="font-size:8px;color:var(--txt-d);margin-top:1px">${u.desc}</div>
-        </div>
-        ${has
-          ?'<div style="background:rgba(64,200,112,.15);border:1px solid rgba(64,200,112,.3);border-radius:8px;padding:5px 10px;font-size:9px;color:var(--grn2);font-weight:700">✓ ACTIVE</div>'
-          :`<button onclick="eBuyUpgrade('${u.id}')" style="padding:8px 14px;background:${can?'rgba(180,140,40,.25)':'rgba(255,255,255,.04)'};border:1.5px solid ${can?'rgba(240,184,64,.4)':'rgba(255,255,255,.1)'};border-radius:9px;color:${can?'var(--emp)':'rgba(255,255,255,.2)'};font-size:10px;font-weight:700;cursor:${can?'pointer':'default'};white-space:nowrap;min-width:58px;text-align:center">${u.cost}<br><span style="font-size:8px">💰</span></button>`
-        }
-      </div>`;
+      // ROI calculation
+      const empHrNow=Math.round((passPerHour().emp||0)*450);
+      const roiHrs=empHrNow>0&&u.mult?Math.ceil(u.cost/(empHrNow*(u.mult-1)||1)):null;
+      const roiTxt=roiHrs?roiHrs<24?roiHrs+'h payback':Math.ceil(roiHrs/24)+'d payback':'';
+      const socialNums=[847,312,1204,489,93,21];
+      const buyers=socialNums[(u.tier||1)-1]||100;
+      const bid=u.id;
+      return'<div data-bid="'+bid+'" onclick="if(this.dataset.bid&&'+(can&&!has)+'===true)eBuyUpgrade(this.dataset.bid)" style="background:'+(has?'rgba(32,80,40,.3)':can?'rgba(20,38,12,.85)':'rgba(255,255,255,.03)')+';border:1.5px solid '+(has?'rgba(64,200,112,.4)':can?'rgba(240,184,64,.5)':'rgba(255,255,255,.07)')+';border-radius:13px;padding:12px;margin-bottom:8px;cursor:'+(can&&!has?'pointer':'default')+';'+(can&&!has?'box-shadow:0 2px 12px rgba(240,184,64,.15)':'')+'">'
+        +'<div style="display:flex;align-items:center;gap:10px">'
+        +'<div style="font-size:26px;flex-shrink:0">'+u.ico+'</div>'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">'
+        +'<div style="font-size:11px;font-weight:700;color:'+(has?'var(--grn2)':tc)+'">'+u.n+'</div>'
+        +(!has?'<div style="font-size:8px;color:rgba(255,255,255,.25)">'+buyers.toLocaleString()+' players</div>':'')
+        +'</div>'
+        +'<div style="font-size:9px;color:var(--txt-d)">'+u.desc+'</div>'
+        +(can&&!has&&roiTxt?'<div style="font-size:8px;color:var(--grn2);margin-top:2px">✓ '+roiTxt+'</div>':'')
+        +'</div>'
+        +(has
+          ?'<div style="background:rgba(64,200,112,.15);border:1px solid rgba(64,200,112,.3);border-radius:8px;padding:5px 10px;font-size:9px;color:var(--grn2);font-weight:700;flex-shrink:0">✓ ACTIVE</div>'
+          :'<div style="text-align:center;flex-shrink:0"><div style="font-size:13px;font-weight:900;color:'+(can?'var(--emp)':'rgba(255,255,255,.2)')+'">'+(u.cost>=1000?Math.floor(u.cost/1000)+'k':u.cost)+'</div>'
+          +'<div style="font-size:7px;color:'+(can?'rgba(240,184,64,.6)':'rgba(255,255,255,.15)')+'">$EMP</div>'
+          +(can?'<div style="font-size:8px;color:var(--grn2);font-weight:700;margin-top:1px">TAP</div>':'')+'</div>')
+        +'</div>'
+        +(can&&!has?'<div style="height:2px;background:linear-gradient(90deg,var(--grn),var(--emp));border-radius:1px;margin-top:8px;opacity:.4"></div>':'')
+        +'</div>';
     }),
-    '<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">🔧 UTILITY</div>',
+        '<div style="font-size:8px;color:var(--txt-d);letter-spacing:1.5px;margin:10px 0 6px">🔧 UTILITY</div>',
     ...utilUpgrades.map(u=>{
       const has=E.upgradesDone.includes(u.id),can=(G.res.emp||0)>=u.cost;
       return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span style="font-size:16px">${u.ico}</span><div style="flex:1"><div style="font-size:9px;font-weight:700;color:${has?'var(--grn)':'var(--txt)'}">${u.n}</div><div style="font-size:8px;color:var(--txt-d)">${u.desc}</div></div>${has?'<span style="font-size:9px;color:var(--grn)">✓</span>':`<button onclick="eBuyUpgrade('${u.id}')" style="padding:5px 10px;background:${can?'rgba(180,140,60,.2)':'rgba(255,255,255,.04)'};border:1px solid ${can?'rgba(240,184,64,.3)':'rgba(255,255,255,.1)'};border-radius:6px;color:${can?'var(--emp)':'rgba(255,255,255,.2)'};font-size:9px;cursor:pointer">${u.cost}💰</button>`}</div>`;
@@ -6087,4 +6509,35 @@ function renderEconEMP(){
 // ──────────────────────────────────────────────────────────────────────────────
 </script>
 </body>
-</html>
+</html>let _toastQ=[];let _toastBusy=false;
+let _lastToastMsg='',_lastToastTime=0;
+function toast(msg,dur=2500){
+  if(msg===_lastToastMsg&&Date.now()-_lastToastTime<800)return;
+  _lastToastMsg=msg;_lastToastTime=Date.now();
+  _toastQ.push({msg,dur});
+  if(!_toastBusy)_nextToast();
+}
+function _nextToast(){
+  if(!_toastQ.length){_toastBusy=false;return;}
+  _toastBusy=true;
+  const {msg,dur}=_toastQ.shift();
+  // Use notif-log if available, else fallback to notif-stack
+  const log=document.getElementById('notif-log')||document.getElementById('notif-stack');
+  if(!log){_toastBusy=false;setTimeout(_nextToast,100);return;}
+  const m=msg.match(/^(\S+)\s+(.*)/s);
+  const ico=m&&[...m[1]].length<=2?m[1]:'';
+  const txt=ico?m[2]:msg;
+  const el=document.createElement('div');
+  el.className='nl-item';
+  if(ico) el.innerHTML='<span class="nl-ico">'+ico+'</span><span class="nl-txt">'+txt+'</span>';
+  else el.innerHTML='<span class="nl-txt">'+msg+'</span>';
+  log.appendChild(el);
+  // Max 3 visible
+  while(log.children.length>3)log.removeChild(log.children[0]);
+  setTimeout(()=>{
+    el.style.transition='opacity .25s';
+    el.style.opacity='0';
+    setTimeout(()=>{try{el.remove();}catch(e){}; _toastBusy=false;_nextToast();},260);
+  },dur);
+}
+
