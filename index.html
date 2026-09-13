@@ -7,23 +7,19 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="three.min.js"></script>
 <script>
-/* three.js terugvalroutes */
 (function(){var u=['https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js','https://unpkg.com/three@0.128.0/build/three.min.js','https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js'];
 function n(){if(window.THREE)return;if(!u.length)return;
 var s=document.createElement('script');s.src=u.shift();s.onerror=n;document.head.appendChild(s);}
 if(!window.THREE)n();})();
-/* Telegram Mini App: schermvullend, niet dichtvegen, donkere balk */
 (function(){
   var tg = window.Telegram && window.Telegram.WebApp;
   if(!tg) return;
   try{
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
     if(tg.requestFullscreen) tg.requestFullscreen();
     if(tg.disableVerticalSwipes) tg.disableVerticalSwipes();
     if(tg.setHeaderColor) tg.setHeaderColor('#0a1524');
     if(tg.setBackgroundColor) tg.setBackgroundColor('#0a1524');
-    document.documentElement.style.setProperty('--tg-top', (tg.safeAreaInset && tg.safeAreaInset.top || 0) + 'px');
     window.TG_USER = tg.initDataUnsafe && tg.initDataUnsafe.user || null;
   }catch(e){}
 })();
@@ -424,6 +420,7 @@ function buyPlot(i,j){
    blokken lichten op zodra je het grondgereedschap pakt. */
 const blocks=()=>Math.ceil(N/PLOT);   /* N bestaat pas later, dus lui berekenen */
 let plotOverlay=null, buyOverlay=null, buyPulse=[];
+const veilMat=new THREE.MeshBasicMaterial({color:'#06182c',transparent:true,opacity:.32,depthWrite:false,depthTest:false,side:THREE.DoubleSide});
 function quad(arr,x0,y0,size,y){
   arr.push(x0,y,y0, x0+size,y,y0, x0+size,y,y0+size,
            x0,y,y0, x0+size,y,y0+size, x0,y,y0+size);
@@ -455,7 +452,7 @@ function rebuildPlotOverlay(){
   }
   const vg=new THREE.BufferGeometry();
   vg.setAttribute('position',new THREE.Float32BufferAttribute(veil,3));
-  const vm=new THREE.MeshBasicMaterial({color:'#04101d',transparent:true,opacity:.44,depthWrite:false,depthTest:false,side:THREE.DoubleSide});
+  const vm=veilMat;
   const vmesh=new THREE.Mesh(vg,vm);vmesh.renderOrder=4;vmesh.frustumCulled=false;
   plotOverlay.add(vmesh);
 
@@ -659,21 +656,23 @@ const SUNOFF=new THREE.Vector3(-62,58,40);
 const DAYLEN=270;                 /* seconden per etmaal */
 let tod=.34;                      /* 0 = middernacht, .5 = middag */
 const cSky=new THREE.Color(),cFog=new THREE.Color(),cHemi=new THREE.Color(),cSun=new THREE.Color();
-const NIGHT_SKY=new THREE.Color('#061527'), NIGHT_FOG=new THREE.Color('#0e2c47'), NIGHT_HEMI=new THREE.Color('#2c4a66');
+const NIGHT_SKY=new THREE.Color('#123049'), NIGHT_FOG=new THREE.Color('#1a4468'), NIGHT_HEMI=new THREE.Color('#6e90b4');
 function sunElev(){return Math.sin((tod-.25)*Math.PI*2);}
 function dayFactor(){return clamp(sunElev()*1.35,0,1);}
 function updateSky(){
   const e=sunElev(), day=dayFactor(), dusk=clamp(1-Math.abs(e)*4,0,1);
   const az=tod*Math.PI*2;
   SUNOFF.set(Math.cos(az)*72, 16+Math.max(e,.05)*74, Math.sin(az)*72);
-  sun.intensity=REG.sunI*day+.05;
+  sun.intensity=REG.sunI*day+.34;
   cSun.set(REG.sun).lerp(new THREE.Color('#ff9d52'),dusk*.7);
   sun.color.copy(cSun);
   cSky.copy(NIGHT_SKY).lerp(new THREE.Color(REG.sky),day);
   cFog.copy(NIGHT_FOG).lerp(new THREE.Color(REG.fog),day);
   cHemi.copy(NIGHT_HEMI).lerp(new THREE.Color(REG.hemiSky),day);
   scene.background.copy(cSky);scene.fog.color.copy(cFog);
-  hemi.color.copy(cHemi);hemi.intensity=.22+.46*day;
+  hemi.color.copy(cHemi);hemi.intensity=.52+.30*day;
+  /* de sluier over ongekocht land vervaagt 's nachts, anders valt alles samen */
+  if(veilMat)veilMat.opacity=.16+.20*day;
   if(typeof glassMat!=='undefined')glassMat.emissiveIntensity=.25+.95*(1-day);
 }
 const LOD={outline:[],small:[],actors:[]};
