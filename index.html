@@ -16,8 +16,7 @@ if(!window.THREE)n();})();
   if(!tg) return;
   function insets(){
     var top=0,bot=0;
-    try{
-      var c=tg.contentSafeAreaInset, s=tg.safeAreaInset;
+    try{ var c=tg.contentSafeAreaInset, s=tg.safeAreaInset;
       top=Math.max((c&&c.top)||0,(s&&s.top)||0);
       bot=Math.max((c&&c.bottom)||0,(s&&s.bottom)||0);
     }catch(e){}
@@ -88,6 +87,14 @@ button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 
 /* ---- header row 2: stats ---- */
 body.statsHidden #statbar{display:none}
+body.oneRow #statbar{position:static;top:auto;left:auto;right:auto;height:auto;
+  flex:1;min-width:0;padding:0;background:none;z-index:auto}
+body.oneRow #statbar .stat{height:40px;padding:3px 8px;gap:6px}
+body.oneRow #statbar .stat label{font-size:8.5px;letter-spacing:.06em}
+body.oneRow #statbar .stat b{font-size:13px}
+body.oneRow #statbar .stat svg{width:15px;height:15px}
+body.oneRow #top{gap:6px}
+body.oneRow #balCard{flex:none}
 body.statsHidden #balChev{transform:rotate(-90deg)}
 #balChev{transition:transform .18s}
 #statbar{position:fixed;top:calc(60px + var(--tgtop));left:0;right:0;height:50px;display:flex;gap:6px;padding:0 10px 4px;background:linear-gradient(#07101c,rgba(7,16,28,0));z-index:6;overflow-x:auto;scrollbar-width:none}
@@ -198,7 +205,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
  body.showInfo #nav .tab{flex:1 1 30%;min-width:86px;padding:7px 4px;font-size:9px}
  body.showInfo #nav .tab span{display:inline}
  body.showInfo #nav .tab svg{width:17px;height:17px}
-#tut{left:6px;right:56px;top:calc(104px + var(--tgtop));width:auto}}
+#tut{left:6px;right:56px;top:calc(64px + var(--tgtop));width:auto}}
 #mode{position:fixed;top:122px;left:50%;transform:translateX(-50%);padding:7px 14px;font-size:12.5px;z-index:4;display:none;white-space:nowrap}
 #mode b{color:var(--gold)}
 #mini{position:fixed;right:10px;bottom:90px;width:160px;padding:6px;z-index:4}
@@ -226,8 +233,8 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
 .zbtn{width:44px;height:44px;display:grid;place-items:center;font-size:22px;font-weight:600;color:#cfe0f2;line-height:1}
 .zbtn:hover{color:var(--teal);border-color:var(--teal)}
 .zbtn:active{background:#12304a}
-@media (max-width:860px){#zoomBox{right:6px;top:calc(150px + var(--tgtop));bottom:auto}.zbtn{width:40px;height:40px;font-size:20px}}
-#panelBtn{display:none;position:fixed;right:6px;top:calc(96px + var(--tgtop));width:40px;height:40px;place-items:center;color:#cfe0f2;z-index:7}
+@media (max-width:860px){#zoomBox{right:6px;top:calc(112px + var(--tgtop));bottom:auto}.zbtn{width:40px;height:40px;font-size:20px}}
+#panelBtn{display:none;position:fixed;right:6px;top:calc(60px + var(--tgtop));width:40px;height:40px;place-items:center;color:#cfe0f2;z-index:7}
 #panelBtn.on{color:var(--teal);border-color:var(--teal)}
 @media (max-width:860px){
  #panelBtn{display:grid}
@@ -262,7 +269,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
  #sel .body{padding:0 10px 10px}
  .selhead img{width:56px;height:56px}
  .selbtns .btn{padding:9px 10px}
- #mode{top:calc(96px + var(--tgtop));left:6px;right:54px;transform:none;white-space:normal;text-align:center}
+ #mode{top:calc(60px + var(--tgtop));left:6px;right:54px;transform:none;white-space:normal;text-align:center}
  .mlab{padding:3px 7px 3px 5px}.mlab .n{font-size:9px}.mlab .v{font-size:10px}.mlab svg{width:12px;height:12px}
  .badge{width:22px;height:22px;font-size:13px}
 }
@@ -1905,7 +1912,37 @@ function recalc(){
 /* ================= UI ================= */
 /* ---- geluid, volledig gesynthetiseerd: geen bestanden nodig ---- */
 const SFX={ctx:null,on:true,master:null,hum:null,humGain:null};
+/* achtergrondmuziek: apart van de effecten, eigen volume, eigen knop */
+const MUSIC={el:null,on:true,vol:.38,ready:false,missing:false};
+function musicInit(){
+  if(MUSIC.el||MUSIC.missing)return;
+  const a=new Audio('empyria-music.mp3');
+  a.loop=true;a.preload='auto';a.volume=0;
+  a.addEventListener('canplaythrough',()=>{MUSIC.ready=true;},{once:true});
+  a.addEventListener('error',()=>{MUSIC.missing=true;MUSIC.el=null;},{once:true});
+  MUSIC.el=a;
+}
+function musicPlay(){
+  musicInit();
+  if(!MUSIC.el||!MUSIC.on)return;
+  if(MUSIC.el.volume<.01)MUSIC.el.volume=MUSIC.vol;  /* meteen hoorbaar, niet wachten op de fade */
+  const p=MUSIC.el.play();
+  if(p&&p.catch)p.catch(()=>{});   /* browser wacht nog op een aanraking */
+}
+function musicFade(dt){
+  if(!MUSIC.el)return;
+  const want=MUSIC.on?MUSIC.vol:0;
+  MUSIC.el.volume=clamp(MUSIC.el.volume+(want-MUSIC.el.volume)*Math.min(1,dt*1.2),0,1);
+  if(!MUSIC.on&&MUSIC.el.volume<.01&&!MUSIC.el.paused)MUSIC.el.pause();
+}
+function setMusic(on){
+  MUSIC.on=on;
+  try{localStorage.setItem('emp_music',on?'':'0');}catch(e){}
+  if(on)musicPlay();
+}
+try{ if(localStorage.getItem('emp_music')==='0')MUSIC.on=false; }catch(e){}
 function audioInit(){
+  musicPlay();
   if(SFX.ctx)return;
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!AC)return;
@@ -2715,10 +2752,14 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 function openSettings(){
   openModal('SETTINGS',
     `<div class="card"><div><div class="n">Map labels</div><div class="d">Names and output above buildings</div></div><button class="btn" id="setLab">${labelsOn?'ON':'OFF'}</button></div>
+     <div class="card"><div><div class="n">Music</div><div class="d">${MUSIC.missing?'empyria-music.mp3 not found next to the game':'Loops in the background'}</div></div><button class="btn" id="setMus" ${MUSIC.missing?'disabled':''}>${MUSIC.on?'ON':'OFF'}</button></div>
+     <div class="card"><div><div class="n">Sound effects</div><div class="d">Placing, alarms, rewards</div></div><button class="btn" id="setSfx">${SFX.on?'ON':'OFF'}</button></div>
      <div class="card"><div><div class="n">Save game</div><div class="d">${storageOK?('Autosaves every 20 seconds'+(CLOUD?' \u00b7 synced to Telegram':'')):'Not available in this browser'}</div></div><button class="btn" id="setSave" ${storageOK?'':'disabled'}>SAVE NOW</button></div>
      <div class="card"><div><div class="n">Start over</div><div class="d">Wipes your empire and your save</div></div><button class="btn red" id="setReset">NEW GAME</button></div>`,
     ()=>{
       $('setLab').onclick=()=>{labelsOn=!labelsOn;openSettings();};
+      const ms=$('setMus');if(ms&&!ms.disabled)ms.onclick=()=>{audioInit();setMusic(!MUSIC.on);openSettings();};
+      $('setSfx').onclick=()=>{audioInit();setMute(!SFX.on);openSettings();};
       const sv=$('setSave');if(sv&&!sv.disabled)sv.onclick=()=>{saveGame();closeModal();};
       $('setReset').onclick=()=>{
         const btn=$('setReset');
@@ -2728,6 +2769,15 @@ function openSettings(){
     });
 }
 if(window.TG_USER&&window.TG_USER.first_name){const pn=$('playerName');if(pn)pn.textContent=window.TG_USER.first_name;}
+const topEl=$('top'), statEl=$('statbar');
+function layoutBar(){
+  const mob=window.innerWidth<=860;
+  document.body.classList.toggle('oneRow',mob);
+  if(mob){ if(statEl.parentNode!==topEl)topEl.appendChild(statEl); }
+  else if(statEl.parentNode!==document.body)document.body.insertBefore(statEl,topEl.nextSibling);
+}
+layoutBar();
+window.addEventListener('resize',layoutBar);
 $('balCard').onclick=()=>{
   const hid=document.body.classList.toggle('statsHidden');
   try{localStorage.setItem('emp_stats_hidden',hid?'1':'');}catch(e){}
@@ -2735,7 +2785,7 @@ $('balCard').onclick=()=>{
 };
 try{ if(localStorage.getItem('emp_stats_hidden'))document.body.classList.add('statsHidden'); }catch(e){}
 $('gear').onclick=openSettings;
-$('muteBtn').onclick=()=>{audioInit();setMute(!SFX.on);};
+$('muteBtn').onclick=()=>{audioInit();const on=!SFX.on;setMute(on);setMusic(on);};
 $('regBtn').onclick=openWorld;
 $('techImg').src=thumbs.tech;
 
@@ -3008,6 +3058,7 @@ function loop(now){
   if(SFX.humGain){const want=SFX.on?Math.min(.05,.006+S.hash*S.eff/60000):0;
     SFX.humGain.gain.value+=(want-SFX.humGain.gain.value)*Math.min(1,dt*2);}
   checkDaily();
+  musicFade(dt);
   saveT+=dt;if(saveT>20){saveT=0;if(storageOK)saveGame(true);}
   renderer.render(scene,camera);
   if(!snap){snap=true;const bt=$('boot');bt.classList.add('gone');setTimeout(()=>bt.remove(),400);try{$('rthumb').style.backgroundImage=`url(${renderer.domElement.toDataURL('image/jpeg',.7)})`;}catch(err){}}
