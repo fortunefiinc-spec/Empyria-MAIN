@@ -14,6 +14,9 @@ if(!window.THREE)n();})();
 (function(){
   var tg = window.Telegram && window.Telegram.WebApp;
   if(!tg) return;
+  /* Telegram tekent zijn eigen balk over de pagina heen en meldt de
+     hoogte daarvan niet betrouwbaar. Daarom altijd minstens 64px vrij
+     houden, en geen fullscreen aanvragen: dat maakt de overlap erger. */
   function insets(){
     var top=0,bot=0;
     try{
@@ -21,13 +24,12 @@ if(!window.THREE)n();})();
       top=Math.max((c&&c.top)||0,(s&&s.top)||0);
       bot=Math.max((c&&c.bottom)||0,(s&&s.bottom)||0);
     }catch(e){}
-    if(!top && !tg.isFullscreen) top=56;
+    top=Math.max(top,64);
     document.documentElement.style.setProperty('--tgtop',top+'px');
     document.documentElement.style.setProperty('--tgbot',bot+'px');
   }
   try{
     tg.ready(); tg.expand();
-    if(tg.requestFullscreen) tg.requestFullscreen();
     if(tg.disableVerticalSwipes) tg.disableVerticalSwipes();
     if(tg.setHeaderColor) tg.setHeaderColor('#0a1524');
     if(tg.setBackgroundColor) tg.setBackgroundColor('#0a1524');
@@ -35,7 +37,6 @@ if(!window.THREE)n();})();
     insets();
     tg.onEvent && tg.onEvent('viewportChanged',insets);
     tg.onEvent && tg.onEvent('safeAreaChanged',insets);
-    tg.onEvent && tg.onEvent('fullscreenChanged',insets);
     setTimeout(insets,400); setTimeout(insets,1500);
   }catch(e){}
 })();
@@ -679,14 +680,14 @@ function updateSky(){
   const e=sunElev(), day=dayFactor(), dusk=clamp(1-Math.abs(e)*4,0,1);
   const az=tod*Math.PI*2;
   SUNOFF.set(Math.cos(az)*72, 16+Math.max(e,.05)*74, Math.sin(az)*72);
-  sun.intensity=REG.sunI*day+.34;
+  sun.intensity=REG.sunI*day+.34*(1-day);
   cSun.set(REG.sun).lerp(new THREE.Color('#ff9d52'),dusk*.7);
   sun.color.copy(cSun);
   cSky.copy(NIGHT_SKY).lerp(new THREE.Color(REG.sky),day);
   cFog.copy(NIGHT_FOG).lerp(new THREE.Color(REG.fog),day);
   cHemi.copy(NIGHT_HEMI).lerp(new THREE.Color(REG.hemiSky),day);
   scene.background.copy(cSky);scene.fog.color.copy(cFog);
-  hemi.color.copy(cHemi);hemi.intensity=.52+.30*day;
+  hemi.color.copy(cHemi);hemi.intensity=.50*(1-day)+.68*day;
   /* de sluier over ongekocht land vervaagt 's nachts, anders valt alles samen */
   if(veilMat)veilMat.opacity=.16+.20*day;
   if(typeof glassMat!=='undefined')glassMat.emissiveIntensity=.25+.95*(1-day);
