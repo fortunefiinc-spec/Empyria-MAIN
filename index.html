@@ -20,7 +20,7 @@ if(!window.THREE)n();})();
       top=Math.max((c&&c.top)||0,(s&&s.top)||0);
       bot=Math.max((c&&c.bottom)||0,(s&&s.bottom)||0);
     }catch(e){}
-    top=Math.max(top,64);
+    top=top>8?top:64;
     document.documentElement.style.setProperty('--tgtop',top+'px');
     document.documentElement.style.setProperty('--tgbot',bot+'px');
   }
@@ -38,7 +38,7 @@ if(!window.THREE)n();})();
 })();
 </script>
 <style>
-:root{--tgtop:0px;--tgbot:0px;--panel:rgba(8,19,33,.94);--panel2:#0b1829;--line:#1a3350;--line-hi:#2a5580;--teal:#34d1c2;--blue:#3a9bff;--blue-deep:#1c5fc4;--text:#dbe6f3;--muted:#7d91a8;--gold:#f5b73b;--green:#4fd66a;--red:#ff5d5d;--orange:#ffa23d}
+:root{--tgtop:0px;--tgbot:0px;--barh:112px;--panel:rgba(8,19,33,.94);--panel2:#0b1829;--line:#1a3350;--line-hi:#2a5580;--teal:#34d1c2;--blue:#3a9bff;--blue-deep:#1c5fc4;--text:#dbe6f3;--muted:#7d91a8;--gold:#f5b73b;--green:#4fd66a;--red:#ff5d5d;--orange:#ffa23d}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#124a78;color:var(--text);font:13px/1.35 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
 #boot{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#081322;transition:opacity .35s}
@@ -87,26 +87,25 @@ button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 
 /* ---- header row 2: stats ---- */
 body.statsHidden #statbar{display:none}
-body.oneRow #statbar{position:static;top:auto;left:auto;right:auto;height:auto;
-  flex:1;min-width:0;padding:0;background:none;z-index:auto}
-body.oneRow #statbar .stat{height:40px;padding:3px 8px;gap:6px}
-body.oneRow #statbar .stat label{font-size:8.5px;letter-spacing:.06em}
-body.oneRow #statbar .stat b{font-size:13px}
-body.oneRow #statbar .stat svg{width:15px;height:15px}
-body.oneRow #top{gap:0;padding-left:8px;padding-right:8px;
+body.oneRow #top{gap:0;padding-left:8px;padding-right:8px;flex-wrap:wrap;align-items:center;
   background:linear-gradient(#0b1726,#081220);border-bottom:1px solid #16293f}
+/* alle technische waarden in de balk, in twee compacte rijen */
+body.oneRow #statbar{position:static;top:auto;left:auto;right:auto;height:auto;
+  flex:1 1 100%;min-width:0;padding:0 0 2px;background:none;z-index:auto;
+  display:flex;flex-wrap:wrap;overflow:visible}
 body.oneRow .chip,body.oneRow #statbar .stat{
-  background:none;border:0;border-radius:0;box-shadow:none;height:44px;
-  padding:0 12px;position:relative}
-body.oneRow #statbar .stat::before{content:'';position:absolute;left:0;top:9px;bottom:9px;
+  background:none;border:0;border-radius:0;box-shadow:none;position:relative}
+body.oneRow #balCard{flex:1 1 100%;height:40px;padding:0 2px}
+body.oneRow #balCard b{font-size:20px}
+body.oneRow #statbar .stat{flex:1 1 76px;min-width:76px;height:31px;padding:0 5px;gap:4px}
+body.oneRow #statbar .stat::before{content:'';position:absolute;left:0;top:6px;bottom:6px;
   width:1px;background:#1b3350}
 body.oneRow #statbar .stat:first-child::before{display:none}
-body.oneRow #statbar{align-items:flex-end;gap:0}
-body.oneRow #balCard{padding-left:2px;padding-right:14px}
-body.oneRow #balCard b{font-size:19px}
-body.oneRow #statbar .stat b{font-size:14px}
-body.oneRow #statbar .stat label{font-size:9px;color:#6f849c}
-body.oneRow .brand{padding-right:4px}
+body.oneRow #statbar .stat label{font-size:8px;letter-spacing:.05em;color:#6f849c;line-height:1.1}
+body.oneRow #statbar .stat b{font-size:12.5px;line-height:1.15}
+body.oneRow #statbar .stat svg{width:14px;height:14px}
+body.oneRow #statbar .stat .bar{display:none}
+body.oneRow .brand{padding-right:6px}
 body.oneRow #balCard{flex:none}
 body.statsHidden #balChev{transform:rotate(-90deg)}
 #balChev{transition:transform .18s}
@@ -218,7 +217,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
  body.showInfo #nav .tab{flex:1 1 30%;min-width:86px;padding:7px 4px;font-size:9px}
  body.showInfo #nav .tab span{display:inline}
  body.showInfo #nav .tab svg{width:17px;height:17px}
-#tut{left:6px;right:56px;top:calc(64px + var(--tgtop));width:auto}}
+#tut{left:6px;right:56px;top:calc(var(--barh) + 6px);width:auto}}
 #mode{position:fixed;top:122px;left:50%;transform:translateX(-50%);padding:7px 14px;font-size:12.5px;z-index:4;display:none;white-space:nowrap}
 #mode b{color:var(--gold)}
 #mini{position:fixed;right:10px;bottom:90px;width:160px;padding:6px;z-index:4}
@@ -246,8 +245,8 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
 .zbtn{width:44px;height:44px;display:grid;place-items:center;font-size:22px;font-weight:600;color:#cfe0f2;line-height:1}
 .zbtn:hover{color:var(--teal);border-color:var(--teal)}
 .zbtn:active{background:#12304a}
-@media (max-width:860px){#zoomBox{right:6px;top:calc(112px + var(--tgtop));bottom:auto}.zbtn{width:40px;height:40px;font-size:20px}}
-#panelBtn{display:none;position:fixed;right:6px;top:calc(60px + var(--tgtop));width:40px;height:40px;place-items:center;color:#cfe0f2;z-index:7}
+@media (max-width:860px){#zoomBox{right:6px;top:calc(var(--barh) + 54px);bottom:auto}.zbtn{width:40px;height:40px;font-size:20px}}
+#panelBtn{display:none;position:fixed;right:6px;top:calc(var(--barh) + 6px);width:40px;height:40px;place-items:center;color:#cfe0f2;z-index:7}
 #panelBtn.on{color:var(--teal);border-color:var(--teal)}
 @media (max-width:860px){
  #panelBtn{display:grid}
@@ -282,7 +281,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
  #sel .body{padding:0 10px 10px}
  .selhead img{width:56px;height:56px}
  .selbtns .btn{padding:9px 10px}
- #mode{top:calc(60px + var(--tgtop));left:6px;right:54px;transform:none;white-space:normal;text-align:center}
+ #mode{top:calc(var(--barh) + 6px);left:6px;right:54px;transform:none;white-space:normal;text-align:center}
  .mlab{padding:3px 7px 3px 5px}.mlab .n{font-size:9px}.mlab .v{font-size:10px}.mlab svg{width:12px;height:12px}
  .badge{width:22px;height:22px;font-size:13px}
 }
@@ -399,17 +398,18 @@ const TYPES={
   office:     {name:'Office',      cost:1100,size:1, inc:.05,  slots:2, desc:'+5% income'},
   park:       {name:'Park',        cost:120, size:1, cool:3,   desc:'\u22123 heat'},
   flag:       {name:'Flagpole',    cost:60,  size:1, deco:true,desc:'Decoration'},
+  cable:      {name:'Buried Cable',cost:45,size:1, line:true, buried:true, desc:'Runs under roads'},
   road:       {name:'Road',          cost:10,  size:1, line:true, desc:'Connects buildings'},
   power:      {name:'Power Line',    cost:25,  size:1, line:true, desc:'Carries power'},
 };
-const ORDER=['rig','gpu','asic','immersion','datacenter','solar','wind','diesel','hydro','battery','cooling','transformer','substation','power','road','warehouse','office','park','flag'];
+const ORDER=['rig','gpu','asic','immersion','datacenter','solar','wind','diesel','hydro','battery','cooling','transformer','substation','power','cable','road','warehouse','office','park','flag'];
 const CAT={rig:'mine',gpu:'mine',asic:'mine',immersion:'mine',datacenter:'mine',
   solar:'energy',wind:'energy',diesel:'energy',hydro:'energy',battery:'energy',cooling:'energy',
-  transformer:'grid',substation:'grid',power:'grid',road:'grid',
+  transformer:'grid',substation:'grid',power:'grid',cable:'grid',road:'grid',
   warehouse:'logistics',office:'logistics',park:'decor',flag:'decor'};
 const CATS=[['mine','MINING'],['energy','ENERGY'],['grid','GRID'],['logistics','LOGISTICS'],['decor','DECOR']];
 let cat='mine';
-const UNLOCK={rig:1,road:1,power:1,solar:1,flag:1,park:1,gpu:2,wind:2,transformer:3,office:3,diesel:4,cooling:4,battery:5,warehouse:5,hydro:5,asic:6,substation:6,immersion:7,datacenter:8};
+const UNLOCK={rig:1,road:1,power:1,cable:1,solar:1,flag:1,park:1,gpu:2,wind:2,transformer:3,office:3,diesel:4,cooling:4,battery:5,warehouse:5,hydro:5,asic:6,substation:6,immersion:7,datacenter:8};
 const lvlNow=()=>1+MISSIONS.filter(m=>m.done).length;
 const NEED={rig:1,gpu:1,immersion:1,asic:2,datacenter:3};
 const ECON={BASE_GRID:250, AMBIENT:22, RATE:0.002, PRICE:0.0013}; // RATE: $EMP/s per TH/s, PRICE: $EMP/s per kW from grid
@@ -540,7 +540,7 @@ function rebuildBuyOverlay(){
   buyOverlay.visible=false;
   scene.add(buyOverlay);
 }
-const FLAT={road:1,power:1,park:1,flag:1};   /* infrastructuur en decor blijven vaste prijs */
+const FLAT={road:1,power:1,cable:1,park:1,flag:1};   /* infrastructuur en decor blijven vaste prijs */
 function costOf(t){
   const n=FLAT[t]?0:(S.counts&&S.counts[t]||0);
   return Math.round(TYPES[t].cost*Math.pow(1.12,n)*REG.cost*RM.cost*(1-(S.disc||0)));
@@ -1043,6 +1043,15 @@ function makeRoad(mask,lamp){
   if(lamp){const l=makeLamp();l.position.set(.38,.04,.38);g.add(l);}
   return g;
 }
+function makeCable(){
+  const g=new THREE.Group();
+  const tr=box(g,.34,.035,1.0,'#3a3327');tr.castShadow=false;
+  const c1=box(g,.09,.015,.96,'#1d2a36',0,.035,0);c1.castShadow=false;
+  const c2=box(g,.045,.012,.9,'#34d1c2',0,.05,0,glow('#1fb5a8',.7));c2.castShadow=false;
+  for(let k=-1;k<=1;k++){const m=box(g,.3,.012,.05,'#6a6150',0,.036,k*.34);m.castShadow=false;}
+  g.userData.cable=true;
+  return g;
+}
 function makePole(){
   const g=new THREE.Group();
   box(g,.12,.03,.12,'#7a7f86');
@@ -1217,7 +1226,7 @@ function makeFlag(){
   g.userData.tick=(t)=>{f.rotation.y=Math.sin(t*1.6)*.25;};
   return g;
 }
-const MAKERS={rig:makeRig,gpu:makeGPU,asic:makeASIC,solar:makeSolar,wind:makeWind,transformer:makeTransformer,battery:makeBattery,cooling:makeCooling,datacenter:makeDataCenter,immersion:makeImmersion,diesel:makeDiesel,hydro:makeHydro,substation:makeSubstation,warehouse:makeWarehouse,office:makeOffice,park:makePark,flag:makeFlag,
+const MAKERS={rig:makeRig,gpu:makeGPU,asic:makeASIC,solar:makeSolar,wind:makeWind,transformer:makeTransformer,battery:makeBattery,cooling:makeCooling,cable:makeCable,datacenter:makeDataCenter,immersion:makeImmersion,diesel:makeDiesel,hydro:makeHydro,substation:makeSubstation,warehouse:makeWarehouse,office:makeOffice,park:makePark,flag:makeFlag,
   road:()=>makeRoad(0,false),power:makePole};
 const PROPMAT={crate:mat('#a4773f'),crate2:mat('#8f6634'),barrel:mat('#3f6f9c'),barrel2:mat('#8d4a3f'),
   cone:mat('#e8631f'),pallet:mat('#7d6240'),drum:mat('#4a5560')};
@@ -1592,7 +1601,11 @@ function check(type,i0,j0){
       for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){const n=T(i0+di,j0+dj);if(n&&(n.type==='shallow'||n.type==='deep'))wet=true;}
       if(!wet)return 'A hydro turbine must touch water';
     }
-    if(t.b)return 'That spot is already taken';
+    if(TYPES[type].buried){
+      if(t.c)return 'There is already a cable here';
+      if(t.b&&t.b.type!=='road')return 'Buried cable only fits under roads or open ground';
+    }else if(t.b)return 'That spot is already taken';
+    else if(t.c&&!TYPES[type].line)return 'A buried cable runs here';
   }
   return null;
 }
@@ -1608,7 +1621,9 @@ function place(type,i0,j0,{free=false,silent=false}={}){
   b.group.scale.setScalar(.01);
   b.group.userData.bid=b.id;
   buildRoot.add(b.group);buildings.push(b);
-  for(let dj=0;dj<s;dj++)for(let di=0;di<s;di++){const t=T(i0+di,j0+dj);t.b=b;clearTrees(t);}
+  for(let dj=0;dj<s;dj++)for(let di=0;di<s;di++){const t=T(i0+di,j0+dj);
+    if(d.buried)t.c=b;else t.b=b;
+    clearTrees(t);}
   if(d.line)refreshLines(i0,j0,type);
   recalc();
   if(!silent)DAILY.prog.build=(DAILY.prog.build||0)+1;
@@ -1618,7 +1633,7 @@ function place(type,i0,j0,{free=false,silent=false}={}){
 function remove(b,{silent=false,noRefund=false}={}){
   const d=TYPES[b.type],refund=noRefund?0:Math.floor(costOf(b.type)*.5);
   buildRoot.remove(b.group);disposeGroup(b.group);
-  for(let dj=0;dj<b.s;dj++)for(let di=0;di<b.s;di++)T(b.i+di,b.j+dj).b=null;
+  for(let dj=0;dj<b.s;dj++)for(let di=0;di<b.s;di++){const t=T(b.i+di,b.j+dj);if(d.buried)t.c=null;else t.b=null;}
   buildings=buildings.filter(x=>x!==b);
   S.bal+=refund;
   if(d.line)refreshLines(b.i,b.j,b.type);
@@ -1628,7 +1643,13 @@ function remove(b,{silent=false,noRefund=false}={}){
   if(!silent){log(`${d.name} dismantled (+${fmtInt(refund)} $EMP)`);sfx.demo();}
   return refund;
 }
-const isType=(i,j,type)=>{const t=T(i,j);return !!(t&&t.b&&t.b.type===type);};
+const isType=(i,j,type)=>{const t=T(i,j);return !!(t&&t.b&&t.b.type===type)||!!(t&&t.c&&t.c.type===type);};
+/* stroomdrager op een tegel: bovengrondse mast of ondergrondse kabel */
+const pwrAt=(i,j)=>{const t=T(i,j);if(!t)return null;
+  if(t.c)return t.c;
+  if(t.b&&t.b.type==='power')return t.b;
+  return null;};
+const srcAt=(i,j)=>{const t=T(i,j);return t&&t.b&&isSource(t.b)?t.b:null;};
 function roadMask(i,j){return (isType(i+1,j,'road')?1:0)|(isType(i-1,j,'road')?2:0)|(isType(i,j+1,'road')?4:0)|(isType(i,j-1,'road')?8:0);}
 function refreshLines(i,j,type){
   if(type==='road'){
@@ -1641,6 +1662,7 @@ function refreshLines(i,j,type){
   }else rebuildWires();
 }
 function rebuildWires(){
+  /* alleen bovengrondse masten krijgen hangdraden */
   if(wireObj){scene.remove(wireObj);wireObj.geometry.dispose();}
   const pts=[];
   for(const b of buildings){
@@ -1706,17 +1728,14 @@ function computeGrid(){
   /* stroomnet: elk gebouw moet via power lines aan een bron of transformator hangen */
   const seen=new Set(),live=new Set();
   for(const b of buildings){
-    if(b.type!=='power'||seen.has(b.id))continue;
+    if((b.type!=='power'&&b.type!=='cable')||seen.has(b.id))continue;
     const comp=[],stack=[b];seen.add(b.id);let powered=false;
     while(stack.length){
       const c=stack.pop();comp.push(c);
       for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){
-        for(let q=0;q<1;q++){
-          const t=T(c.i+di,c.j+dj);if(!t||!t.b)continue;
-          const nb=t.b;
-          if(nb.type==='power'){if(!seen.has(nb.id)){seen.add(nb.id);stack.push(nb);}}
-          else if(isSource(nb))powered=true;
-        }
+        const line=pwrAt(c.i+di,c.j+dj);
+        if(line){if(!seen.has(line.id)){seen.add(line.id);stack.push(line);}}
+        if(srcAt(c.i+di,c.j+dj))powered=true;
       }
     }
     if(powered)for(const c of comp)live.add(c.id);
@@ -1726,8 +1745,7 @@ function computeGrid(){
     let feeds=0;
     for(const c of comp){
       for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){
-        const t=T(c.i+di,c.j+dj);
-        if(t&&t.b&&isSource(t.b)){feeds++;break;}
+        if(srcAt(c.i+di,c.j+dj)){feeds++;break;}
       }
     }
     const capacity=feeds*LINE_CAP;
@@ -1735,18 +1753,15 @@ function computeGrid(){
     const dist=new Map(),q=[];
     for(const c of comp){
       let src=false;
-      for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){
-        const t=T(c.i+di,c.j+dj);
-        if(t&&t.b&&isSource(t.b))src=true;
-      }
+      for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]) if(srcAt(c.i+di,c.j+dj))src=true;
       if(src){dist.set(c.id,0);q.push(c);}
     }
     for(let h=0;h<q.length;h++){
       const c=q[h],d0=dist.get(c.id);
       for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){
-        const t=T(c.i+di,c.j+dj);
-        if(!t||!t.b||t.b.type!=='power'||dist.has(t.b.id))continue;
-        dist.set(t.b.id,d0+1);q.push(t.b);
+        const nb=pwrAt(c.i+di,c.j+dj);
+        if(!nb||dist.has(nb.id))continue;
+        dist.set(nb.id,d0+1);q.push(nb);
       }
     }
     for(const c of comp){c.netCap=capacity;c.netDist=dist.has(c.id)?dist.get(c.id):99;c.comp=comp;}
@@ -1756,11 +1771,12 @@ function computeGrid(){
     if(d.line||isSource(b)){b.powered=true;continue;}
     let ok=false,feed=null;
     for(const [i,j] of edgeTiles(b)){
-      const t=T(i,j);if(!t||!t.b)continue;
-      if(t.b.type==='power'&&live.has(t.b.id)){
+      const line=pwrAt(i,j);
+      if(line&&live.has(line.id)){
         ok=true;
-        if(!feed||(t.b.netDist||99)<(feed.netDist||99))feed=t.b;
-      }else if(isSource(t.b))ok=true;
+        if(!feed||(line.netDist||99)<(feed.netDist||99))feed=line;
+      }
+      if(srcAt(i,j))ok=true;
     }
     b.powered=ok;
     b.feedLine=feed;
@@ -2110,7 +2126,7 @@ function setTool(t){
   const touch=matchMedia('(hover:none)').matches;
   const stop=touch?'Tap the same button again to stop.':'Right-click or Esc to stop.';
   if(TYPES[t]){const d=TYPES[t];
-    const zone=d.cool?' Blue ring is its cooling range.':(d.slots?' Amber ring is its supply range.':(d.hash?' Blue is cooling, amber is supply \u2014 build inside them.':''));
+    const zone=d.buried?' Runs under roads, so you can follow your streets.':d.cool?' Blue ring is its cooling range.':(d.slots?' Amber ring is its supply range.':(d.hash?' Blue is cooling, amber is supply \u2014 build inside them.':''));
     md.innerHTML=`Placing <b>${d.name}</b> for ${fmtInt(costOf(t))} $EMP${d.line?(touch?'. Swipe to draw a line.':'. Drag to draw a line.'):'.'}${zone} ${stop}`;md.style.display='block';}
   else if(t==='land'){md.innerHTML=`Buying land: tap a block next to the land you own. Next plot costs <b>${fmtInt(plotCost())} $EMP</b>.`;md.style.display='block';}
   else if(t==='bulldoze'){md.innerHTML=`Bulldoze: ${touch?'tap or swipe':'click or drag'} over buildings to dismantle them for a 50% refund. ${stop}`;md.style.display='block';}
@@ -2295,7 +2311,7 @@ function updateHover(x,y){
 }
 
 function paintTile(i,j,d){
-  if(tool==='bulldoze'){const t=T(i,j);if(t&&t.b){d.refund+=remove(t.b,{silent:true});d.count++;}return;}
+  if(tool==='bulldoze'){const t=T(i,j);const tgt=t&&(t.c||t.b);if(tgt){d.refund+=remove(tgt,{silent:true});d.count++;}return;}
   if(check(tool,i,j))return;
   const c=costOf(tool);
   if(S.bal<c){if(!d.warned){log(`Not enough $EMP for ${TYPES[tool].name}`,'bad');flashBal();d.warned=true;}return;}
@@ -2783,14 +2799,18 @@ function openSettings(){
 }
 if(window.TG_USER&&window.TG_USER.first_name){const pn=$('playerName');if(pn)pn.textContent=window.TG_USER.first_name;}
 const topEl=$('top'), statEl=$('statbar');
+function measureBar(){
+  document.documentElement.style.setProperty('--barh',topEl.offsetHeight+'px');
+}
 function layoutBar(){
   const mob=window.innerWidth<=860;
   document.body.classList.toggle('oneRow',mob);
   if(mob){ if(statEl.parentNode!==topEl)topEl.appendChild(statEl); }
   else if(statEl.parentNode!==document.body)document.body.insertBefore(statEl,topEl.nextSibling);
 }
-layoutBar();
-window.addEventListener('resize',layoutBar);
+layoutBar();measureBar();
+window.addEventListener('resize',()=>{layoutBar();measureBar();});
+setInterval(measureBar,1000);
 $('balCard').onclick=()=>{
   const hid=document.body.classList.toggle('statsHidden');
   try{localStorage.setItem('emp_stats_hidden',hid?'1':'');}catch(e){}
