@@ -27,8 +27,8 @@ if(!window.THREE)n();})();
   try{
     tg.ready(); tg.expand();
     if(tg.disableVerticalSwipes) tg.disableVerticalSwipes();
-    if(tg.setHeaderColor) tg.setHeaderColor('#0a1524');
-    if(tg.setBackgroundColor) tg.setBackgroundColor('#0a1524');
+    if(tg.setHeaderColor) tg.setHeaderColor('#0b1726');
+    if(tg.setBackgroundColor) tg.setBackgroundColor('#0b1726');
     window.TG_USER = tg.initDataUnsafe && tg.initDataUnsafe.user || null;
     insets();
     tg.onEvent && tg.onEvent('viewportChanged',insets);
@@ -93,7 +93,20 @@ body.oneRow #statbar .stat{height:40px;padding:3px 8px;gap:6px}
 body.oneRow #statbar .stat label{font-size:8.5px;letter-spacing:.06em}
 body.oneRow #statbar .stat b{font-size:13px}
 body.oneRow #statbar .stat svg{width:15px;height:15px}
-body.oneRow #top{gap:6px}
+body.oneRow #top{gap:0;padding-left:8px;padding-right:8px;
+  background:linear-gradient(#0b1726,#081220);border-bottom:1px solid #16293f}
+body.oneRow .chip,body.oneRow #statbar .stat{
+  background:none;border:0;border-radius:0;box-shadow:none;height:44px;
+  padding:0 12px;position:relative}
+body.oneRow #statbar .stat::before{content:'';position:absolute;left:0;top:9px;bottom:9px;
+  width:1px;background:#1b3350}
+body.oneRow #statbar .stat:first-child::before{display:none}
+body.oneRow #statbar{align-items:flex-end;gap:0}
+body.oneRow #balCard{padding-left:2px;padding-right:14px}
+body.oneRow #balCard b{font-size:19px}
+body.oneRow #statbar .stat b{font-size:14px}
+body.oneRow #statbar .stat label{font-size:9px;color:#6f849c}
+body.oneRow .brand{padding-right:4px}
 body.oneRow #balCard{flex:none}
 body.statsHidden #balChev{transform:rotate(-90deg)}
 #balChev{transition:transform .18s}
@@ -1913,7 +1926,7 @@ function recalc(){
 /* ---- geluid, volledig gesynthetiseerd: geen bestanden nodig ---- */
 const SFX={ctx:null,on:true,master:null,hum:null,humGain:null};
 /* achtergrondmuziek: apart van de effecten, eigen volume, eigen knop */
-const MUSIC={el:null,on:true,vol:.38,ready:false,missing:false};
+const MUSIC={el:null,on:true,vol:.12,ready:false,missing:false};
 function musicInit(){
   if(MUSIC.el||MUSIC.missing)return;
   const a=new Audio('empyria-music.mp3');
