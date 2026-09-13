@@ -371,7 +371,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
   <button class="mega" id="muteBtn" title="Sound on/off"><svg viewBox="0 0 24 24" width="22" height="22" fill="#dbe6f3"><path d="M3 10v4h3l6 4V6L6 10zm13-1.5v7a4.5 4.5 0 0 0 0-7z"/></svg></button>
   <div id="log"></div>
   <div class="tag">A CLEANER, BRIGHTER BLOCKCHAIN FUTURE</div>
-  <div class="ver">v0.2 prototype</div>
+  <div class="ver" id="verTag">v0.2</div>
 </footer>
 
 <script>
@@ -1044,12 +1044,18 @@ function makeRoad(mask,lamp){
   return g;
 }
 function makeCable(){
+  /* Ondergronds: alleen een dichtgemaakte sleuf in het maaiveld.
+     Vlak, donker, geen volume, zodat het onder wegen door loopt. */
   const g=new THREE.Group();
-  const tr=box(g,.34,.035,1.0,'#3a3327');tr.castShadow=false;
-  const c1=box(g,.09,.015,.96,'#1d2a36',0,.035,0);c1.castShadow=false;
-  const c2=box(g,.045,.012,.9,'#34d1c2',0,.05,0,glow('#1fb5a8',.7));c2.castShadow=false;
-  for(let k=-1;k<=1;k++){const m=box(g,.3,.012,.05,'#6a6150',0,.036,k*.34);m.castShadow=false;}
-  g.userData.cable=true;
+  const seam=box(g,.2,.006,1.0,'#2b2f35',0,-.002,0);seam.castShadow=seam.receiveShadow=false;
+  const fill=box(g,.13,.005,.98,'#3d4148',0,.002,0);fill.castShadow=fill.receiveShadow=false;
+  for(let k=-1;k<=1;k++){
+    const m=box(g,.17,.004,.035,'#20242a',0,.005,k*.33);m.castShadow=m.receiveShadow=false;
+  }
+  /* klein inspectieluik, het enige wat je bovengronds ziet */
+  const lid=box(g,.15,.008,.15,'#4a4f57',0,.004,.34);lid.castShadow=false;
+  const rim=box(g,.19,.005,.19,'#31363d',0,.001,.34);rim.castShadow=false;
+  g.userData.cable=true;g.userData.noEdge=true;
   return g;
 }
 function makePole(){
@@ -1942,14 +1948,35 @@ function recalc(){
 /* ---- geluid, volledig gesynthetiseerd: geen bestanden nodig ---- */
 const SFX={ctx:null,on:true,master:null,hum:null,humGain:null};
 /* achtergrondmuziek: apart van de effecten, eigen volume, eigen knop */
-const MUSIC={el:null,on:true,vol:.12,ready:false,missing:false};
+const TRACKS=['empyria-music.mp3','empyria-music2.mp3'];
+const MUSIC={el:null,on:true,vol:.12,ready:false,missing:false,track:Math.floor(Math.random()*2)};
 function musicInit(){
   if(MUSIC.el||MUSIC.missing)return;
-  const a=new Audio('empyria-music.mp3');
-  a.loop=true;a.preload='auto';a.volume=0;
-  a.addEventListener('canplaythrough',()=>{MUSIC.ready=true;},{once:true});
-  a.addEventListener('error',()=>{MUSIC.missing=true;MUSIC.el=null;},{once:true});
+  const a=new Audio();
+  a.preload='auto';a.volume=0;a.loop=false;
+  /* twee nummers die elkaar afwisselen, zodat het niet gaat vervelen */
+  a.addEventListener('ended',()=>{
+    MUSIC.track=(MUSIC.track+1)%TRACKS.length;
+    a.src=TRACKS[MUSIC.track];
+    const p=a.play();if(p&&p.catch)p.catch(()=>{});
+  });
+  let fails=0;
+  a.addEventListener('error',()=>{
+    if(++fails>=TRACKS.length){MUSIC.missing=true;return;}
+    MUSIC.track=(MUSIC.track+1)%TRACKS.length;
+    a.src=TRACKS[MUSIC.track];
+  });
+  a.addEventListener('canplaythrough',()=>{MUSIC.ready=true;fails=0;},{once:false});
+  a.src=TRACKS[MUSIC.track];
   MUSIC.el=a;
+}
+function musicSkip(){
+  musicInit();
+  if(!MUSIC.el)return;
+  MUSIC.track=(MUSIC.track+1)%TRACKS.length;
+  MUSIC.el.src=TRACKS[MUSIC.track];
+  MUSIC.el.volume=MUSIC.vol;
+  const p=MUSIC.el.play();if(p&&p.catch)p.catch(()=>{});
 }
 function musicPlay(){
   musicInit();
@@ -2781,13 +2808,15 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 function openSettings(){
   openModal('SETTINGS',
     `<div class="card"><div><div class="n">Map labels</div><div class="d">Names and output above buildings</div></div><button class="btn" id="setLab">${labelsOn?'ON':'OFF'}</button></div>
-     <div class="card"><div><div class="n">Music</div><div class="d">${MUSIC.missing?'empyria-music.mp3 not found next to the game':'Loops in the background'}</div></div><button class="btn" id="setMus" ${MUSIC.missing?'disabled':''}>${MUSIC.on?'ON':'OFF'}</button></div>
+     <div class="card"><div><div class="n">Build</div><div class="d">If this is not the version you just uploaded, your browser or Telegram is showing a cached copy</div></div><div style="color:var(--teal);font-weight:600;font-size:12px;white-space:nowrap">${BUILD}</div></div>
+     <div class="card"><div><div class="n">Music</div><div class="d">${MUSIC.missing?'no music files found next to the game':'Two tracks, playing in turn'}</div></div><div style="display:flex;gap:6px"><button class="btn" id="setSkip" ${MUSIC.missing?'disabled':''}>NEXT</button><button class="btn" id="setMus" ${MUSIC.missing?'disabled':''}>${MUSIC.on?'ON':'OFF'}</button></div></div>
      <div class="card"><div><div class="n">Sound effects</div><div class="d">Placing, alarms, rewards</div></div><button class="btn" id="setSfx">${SFX.on?'ON':'OFF'}</button></div>
      <div class="card"><div><div class="n">Save game</div><div class="d">${storageOK?('Autosaves every 20 seconds'+(CLOUD?' \u00b7 synced to Telegram':'')):'Not available in this browser'}</div></div><button class="btn" id="setSave" ${storageOK?'':'disabled'}>SAVE NOW</button></div>
      <div class="card"><div><div class="n">Start over</div><div class="d">Wipes your empire and your save</div></div><button class="btn red" id="setReset">NEW GAME</button></div>`,
     ()=>{
       $('setLab').onclick=()=>{labelsOn=!labelsOn;openSettings();};
       const ms=$('setMus');if(ms&&!ms.disabled)ms.onclick=()=>{audioInit();setMusic(!MUSIC.on);openSettings();};
+      const sk=$('setSkip');if(sk&&!sk.disabled)sk.onclick=()=>{audioInit();musicSkip();};
       $('setSfx').onclick=()=>{audioInit();setMute(!SFX.on);openSettings();};
       const sv=$('setSave');if(sv&&!sv.disabled)sv.onclick=()=>{saveGame();closeModal();};
       $('setReset').onclick=()=>{
@@ -2810,7 +2839,10 @@ function layoutBar(){
 }
 layoutBar();measureBar();
 window.addEventListener('resize',()=>{layoutBar();measureBar();});
-setInterval(measureBar,1000);
+if(window.ResizeObserver)new ResizeObserver(measureBar).observe(topEl);
+else setInterval(measureBar,500);
+[60,200,600,1500,3000].forEach(t=>setTimeout(measureBar,t));
+const vt=$('verTag');if(vt)vt.textContent=BUILD;
 $('balCard').onclick=()=>{
   const hid=document.body.classList.toggle('statsHidden');
   try{localStorage.setItem('emp_stats_hidden',hid?'1':'');}catch(e){}
@@ -2871,6 +2903,7 @@ function tickEvents(dt){
 }
 
 /* ================= SAVE / LOAD ================= */
+const BUILD='v0.20 \u00b7 kabel ondergronds';
 const SAVEKEY='empyria-save-v1';
 let storageOK=true;
 const TG=window.Telegram&&window.Telegram.WebApp;
