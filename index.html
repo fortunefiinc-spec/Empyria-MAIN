@@ -91,12 +91,15 @@ body.statsHidden #statbar{display:none}
 body.oneRow #top{gap:0;padding-left:8px;padding-right:8px;flex-wrap:wrap;align-items:center;
   background:linear-gradient(#0b1726,#081220);border-bottom:1px solid #16293f}
 /* alle technische waarden in de balk, in twee compacte rijen */
-body.oneRow #statbar{position:static;top:auto;left:auto;right:auto;height:auto;
-  flex:1 1 100%;min-width:0;padding:0 0 2px;background:none;z-index:auto;
-  display:flex;flex-wrap:wrap;overflow:visible}
+body.oneRow #statbar{position:fixed;left:0;right:0;height:auto;
+  top:calc(48px + var(--tgtop));
+  padding:0 8px 3px;z-index:6;
+  background:linear-gradient(#0a1624,#081220);
+  border-bottom:1px solid #16293f;
+  display:flex;flex-wrap:wrap;overflow:visible;gap:0}
 body.oneRow .chip,body.oneRow #statbar .stat{
   background:none;border:0;border-radius:0;box-shadow:none;position:relative}
-body.oneRow #balCard{flex:1 1 100%;height:40px;padding:0 2px}
+body.oneRow #balCard{flex:1 1 auto;height:40px;padding:0 2px}
 body.oneRow #balCard b{font-size:20px}
 body.oneRow #statbar .stat{flex:1 1 76px;min-width:76px;height:31px;padding:0 5px;gap:4px}
 body.oneRow #statbar .stat::before{content:'';position:absolute;left:0;top:6px;bottom:6px;
@@ -378,7 +381,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
 <script>
 const EMPYRIA_MAIN=()=>{
 'use strict';
-const BUILD='v0.21 \u00b7 wacht op three.js';
+const BUILD='v0.22 \u00b7 statusbalk vast';
 
 /* ================= GAME DATA ================= */
 const H={rig:.72,gpu:.76,asic:.95,solar:.62,wind:2.5,transformer:.78,battery:.72,cooling:1.15};
@@ -2831,18 +2834,21 @@ function openSettings(){
 if(window.TG_USER&&window.TG_USER.first_name){const pn=$('playerName');if(pn)pn.textContent=window.TG_USER.first_name;}
 const topEl=$('top'), statEl=$('statbar');
 function measureBar(){
-  document.documentElement.style.setProperty('--barh',topEl.offsetHeight+'px');
+  let h=topEl.offsetHeight;
+  if(document.body.classList.contains('oneRow')&&statEl&&statEl.offsetParent!==null)
+    h=Math.max(h,statEl.getBoundingClientRect().bottom);
+  document.documentElement.style.setProperty('--barh',Math.round(h)+'px');
 }
 function layoutBar(){
   const mob=window.innerWidth<=860;
   document.body.classList.toggle('oneRow',mob);
-  if(mob){ if(statEl.parentNode!==topEl)topEl.appendChild(statEl); }
-  else if(statEl.parentNode!==document.body)document.body.insertBefore(statEl,topEl.nextSibling);
+  if(statEl.parentNode!==document.body)document.body.insertBefore(statEl,topEl.nextSibling);
 }
 layoutBar();measureBar();
 window.addEventListener('resize',()=>{layoutBar();measureBar();});
-if(window.ResizeObserver)new ResizeObserver(measureBar).observe(topEl);
-else setInterval(measureBar,500);
+if(window.ResizeObserver){const ro=new ResizeObserver(measureBar);ro.observe(topEl);ro.observe(statEl);}
+/* een verschuiving zonder maatverandering merkt de observer niet, dus altijd ook periodiek meten */
+setInterval(measureBar,400);
 [60,200,600,1500,3000].forEach(t=>setTimeout(measureBar,t));
 const vt=$('verTag');if(vt)vt.textContent=BUILD;
 $('balCard').onclick=()=>{
