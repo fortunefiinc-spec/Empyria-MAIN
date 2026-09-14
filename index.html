@@ -381,7 +381,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
 <script>
 const EMPYRIA_MAIN=()=>{
 'use strict';
-const BUILD='v0.22 \u00b7 statusbalk vast';
+const BUILD='v0.23 \u00b7 kabels slopen';
 
 /* ================= GAME DATA ================= */
 const H={rig:.72,gpu:.76,asic:.95,solar:.62,wind:2.5,transformer:.78,battery:.72,cooling:1.15};
@@ -1048,6 +1048,7 @@ function makeRoad(mask,lamp){
   if(lamp){const l=makeLamp();l.position.set(.38,.04,.38);g.add(l);}
   return g;
 }
+const cableLit=new THREE.MeshStandardMaterial({color:'#5fd0ff',emissive:new THREE.Color('#2b7fa8'),emissiveIntensity:.8,roughness:.6});
 function makeCable(){
   /* Ondergronds: alleen een dichtgemaakte sleuf in het maaiveld.
      Vlak, donker, geen volume, zodat het onder wegen door loopt. */
@@ -1060,7 +1061,7 @@ function makeCable(){
   /* klein inspectieluik, het enige wat je bovengronds ziet */
   const lid=box(g,.15,.008,.15,'#4a4f57',0,.004,.34);lid.castShadow=false;
   const rim=box(g,.19,.005,.19,'#31363d',0,.001,.34);rim.castShadow=false;
-  g.userData.cable=true;g.userData.noEdge=true;
+  g.userData.cable=true;g.userData.noEdge=true;g.userData.fillMesh=fill;
   return g;
 }
 function makePole(){
@@ -1534,6 +1535,16 @@ const hl=new THREE.Mesh(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2),hlMat);
 const hlEdge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2)),new THREE.LineBasicMaterial({color:'#34d1c2'}));
 hl.add(hlEdge);hl.renderOrder=7;hlMat.depthTest=false;hlEdge.material.depthTest=false;hl.visible=false;scene.add(hl);
 function setHl(c){hlMat.color.set(c);hlEdge.material.color.set(c);}
+/* de aangewezen kabel licht op, anders zie je bij slopen niet wat je raakt */
+let litCable=null;
+function litUp(b){
+  if(litCable===b)return;
+  if(litCable&&litCable.group&&litCable.group.userData.fillMesh)
+    litCable.group.userData.fillMesh.material=mat('#3d4148');
+  litCable=(b&&b.type==='cable')?b:null;
+  if(litCable&&litCable.group.userData.fillMesh)
+    litCable.group.userData.fillMesh.material=cableLit;
+}
 const selBox=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2)),new THREE.LineBasicMaterial({color:'#34d1c2',transparent:true}));
 selBox.visible=false;scene.add(selBox);
 
@@ -2336,21 +2347,31 @@ function updateHover(x,y){
     hl.position.set(cx,.05,cz);hl.scale.set(fp.s,1,fp.s);setHl(ok?'#34d1c2':'#ff5050');hl.visible=true;
     canvas.className='build';
   }else{
-    const b=pickBuilding(x,y)||(tileUnder(p)||{}).b||null;hoverB=b;
+    const tl=tileUnder(p)||{};
+    /* bij slopen staat de kabel bovenaan, want die haal je als eerste weg */
+    const b=(tool==='bulldoze'?(tl.c||tl.b):(pickBuilding(x,y)||tl.c||tl.b))||null;hoverB=b;litUp(b);
     if(b){hl.position.set(b.i-HALF+b.s/2,.05,b.j-HALF+b.s/2);hl.scale.set(b.s,1,b.s);setHl(tool==='bulldoze'?'#ff5050':'#ffffff');hl.visible=true;}
     canvas.className=tool==='bulldoze'?'build':(b?'pointer':'');
   }
 }
 
 function paintTile(i,j,d){
-  if(tool==='bulldoze'){const t=T(i,j);const tgt=t&&(t.c||t.b);if(tgt){d.refund+=remove(tgt,{silent:true});d.count++;}return;}
+  if(tool==='bulldoze'){
+    const k=i*1000+j;
+    if(!d.done)d.done=new Set();
+    if(d.done.has(k))return;          /* niet twee keer over dezelfde tegel */
+    d.done.add(k);
+    const t=T(i,j),tgt=t&&(t.c||t.b); /* kabel eerst, weg blijft liggen */
+    if(tgt){d.refund+=remove(tgt,{silent:true});d.count++;}
+    return;
+  }
   if(check(tool,i,j))return;
   const c=costOf(tool);
   if(S.bal<c){if(!d.warned){log(`Not enough $EMP for ${TYPES[tool].name}`,'bad');flashBal();d.warned=true;}return;}
   if(place(tool,i,j,{silent:true})){d.count++;d.spent+=c;}
 }
 function paintAt(x,y,d){
-  if(tool==='bulldoze'&&!d.last){const b=pickBuilding(x,y);if(b){d.refund+=remove(b,{silent:true});d.count++;}}
+
   const p=groundAt(x,y);if(!p)return;
   const i=Math.floor(p.x+HALF),j=Math.floor(p.z+HALF);
   if(!d.last){d.last=[i,j];paintTile(i,j,d);return;}
@@ -2377,7 +2398,7 @@ function clickAt(x,y){
     if(place(tool,fp.i0,fp.j0)){ghostValid=null;}
     updateHover(x,y);
   }else{
-    const p=groundAt(x,y);select(pickBuilding(x,y)||(tileUnder(p)||{}).b||null);
+    const p=groundAt(x,y),tl=tileUnder(p)||{};select(pickBuilding(x,y)||tl.c||tl.b||null);
   }
 }
 
