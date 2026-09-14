@@ -10,7 +10,8 @@
 (function(){var u=['https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js','https://unpkg.com/three@0.128.0/build/three.min.js','https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js'];
 function n(){if(window.THREE)return;if(!u.length)return;
 var s=document.createElement('script');s.src=u.shift();s.onerror=n;document.head.appendChild(s);}
-if(!window.THREE)n();})();
+if(!window.THREE)n();
+window.addEventListener('load',function(){if(!window.THREE)n();});})();
 (function(){
   var tg = window.Telegram && window.Telegram.WebApp;
   if(!tg) return;
@@ -375,8 +376,9 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
 </footer>
 
 <script>
-(()=>{
+const EMPYRIA_MAIN=()=>{
 'use strict';
+const BUILD='v0.21 \u00b7 wacht op three.js';
 
 /* ================= GAME DATA ================= */
 const H={rig:.72,gpu:.76,asic:.95,solar:.62,wind:2.5,transformer:.78,battery:.72,cooling:1.15};
@@ -2903,7 +2905,6 @@ function tickEvents(dt){
 }
 
 /* ================= SAVE / LOAD ================= */
-const BUILD='v0.20 \u00b7 kabel ondergronds';
 const SAVEKEY='empyria-save-v1';
 let storageOK=true;
 const TG=window.Telegram&&window.Telegram.WebApp;
@@ -3131,7 +3132,21 @@ function loop(now){
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-})();
+};
+/* Wacht tot three.js echt binnen is. Laadt het lokale bestand niet, dan
+   draaien de CDN-terugvalroutes nog; zonder deze wachtlus zou het spel
+   op een leeg laadscherm blijven hangen. */
+(function boot(t){
+  if(window.THREE){ try{ EMPYRIA_MAIN(); }catch(e){ console.error(e); } return; }
+  if(t>12000){
+    var b=document.getElementById('boot');
+    if(b)b.innerHTML='<div style="font:15px/1.6 system-ui;color:#dbe6f3;padding:26px;text-align:center">'+
+      '<h2 style="color:#34d1c2;margin-bottom:8px">3D-bibliotheek niet geladen</h2>'+
+      '<p>three.min.js ontbreekt naast index.html, of het netwerk blokkeert de terugval.</p></div>';
+    return;
+  }
+  setTimeout(function(){boot(t+100);},100);
+})(0);
 </script>
 </body>
 </html>
