@@ -4,31 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Empyria – Prototype v0.1</title>
-<script>
-/* Diagnose: toont welk bestand ontbreekt in plaats van een leeg scherm. */
-(function(){
-  var missing=[];
-  function report(){
-    var b=document.body||document.documentElement;
-    var box=document.getElementById('empErr');
-    if(!box){box=document.createElement('div');box.id='empErr';
-      box.style.cssText='position:fixed;inset:0;z-index:99999;background:#0a1524;color:#dbe6f3;font:14px/1.6 system-ui,sans-serif;padding:24px;overflow:auto';
-      b.appendChild(box);}
-    box.innerHTML='<h2 style="color:#ff6b6b;margin-bottom:10px">Bestanden niet gevonden</h2><ul style="margin:10px 0 14px 18px;color:#ffb46b">'+
-      missing.map(function(u){return '<li>'+u+'</li>';}).join('')+'</ul>'+
-      '<p style="color:#7d91a8">Zet deze bestanden in dezelfde map als index.html.</p>';
-  }
-  window.addEventListener('error',function(e){
-    var el=e.target;if(!el||!el.tagName)return;
-    var url=el.src||el.href;if(!url)return;
-    if(el.tagName==='SCRIPT'||el.tagName==='LINK'){
-      var short=url.replace(location.origin+location.pathname.replace(/[^/]*$/,''),'');
-      if(missing.indexOf(short)<0)missing.push(short);
-      setTimeout(report,120);
-    }
-  },true);
-})();
-</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="three.min.js"></script>
 <script>
