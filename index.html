@@ -4,8 +4,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Empyria – Prototype v0.1</title>
+<script>
+/* Diagnose: laat zien welk bestand ontbreekt in plaats van een leeg scherm.
+   Vangt laadfouten van scripts en stylesheets op. */
+(function(){
+  var missing=[];
+  function report(){
+    var b=document.body||document.documentElement;
+    var box=document.getElementById('empErr');
+    if(!box){
+      box=document.createElement('div');box.id='empErr';
+      box.style.cssText='position:fixed;inset:0;z-index:99999;background:#0a1524;color:#dbe6f3;'+
+        'font:14px/1.6 system-ui,sans-serif;padding:24px;overflow:auto';
+      b.appendChild(box);
+    }
+    box.innerHTML='<h2 style="color:#ff6b6b;margin-bottom:10px">Bestanden niet gevonden</h2>'+
+      '<p>Deze bestanden staan niet op de server, of op een ander pad:</p>'+
+      '<ul style="margin:10px 0 14px 18px;color:#ffb46b">'+
+      missing.map(function(u){return '<li>'+u+'</li>';}).join('')+'</ul>'+
+      '<p style="color:#7d91a8">Controleer of de map <b>assets/</b> volledig is geupload, met dezelfde '+
+      'hoofdletters en submappen. Op GitHub Pages is het pad hoofdlettergevoelig.</p>';
+  }
+  window.addEventListener('error', function(e){
+    var el=e.target;
+    if(!el||!el.tagName)return;
+    var url=el.src||el.href;
+    if(!url)return;
+    if(el.tagName==='SCRIPT'||el.tagName==='LINK'){
+      var short=url.replace(location.origin+location.pathname.replace(/[^/]*$/,''),'');
+      if(missing.indexOf(short)<0)missing.push(short);
+      setTimeout(report,120);
+    }
+  }, true);
+})();
+</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="assets/vendor/three.min.js"></script>
+<script>
+/* Staat three.js niet in assets/vendor, probeer dan het CDN. */
+(function(){
+  if(window.THREE)return;
+  var u=['https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
+         'https://unpkg.com/three@0.128.0/build/three.min.js'];
+  function n(){ if(window.THREE||!u.length)return;
+    var s=document.createElement('script');s.src=u.shift();s.onerror=n;
+    document.head.appendChild(s); }
+  n();
+})();
+</script>
+
 <script src="assets/js/startup-1.js"></script>
 <style>
 :root{--tgtop:0px;--tgbot:0px;--barh:112px;--panel:rgba(8,19,33,.94);--panel2:#0b1829;--line:#1a3350;--line-hi:#2a5580;--teal:#34d1c2;--blue:#3a9bff;--blue-deep:#1c5fc4;--text:#dbe6f3;--muted:#7d91a8;--gold:#f5b73b;--green:#4fd66a;--red:#ff5d5d;--orange:#ffa23d}
@@ -356,6 +403,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
 <script src="assets/js/industrial-pack.js"></script>
 <script src="assets/js/telegram-account.js"></script>
 <script src="assets/js/game.js"></script>
+<script src="assets/js/tracking.js"></script>
 </body>
 </html>
 
