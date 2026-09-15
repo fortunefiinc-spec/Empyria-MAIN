@@ -1,38 +1,29 @@
-# Empyria v0.28 terugzetten
+# Empyria v0.29
 
-Deze versie is één bestand met alles erin. Geen assets-map, geen
-submappen. Dat is precies waarom hij het doet.
-
-## Uploaden
-
-Zet deze vier bestanden in de ROOT van fortunefiinc-spec/Empyria-MAIN,
-naast elkaar, en overschrijf wat er staat:
+Vier bestanden, allemaal in de ROOT van fortunefiinc-spec/Empyria-MAIN.
+Geen assets-map, geen submappen.
 
     index.html
     three.min.js
     empyria-music.mp3
     empyria-music2.mp3
 
-Heb je eerder een assets/-map aangemaakt: die mag blijven staan, hij
-wordt niet meer gebruikt. Verwijderen mag ook.
+Staan de laatste drie er al, dan hoef je alleen index.html te vervangen.
 
-## Daarna
+Daarna in BotFather het versienummer ophogen:
 
-BotFather openen en het versienummer achter je Mini App URL ophogen,
-anders zien je leden de kapotte versie uit hun cache:
+    https://fortunefiinc-spec.github.io/Empyria-MAIN/index.html?v=18
 
-    https://fortunefiinc-spec.github.io/Empyria-MAIN/index.html?v=17
+Controle: onder het tandwiel hoort v0.29 te staan.
 
-## Controleren
+## Wat er in deze versie is opgelost
 
-Onder het tandwiel hoort te staan: v0.28 · rotate & conversations
+Het kader van je grondgebied werd op 3,7 eenheden hoogte getekend in
+plaats van op het maaiveld. In een isometrisch beeld schuift alles wat
+hoger ligt omhoog op je scherm, dus het kader stond scheef ten opzichte
+van de tegels die het aangaf. Je gebouwen leken daardoor buiten je eigen
+grond te staan. Alles ligt nu op de grond zelf.
 
-Gaat er iets mis, dan krijg je nu een rode lijst met de ontbrekende
-bestanden in beeld, in plaats van een leeg scherm.
-
-## Over v0.31
-
-Die versie verwacht een assets/-map met game.js, industrial-pack.js,
-startup-1.js, telegram-account.js, three.min.js en de css. Heb je die
-bestanden compleet, dan kun je alsnog overstappen. Zonder game.js werkt
-v0.31 niet, want daar zit de hele game-code in.
+Verder toont het spel nu een leesbare melding als een bestand ontbreekt,
+in plaats van een leeg scherm. Die melding gaat alleen over je eigen
+bestanden; externe scripts hebben hun eigen terugval.

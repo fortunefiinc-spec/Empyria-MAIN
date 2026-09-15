@@ -4,6 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Empyria – Prototype v0.1</title>
+<script>
+/* Diagnose: toont welk bestand ontbreekt in plaats van een leeg scherm. */
+(function(){
+  var missing=[];
+  function report(){
+    var b=document.body||document.documentElement;
+    var box=document.getElementById('empErr');
+    if(!box){box=document.createElement('div');box.id='empErr';
+      box.style.cssText='position:fixed;inset:0;z-index:99999;background:#0a1524;color:#dbe6f3;font:14px/1.6 system-ui,sans-serif;padding:24px;overflow:auto';
+      b.appendChild(box);}
+    box.innerHTML='<h2 style="color:#ff6b6b;margin-bottom:10px">Bestanden niet gevonden</h2><ul style="margin:10px 0 14px 18px;color:#ffb46b">'+
+      missing.map(function(u){return '<li>'+u+'</li>';}).join('')+'</ul>'+
+      '<p style="color:#7d91a8">Zet deze bestanden in dezelfde map als index.html.</p>';
+  }
+  window.addEventListener('error',function(e){
+    var el=e.target;if(!el||!el.tagName)return;
+    var url=el.src||el.href;if(!url)return;
+    if(el.tagName!=='SCRIPT'&&el.tagName!=='LINK')return;
+    /* alleen eigen bestanden melden; externe CDN's hebben hun eigen terugval */
+    if(url.indexOf(location.origin)!==0)return;
+    {
+      var short=url.replace(location.origin+location.pathname.replace(/[^/]*$/,''),'');
+      if(missing.indexOf(short)<0)missing.push(short);
+      setTimeout(report,120);
+    }
+  },true);
+})();
+</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="three.min.js"></script>
 <script>
@@ -385,7 +413,7 @@ body.statsHidden #balChev{transform:rotate(-90deg)}
 <script>
 const EMPYRIA_MAIN=()=>{
 'use strict';
-const BUILD='v0.28 \u00b7 rotate & conversations';
+const BUILD='v0.29 \u00b7 grondkader uitgelijnd';
 
 /* ================= GAME DATA ================= */
 const H={rig:.72,gpu:.76,asic:.95,solar:.62,wind:2.5,transformer:.78,battery:.72,cooling:1.15};
@@ -494,7 +522,7 @@ function rebuildPlotOverlay(){
   const B=blocks();
   for(let by=0;by<B;by++)for(let bx=0;bx<B;bx++){
     if(plots.has(plotKey(bx,by)))continue;
-    quad(veil,bx*PLOT-HALF,by*PLOT-HALF,PLOT,3.6);
+    quad(veil,bx*PLOT-HALF,by*PLOT-HALF,PLOT,0.04);
   }
   const vg=new THREE.BufferGeometry();
   vg.setAttribute('position',new THREE.Float32BufferAttribute(veil,3));
@@ -511,7 +539,7 @@ function rebuildPlotOverlay(){
       [1,0, x0+PLOT,y0, x0+PLOT,y0+PLOT],[-1,0, x0,y0, x0,y0+PLOT],
       [0,1, x0,y0+PLOT, x0+PLOT,y0+PLOT],[0,-1, x0,y0, x0+PLOT,y0]]){
       if(plots.has(plotKey(bx+dx,by+dy)))continue;
-      pts.push(ax,3.7,ay, bx2,3.7,by2);
+      pts.push(ax,0.05,ay, bx2,0.05,by2);
     }
   }
   const g=new THREE.BufferGeometry();
@@ -530,11 +558,11 @@ function rebuildBuyOverlay(){
   for(let by=0;by<B;by++)for(let bx=0;bx<B;bx++){
     if(!isBuyable(bx,by)||!blockHasLand(bx,by))continue;
     const x0=bx*PLOT-HALF,y0=by*PLOT-HALF;
-    quad(fills,x0+.25,y0+.25,PLOT-.5,3.8);
-    edges.push(x0+.25,3.85,y0+.25, x0+PLOT-.25,3.85,y0+.25,
-               x0+PLOT-.25,3.85,y0+.25, x0+PLOT-.25,3.85,y0+PLOT-.25,
-               x0+PLOT-.25,3.85,y0+PLOT-.25, x0+.25,3.85,y0+PLOT-.25,
-               x0+.25,3.85,y0+PLOT-.25, x0+.25,3.85,y0+.25);
+    quad(fills,x0+.25,y0+.25,PLOT-.5,0.05);
+    edges.push(x0+.25,0.06,y0+.25, x0+PLOT-.25,0.06,y0+.25,
+               x0+PLOT-.25,0.06,y0+.25, x0+PLOT-.25,0.06,y0+PLOT-.25,
+               x0+PLOT-.25,0.06,y0+PLOT-.25, x0+.25,0.06,y0+PLOT-.25,
+               x0+.25,0.06,y0+PLOT-.25, x0+.25,0.06,y0+.25);
   }
   const fg=new THREE.BufferGeometry();
   fg.setAttribute('position',new THREE.Float32BufferAttribute(fills,3));
@@ -2435,7 +2463,7 @@ function updateHover(x,y){
   if(tool==='land'){
     const bx=Math.floor((p.x+HALF)/PLOT),by=Math.floor((p.z+HALF)/PLOT);
     const buy=isBuyable(bx,by)&&blockHasLand(bx,by), afford=S.bal>=plotCost();
-    hl.position.set(bx*PLOT-HALF+PLOT/2,3.9,by*PLOT-HALF+PLOT/2);
+    hl.position.set(bx*PLOT-HALF+PLOT/2,0.07,by*PLOT-HALF+PLOT/2);
     hl.scale.set(PLOT-.5,1,PLOT-.5);
     setHl(buy&&afford?'#34d1c2':'#ff5050');hl.visible=true;
     canvas.className='build';
